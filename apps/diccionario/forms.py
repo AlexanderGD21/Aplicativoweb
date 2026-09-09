@@ -13,22 +13,17 @@ class BusquedaForm(forms.Form):
     )
     
     categoria = forms.ModelChoiceField(
-        queryset=Categoria.objects.all(),
+        queryset=Categoria.objects.all().order_by('grupo', 'orden', 'nombre'),
         required=False,
         empty_label="Todas las categorías",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
     dificultad = forms.ChoiceField(
-        choices=[('', 'Todas las dificultades')] + Palabra.DIFICULTAD_CHOICES,
+        label='Dificultad de pronunciación',
+        choices=[('', 'Cualquier dificultad')] + Palabra.DIFICULTAD_CHOICES,
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
-    nivel_pronunciacion = forms.ChoiceField(
-        choices=[('', 'Todos los niveles de pronunciación')] + Palabra.NIVEL_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-select'}),
     )
 
 class ContactoForm(forms.Form):

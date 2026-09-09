@@ -27,9 +27,16 @@ class Command(BaseCommand):
             },
             'clasificacion': {
                 campo: list(palabras.values(campo).annotate(total=Count('id')).order_by(campo))
-                for campo in ('dificultad', 'nivel_dificultad', 'tipo', 'estado_revision')
+                for campo in (
+                    'dificultad', 'nivel_dificultad', 'tipo', 'estado_revision',
+                    'clasificacion_confianza',
+                )
             },
-            'categorias': list(Categoria.objects.annotate(total=Count('palabras')).values('nombre', 'total').order_by('-total', 'nombre')),
+            'categorias': list(
+                Categoria.objects.annotate(total=Count('palabras'))
+                .values('grupo', 'nombre', 'total')
+                .order_by('grupo', 'orden', 'nombre')
+            ),
         }
         if options['json']:
             self.stdout.write(json.dumps(reporte, ensure_ascii=False, indent=2))

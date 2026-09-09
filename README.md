@@ -26,11 +26,18 @@ base SQLite original.
 
 ```powershell
 python manage.py auditar_diccionario --json
-python manage.py preparar_categorias --apply
-python manage.py proponer_categorias --apply
+python manage.py reestructurar_diccionario
+python manage.py reestructurar_diccionario --apply
 python manage.py importar_audios_estaticos --apply
 ```
 
-Las propuestas nunca reclasifican automáticamente: se aceptan o rechazan en
-`/admin/`. La IA está apagada por defecto; valida su configuración con
+`reestructurar_diccionario` muestra primero una vista previa. Con `--apply`
+crea la taxonomía temática, clasifica las entradas pendientes, recalcula la
+dificultad de pronunciación y actualiza los campos de búsqueda bilingüe sin
+tildes. Cada decisión guarda una confianza y una explicación auditable; las
+entradas de confianza baja permanecen señaladas para revisión humana en
+`/admin/`. Usa `--force` solo si también deseas reemplazar categorías revisadas
+o validadas manualmente.
+
+La IA está apagada por defecto; valida su configuración con
 `python manage.py verificar_ia_kichwa`.

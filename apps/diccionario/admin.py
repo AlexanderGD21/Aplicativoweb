@@ -4,19 +4,20 @@ from .models import Categoria, Palabra, PalabraFavorita, HistorialBusqueda, Esta
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'descripcion', 'color', 'fecha_creacion']
-    list_filter = ['fecha_creacion']
+    list_display = ['nombre', 'grupo', 'orden', 'color', 'fecha_creacion']
+    list_filter = ['grupo', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion']
-    ordering = ['nombre']
+    ordering = ['grupo', 'orden', 'nombre']
 
 @admin.register(Palabra)
 class PalabraAdmin(admin.ModelAdmin):
     list_display = [
         'palabra_kichwa', 'traduccion_espanol', 'categoria', 'categoria_propuesta',
-        'estado_revision', 'dificultad', 'apta_para_juegos', 'activa', 'veces_vista'
+        'estado_revision', 'clasificacion_confianza', 'dificultad', 'apta_para_juegos', 'activa', 'veces_vista'
     ]
     list_filter = [
-        'categoria', 'categoria_propuesta', 'estado_revision', 'dificultad', 'nivel_dificultad', 'tipo',
+        'categoria', 'categoria_propuesta', 'estado_revision', 'clasificacion_confianza',
+        'dificultad', 'nivel_dificultad', 'tipo',
         'apta_para_juegos', 'activa', 'fecha_creacion'
     ]
     search_fields = ['palabra_kichwa', 'traduccion_espanol', 'definicion']
@@ -28,7 +29,10 @@ class PalabraAdmin(admin.ModelAdmin):
             'fields': ('palabra_kichwa', 'traduccion_espanol', 'definicion', 'pronunciacion', 'audio', 'categoria')
         }),
         ('Clasificación', {
-            'fields': ('categoria_propuesta', 'estado_revision', 'dificultad', 'nivel_dificultad', 'tipo')
+            'fields': (
+                'categoria_propuesta', 'estado_revision', 'clasificacion_confianza',
+                'clasificacion_motivo', 'dificultad', 'nivel_dificultad', 'tipo',
+            )
         }),
         ('Configuración de Juegos', {
             'fields': ('apta_para_juegos', 'dificultad_juego', 'descripcion_juego_espanol', 'descripcion_juego_kichwa', 'frecuencia_uso')

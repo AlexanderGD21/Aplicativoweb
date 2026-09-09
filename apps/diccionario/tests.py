@@ -11,6 +11,10 @@ from django.urls import reverse
 
 from .models import Categoria, EstadisticaJuego, HistorialBusqueda, Palabra
 from .models import PalabraFavorita
+from .services.clasificacion import (
+    calcular_dificultad_pronunciacion,
+    clasificar_textos,
+)
 from .services.ia_kichwa import obtener_configuracion_ia
 
 
@@ -94,19 +98,51 @@ class DiccionarioTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual(respuesta.context['total_resultados'], 3)
 
-    def test_busqueda_bilingue_combina_categoria_y_nivel_pronunciacion(self):
+    def test_busqueda_bilingue_combina_categoria_y_dificultad_pronunciacion(self):
         respuesta = self.client.get(
             reverse('diccionario:buscar'),
-            {'termino': 'gato', 'categoria': self.animales.pk, 'nivel_pronunciacion': 'intermedio'},
+            {'termino': 'gato', 'categoria': self.animales.pk, 'dificultad': 'facil'},
         )
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual(list(respuesta.context['page_obj'].object_list), [self.misi])
 
         respuesta = self.client.get(
             reverse('diccionario:buscar'),
-            {'categoria': self.animales.pk, 'nivel_pronunciacion': 'basico'},
+            {'categoria': self.animales.pk, 'dificultad': 'dificil'},
         )
         self.assertEqual(respuesta.context['total_resultados'], 0)
+
+    def test_busqueda_ignora_tildes_y_funciona_en_ambos_idiomas(self):
+        maiz = Palabra.objects.create(
+            palabra_kichwa='Sara',
+            traduccion_espanol='Maíz',
+            categoria=self.categoria,
+        )
+        respuesta = self.client.get(reverse('diccionario:buscar'), {'termino': 'maiz'})
+        self.assertIn(maiz, respuesta.context['page_obj'].object_list)
+
+        respuesta = self.client.get(reverse('diccionario:buscar'), {'termino': 'sara'})
+        self.assertIn(maiz, respuesta.context['page_obj'].object_list)
+
+    def test_clasificacion_evitar_subcadenas_y_asigna_temas_logicos(self):
+        self.assertEqual(
+            clasificar_textos('wasi', 'casa', 'Lugar o construcción').categoria,
+            'Hogar y construcción',
+        )
+        self.assertEqual(
+            clasificar_textos('misi', 'gato', 'Animal doméstico felino').categoria,
+            'Animales',
+        )
+        resultado = clasificar_textos('killkana pata', 'escritorio', 'Mueble para escribir')
+        self.assertEqual(resultado.categoria, 'Hogar y construcción')
+        self.assertNotEqual(resultado.categoria, 'Territorio y lugares')
+
+    def test_dificultad_pronunciacion_aumenta_con_complejidad(self):
+        facil = calcular_dificultad_pronunciacion('misi')
+        dificil = calcular_dificultad_pronunciacion('hatun-shimikunawan; rimay')
+        self.assertEqual(facil[0], 'facil')
+        self.assertEqual(dificil[0], 'dificil')
+        self.assertGreater(dificil[2], facil[2])
 
     def test_busqueda_con_filtro_invalido_no_devuelve_error_500(self):
         respuesta = self.client.get(

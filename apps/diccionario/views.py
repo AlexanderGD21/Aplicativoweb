@@ -9,7 +9,15 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 from django.views.decorators.http import require_http_methods
-from .models import Palabra, Categoria, PalabraFavorita, HistorialBusqueda, EstadisticaJuego, RelacionPalabra
+from .models import (
+    Categoria,
+    EstadisticaJuego,
+    HistorialBusqueda,
+    Palabra,
+    PalabraFavorita,
+    RelacionPalabra,
+    normalizar_texto_busqueda,
+)
 from .forms import BusquedaForm, ContactoForm
 
 
@@ -58,19 +66,23 @@ def _pista_de_traduccion(palabra):
 def _palabras_busqueda(termino='', incluir_campos_ampliados=False):
     """Consulta común, ordenada por relevancia y sin duplicar reglas de búsqueda."""
     palabras = Palabra.objects.select_related('categoria').filter(activa=True)
-    if not termino:
+    termino_normalizado = normalizar_texto_busqueda(termino)
+    if not termino_normalizado:
         return palabras
 
-    coincidencias = Q(palabra_kichwa__icontains=termino) | Q(traduccion_espanol__icontains=termino)
+    coincidencias = (
+        Q(busqueda_kichwa__icontains=termino_normalizado)
+        | Q(busqueda_espanol__icontains=termino_normalizado)
+    )
     if incluir_campos_ampliados:
-        coincidencias |= Q(definicion__icontains=termino) | Q(pronunciacion__icontains=termino)
+        coincidencias |= Q(busqueda_contenido__icontains=termino_normalizado)
 
     return palabras.filter(coincidencias).annotate(
         relevancia=Case(
-            When(palabra_kichwa__iexact=termino, then=Value(1)),
-            When(traduccion_espanol__iexact=termino, then=Value(2)),
-            When(palabra_kichwa__istartswith=termino, then=Value(3)),
-            When(traduccion_espanol__istartswith=termino, then=Value(4)),
+            When(busqueda_kichwa=termino_normalizado, then=Value(1)),
+            When(busqueda_espanol=termino_normalizado, then=Value(2)),
+            When(busqueda_kichwa__startswith=termino_normalizado, then=Value(3)),
+            When(busqueda_espanol__startswith=termino_normalizado, then=Value(4)),
             default=Value(5),
             output_field=IntegerField(),
         )
@@ -78,28 +90,41 @@ def _palabras_busqueda(termino='', incluir_campos_ampliados=False):
 
 
 def _filtro_categoria_efectiva(categoria):
-    """Incluye la clasificación revisada y la propuesta pendiente de curación.
-
-    La categoría General representa las entradas que aún no tienen una
-    propuesta. Así no se mezclan con las palabras que ya pueden explorarse por
-    una categoría concreta, sin promover automáticamente una sugerencia a dato
-    lingüístico definitivo.
-    """
-    if categoria.nombre == 'General':
-        return Q(categoria=categoria, categoria_propuesta__isnull=True)
-    return Q(categoria=categoria) | Q(categoria_propuesta=categoria)
+    """Filtra por la clasificación efectiva guardada en cada entrada."""
+    return Q(categoria=categoria)
 
 
-def _conteos_categoria_efectiva():
-    """Cuenta una sola categoría visible por palabra en una consulta ligera."""
-    conteos = {}
-    palabras = Palabra.objects.filter(activa=True).values_list(
-        'categoria_id', 'categoria_propuesta_id'
-    )
-    for categoria_id, propuesta_id in palabras.iterator(chunk_size=1000):
-        categoria_visible_id = propuesta_id or categoria_id
-        conteos[categoria_visible_id] = conteos.get(categoria_visible_id, 0) + 1
-    return conteos
+def _agrupar_categorias(categorias):
+    grupos = []
+    por_clave = {}
+    etiquetas = dict(Categoria.GRUPO_CHOICES)
+    for categoria in categorias:
+        grupo = por_clave.get(categoria.grupo)
+        if grupo is None:
+            grupo = {
+                'clave': categoria.grupo,
+                'nombre': etiquetas.get(categoria.grupo, categoria.grupo),
+                'categorias': [],
+            }
+            por_clave[categoria.grupo] = grupo
+            grupos.append(grupo)
+        grupo['categorias'].append(categoria)
+    return grupos
+
+
+def _ordenar_categorias(queryset):
+    """Respeta el orden conceptual de los grupos, no el orden alfabético de sus claves."""
+    return queryset.annotate(
+        grupo_orden=Case(
+            When(grupo='entorno', then=Value(1)),
+            When(grupo='personas', then=Value(2)),
+            When(grupo='cotidiano', then=Value(3)),
+            When(grupo='lengua', then=Value(4)),
+            When(grupo='acciones', then=Value(5)),
+            default=Value(6),
+            output_field=IntegerField(),
+        )
+    ).order_by('grupo_orden', 'orden', 'nombre')
 
 def home(request):
     """Vista principal del diccionario"""
@@ -152,14 +177,12 @@ def buscar(request):
     termino = ''
     categoria = None
     dificultad = ''
-    nivel_pronunciacion = ''
     formulario_valido = form.is_valid()
 
     # Si un filtro es inválido se conserva el término válido; así un enlace
     # mal formado no transforma una búsqueda puntual en todo el diccionario.
     termino = form.cleaned_data.get('termino', '')
     dificultad = form.cleaned_data.get('dificultad', '')
-    nivel_pronunciacion = form.cleaned_data.get('nivel_pronunciacion', '')
     if formulario_valido:
         categoria = form.cleaned_data.get('categoria')
 
@@ -172,8 +195,6 @@ def buscar(request):
         palabras = palabras.filter(_filtro_categoria_efectiva(categoria))
     if dificultad:
         palabras = palabras.filter(dificultad=dificultad)
-    if nivel_pronunciacion:
-        palabras = palabras.filter(nivel_dificultad=nivel_pronunciacion)
 
     if termino:
         palabras = palabras.order_by('relevancia', 'palabra_kichwa', 'id')
@@ -183,6 +204,13 @@ def buscar(request):
     paginator = Paginator(palabras, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    parametros_pagina = request.GET.copy()
+    parametros_pagina.pop('page', None)
+    categorias = _ordenar_categorias(Categoria.objects.annotate(
+        total_palabras=Count('palabras', filter=Q(palabras__activa=True))
+    ).filter(total_palabras__gt=0))
+    filtros_activos = bool(termino or categoria or dificultad)
 
     if formulario_valido and termino and request.user.is_authenticated:
         HistorialBusqueda.objects.create(
@@ -196,6 +224,12 @@ def buscar(request):
         'page_obj': page_obj,
         'total_resultados': paginator.count,
         'query': termino,
+        'categoria_activa': categoria,
+        'dificultad_activa': dificultad,
+        'dificultad_activa_label': dict(Palabra.DIFICULTAD_CHOICES).get(dificultad, ''),
+        'categorias_agrupadas': _agrupar_categorias(categorias),
+        'parametros_pagina': parametros_pagina.urlencode(),
+        'filtros_activos': filtros_activos,
     }
     
     return render(request, 'diccionario/buscar.html', context)
@@ -217,6 +251,7 @@ def buscar_palabras_ajax(request):
         for palabra in palabras:
             resultados.append({
                 'id': palabra.pk,
+                'url': palabra.get_absolute_url(),
                 'palabra_kichwa': palabra.palabra_kichwa,
                 'traduccion_espanol': palabra.traduccion_espanol,
                 'pronunciacion': getattr(palabra, 'pronunciacion', '') or '',
@@ -250,6 +285,7 @@ def obtener_sugerencias_ajax(request):
         for palabra in palabras:
             resultados.append({
                 'id': palabra.pk,
+                'url': palabra.get_absolute_url(),
                 'palabra_kichwa': palabra.palabra_kichwa,
                 'traduccion_espanol': palabra.traduccion_espanol,
                 'pronunciacion': getattr(palabra, 'pronunciacion', '') or '',
@@ -294,13 +330,13 @@ def detalle_palabra(request, pk):
 
 def categorias(request):
     """Vista de categorías"""
-    categorias = Categoria.objects.order_by('nombre')
-    conteos = _conteos_categoria_efectiva()
-    for categoria in categorias:
-        categoria.total_palabras = conteos.get(categoria.pk, 0)
+    categorias = _ordenar_categorias(Categoria.objects.annotate(
+        total_palabras=Count('palabras', filter=Q(palabras__activa=True))
+    ).filter(total_palabras__gt=0))
     
     context = {
         'categorias': categorias,
+        'categorias_agrupadas': _agrupar_categorias(categorias),
     }
     
     return render(request, 'diccionario/categorias.html', context)
@@ -727,6 +763,7 @@ def api_palabras(request):
         'resultados': [
             {
                 'id': palabra.pk,
+                'url': palabra.get_absolute_url(),
                 'kichwa': palabra.palabra_kichwa,
                 'espanol': palabra.traduccion_espanol,
                 'categoria': palabra.categoria.slug,
@@ -742,6 +779,7 @@ def api_detalle_palabra(request, pk):
     palabra = get_object_or_404(Palabra.objects.select_related('categoria'), pk=pk, activa=True)
     return JsonResponse({
         'id': palabra.pk,
+        'url': palabra.get_absolute_url(),
         'kichwa': palabra.palabra_kichwa,
         'espanol': palabra.traduccion_espanol,
         'definicion': palabra.definicion or '',

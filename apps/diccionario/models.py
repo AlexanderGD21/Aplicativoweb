@@ -1,9 +1,22 @@
-from django.db import models
+import re
+import unicodedata
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+
+
+def normalizar_texto_busqueda(texto):
+    """Crea una versión comparable sin tildes editoriales ni mayúsculas."""
+    texto = unicodedata.normalize('NFKD', (texto or '').casefold())
+    texto = ''.join(
+        caracter for caracter in texto
+        if unicodedata.category(caracter) != 'Mn'
+    )
+    return re.sub(r'[^a-z0-9ñ]+', ' ', texto).strip()
 
 
 def validar_tamano_audio(archivo):
@@ -11,16 +24,26 @@ def validar_tamano_audio(archivo):
         raise ValidationError('El audio no puede superar 10 MB.')
 
 class Categoria(models.Model):
+    GRUPO_CHOICES = [
+        ('entorno', 'Entorno natural'),
+        ('personas', 'Personas y comunidad'),
+        ('cotidiano', 'Vida cotidiana'),
+        ('lengua', 'Lengua, tiempo y pensamiento'),
+        ('acciones', 'Acciones y cualidades'),
+    ]
+
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True, null=True)
     slug = models.SlugField(blank=True, unique=True)
     color = models.CharField(max_length=7, default='#007bff', help_text='Color en formato hexadecimal')
+    grupo = models.CharField(max_length=20, choices=GRUPO_CHOICES, default='lengua')
+    orden = models.PositiveSmallIntegerField(default=0)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         verbose_name = 'Categoría'
         verbose_name_plural = 'Categorías'
-        ordering = ['nombre']
+        ordering = ['grupo', 'orden', 'nombre']
     
     def __str__(self):
         return self.nombre
@@ -60,12 +83,22 @@ class Palabra(models.Model):
         ('revisada', 'Revisada'),
         ('validada', 'Validada'),
     ]
+
+    CONFIANZA_CLASIFICACION_CHOICES = [
+        ('alta', 'Alta'),
+        ('media', 'Media'),
+        ('baja', 'Baja; requiere revisión'),
+        ('manual', 'Clasificación manual'),
+    ]
     
     # Campos básicos
     palabra_kichwa = models.CharField(max_length=300, db_index=True)
     traduccion_espanol = models.CharField(max_length=200, db_index=True)
     definicion = models.TextField(blank=True, null=True)
     pronunciacion = models.CharField(max_length=400, blank=True, null=True)
+    busqueda_kichwa = models.CharField(max_length=300, blank=True, editable=False, db_index=True)
+    busqueda_espanol = models.CharField(max_length=200, blank=True, editable=False, db_index=True)
+    busqueda_contenido = models.TextField(blank=True, editable=False)
     audio = models.FileField(
         upload_to='audios/',
         blank=True,
@@ -99,6 +132,13 @@ class Palabra(models.Model):
         db_index=True,
         help_text='Control interno de la curación lingüística de la entrada.',
     )
+    clasificacion_confianza = models.CharField(
+        max_length=10,
+        choices=CONFIANZA_CLASIFICACION_CHOICES,
+        default='baja',
+        db_index=True,
+    )
+    clasificacion_motivo = models.CharField(max_length=255, blank=True)
     
     # Campos para juegos
     apta_para_juegos = models.BooleanField(default=False)
@@ -133,6 +173,21 @@ class Palabra(models.Model):
     
     def __str__(self):
         return f"{self.palabra_kichwa} - {self.traduccion_espanol}"
+
+    def save(self, *args, **kwargs):
+        self.busqueda_kichwa = normalizar_texto_busqueda(self.palabra_kichwa)
+        self.busqueda_espanol = normalizar_texto_busqueda(self.traduccion_espanol)
+        self.busqueda_contenido = normalizar_texto_busqueda(' '.join(filter(None, (
+            self.definicion,
+            self.pronunciacion,
+            self.sinonimos,
+            self.notas_gramaticales,
+        ))))
+        if kwargs.get('update_fields') is not None:
+            kwargs['update_fields'] = set(kwargs['update_fields']) | {
+                'busqueda_kichwa', 'busqueda_espanol', 'busqueda_contenido',
+            }
+        super().save(*args, **kwargs)
     
     def get_absolute_url(self):
         return reverse('diccionario:detalle_palabra', kwargs={'pk': self.pk})
