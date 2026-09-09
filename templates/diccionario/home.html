@@ -1,0 +1,1727 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Diccionario Kichwa - Inicio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<style>
+    /* ===== VARIABLES CSS PARA CONSISTENCIA ===== */
+    /* Agregando variables CSS adicionales para animaciones */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
+        --border-color: #e2e8f0;
+        --bg-light: #f8faff;
+
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+
+        --border-radius: 12px;
+        --border-radius-lg: 15px;
+        --border-radius-xl: 20px;
+        
+        /* Nuevas variables para animaciones */
+        --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        --transition-bounce: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        --transition-elastic: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Agregando smooth scrolling global */
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 80px;
+    }
+
+    /* ===== RESET Y BASE ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+        color: var(--text-primary);
+        background: #f8fafc;
+        /* Agregando cursor personalizado */
+        cursor: default;
+    }
+
+    /* Efectos de cursor personalizados */
+    a, button, .clickable {
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    a:hover, button:hover, .clickable:hover {
+        transform: translateY(-1px);
+    }
+
+    /* ===== HERO SECTION CON EFECTOS PARALLAX ===== */
+    .hero-section {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 80px 0 60px;
+        position: relative;
+        overflow: hidden;
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        /* Agregando efecto parallax */
+        background-attachment: fixed;
+        background-size: cover;
+    }
+
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+            repeat;
+        opacity: 0.3;
+        /* Agregando animación de movimiento */
+        animation: backgroundMove 20s linear infinite;
+    }
+
+    @keyframes backgroundMove {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(-60px, -60px); }
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 800px;
+        margin: 0 auto;
+        /* Agregando animación de entrada */
+        animation: heroFadeIn 1.2s ease-out;
+    }
+
+    @keyframes heroFadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        line-height: 1.1;
+        /* Agregando animación de texto */
+        animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+        0% { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        100% { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 20px rgba(255, 255, 255, 0.3); }
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        opacity: 0.95;
+        /* Agregando animación con delay */
+        animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    .hero-description {
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        /* Agregando animación con delay */
+        animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    /* ===== SEARCH CONTAINER CON ANIMACIONES MEJORADAS ===== */
+    /* ===== SEARCH CONTAINER CON ANIMACIONES MEJORADAS ===== */
+    .search-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius-xl);
+        padding: 2.5rem;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+        animation: searchContainerFadeIn 1s ease-out 0.9s both;
+        transition: var(--transition-smooth);
+    }
+
+    /* Agregando elementos decorativos de fondo para el buscador */
+    .search-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
+        animation: searchBackgroundRotate 20s linear infinite;
+        z-index: -1;
+    }
+
+    .search-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23667eea' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E") repeat;
+        animation: searchPatternMove 15s linear infinite;
+        z-index: -1;
+        opacity: 0.6;
+    }
+
+    @keyframes searchBackgroundRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes searchPatternMove {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(-40px, -40px); }
+    }
+
+    .search-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        background: rgba(255, 255, 255, 0.98);
+    }
+
+    .search-container:hover::before {
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 70%);
+    }
+
+    .search-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-icon-large {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        color: white;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        position: relative;
+        /* Mejorando animaciones del icono del buscador */
+        animation: iconPulse 3s ease-in-out infinite, iconFloat 4s ease-in-out infinite;
+        transition: var(--transition-bounce);
+    }
+
+    /* Agregando elemento decorativo al icono del buscador */
+    .search-icon-large::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 50%;
+        animation: iconRingPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes iconRingPulse {
+        0%, 100% { 
+            transform: scale(1);
+            opacity: 0.3;
+        }
+        50% { 
+            transform: scale(1.1);
+            opacity: 0.1;
+        }
+    }
+
+    .search-icon-large:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .search-icon-large:hover::before {
+        border-color: rgba(102, 126, 234, 0.4);
+        animation-duration: 1s;
+    }
+
+    .search-header h3 {
+        color: var(--text-primary);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .search-subtitle {
+        color: #2d3748;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* ===== SEARCH FORM ===== */
+    /* ===== SEARCH FORM CON EFECTOS MEJORADOS ===== */
+    .search-form {
+        width: 100%;
+    }
+
+    .search-input-container {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 4rem 1rem 1.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1.1rem;
+        transition: var(--transition-smooth);
+        background: white;
+        color: var(--text-primary);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+        /* Agregando efecto de brillo */
+        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+    }
+
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        color: white;
+        cursor: pointer;
+        transition: var(--transition-bounce);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Agregando animación de pulso */
+        animation: buttonPulse 3s ease-in-out infinite;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-50%) scale(1.1) rotate(10deg);
+        box-shadow: var(--shadow-md);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+    }
+
+    @keyframes buttonPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(102, 126, 234, 0); }
+    }
+
+    /* ===== SEARCH FILTERS ===== */
+    .search-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-select {
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        background: white;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: var(--transition-smooth);
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        /* Agregando transformación */
+        transform: translateY(-1px);
+    }
+
+    /* ===== QUICK FILTERS ===== */
+    /* ===== QUICK FILTERS CON ANIMACIONES ===== */
+    .quick-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .quick-filters-label {
+        color: rgba(255,255,255,0.95);
+        font-size: 0.9rem;
+        margin-right: 10px;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        /* Agregando animación de entrada */
+        animation: fadeInLeft 0.8s ease-out;
+    }
+
+    .quick-filter {
+        padding: 6px 12px;
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: var(--transition-bounce);
+        font-weight: 500;
+        /* Agregando animación de entrada escalonada */
+        animation: quickFilterFadeIn 0.6s ease-out both;
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    .quick-filter:nth-child(2) { animation-delay: 0.1s; }
+    .quick-filter:nth-child(3) { animation-delay: 0.2s; }
+    .quick-filter:nth-child(4) { animation-delay: 0.3s; }
+    .quick-filter:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes quickFilterFadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInLeft {
+        0% {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .quick-filter:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ===== SECCIÓN DE PALABRAS DESTACADAS ===== */
+    .featured-section-new {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #1e40af 50%, #1e3a8a 75%, #1e1b4b 100%);
+        min-height: 100vh;
+        padding: 80px 0 120px;
+        position: relative;
+        overflow: hidden;
+        margin-top: 0;
+    }
+
+    .featured-section-new::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 60%, rgba(147, 51, 234, 0.2) 0%, transparent 50%);
+        opacity: 0.6;
+        /* Agregando animación de movimiento parallax */
+        animation: parallaxMove 15s ease-in-out infinite;
+    }
+
+    @keyframes parallaxMove {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        25% { transform: translate(-10px, -5px) scale(1.02); }
+        50% { transform: translate(5px, -10px) scale(0.98); }
+        75% { transform: translate(-5px, 5px) scale(1.01); }
+    }
+
+    .featured-section-new::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="12" cy="12" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+        opacity: 0.4;
+        /* Agregando animación de rotación lenta */
+        animation: dotRotate 30s linear infinite;
+    }
+
+    @keyframes dotRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .featured-section-new .container {
+        position: relative;
+        z-index: 2;
+    }
+
+    .featured-section-new .section-header {
+        text-align: center;
+        margin-bottom: 60px;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .featured-section-new .section-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+        backdrop-filter: blur(15px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        color: #fbbf24;
+        font-size: 3rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        /* Mejorando animación de pulso con hover */
+        animation: enhancedPulse 3s ease-in-out infinite;
+        transition: var(--transition-elastic);
+        cursor: pointer;
+    }
+
+    .featured-section-new .section-icon:hover {
+        transform: scale(1.1) rotate(10deg);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+    }
+
+    @keyframes enhancedPulse {
+        0%, 100% { 
+            transform: scale(1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        25% {
+            transform: scale(1.02);
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.25);
+        }
+        50% { 
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+        75% {
+            transform: scale(1.02);
+            box-shadow: 0 22px 44px rgba(0, 0, 0, 0.25);
+        }
+    }
+
+    .featured-section-new .section-title {
+        color: #ffffff;
+        font-size: 4rem;
+        font-weight: 900;
+        margin-bottom: 25px;
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+
+    .featured-section-new .section-subtitle {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.4rem;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.6;
+        font-weight: 500;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* ===== BADGES FLOTANTES DENTRO DE LA SECCIÓN ===== */
+    /* ===== BADGES FLOTANTES CON ANIMACIONES MEJORADAS ===== */
+    
+    .section-floating-badges {
+        position: absolute;
+        bottom: 180px;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .floating-badge {
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.15) 0%, 
+            rgba(255, 255, 255, 0.08) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        /* Removiendo animaciones y haciendo más opaco para que no parezcan botones */
+        opacity: 0.7;
+        transition: none;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    /* Removiendo hover effects para que no parezcan clickeables */
+    .floating-badge:hover {
+        /* Sin efectos hover */
+    }
+
+    .floating-badge.left {
+        left: 40px;
+        /* Removiendo animation-delay */
+    }
+
+    .floating-badge.right {
+        right: 40px;
+        /* Removiendo animation-delay */
+    }
+
+    /* Removiendo animación flotante para los badges */
+    @keyframes enhancedFloatAnimation {
+        /* Animación removida */
+    }
+
+    .floating-badge-icon {
+        font-size: 2.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 8px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        /* Removiendo animación de rotación */
+    }
+
+    /* Removiendo animación de rotación de iconos */
+    @keyframes iconRotate {
+        /* Animación removida */
+    }
+
+    .floating-badge-number {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+        /* Removiendo animación de brillo */
+    }
+
+    /* Removiendo animación de brillo de números */
+    @keyframes numberGlow {
+        /* Animación removida */
+    }
+
+    .floating-badge-label {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        text-align: center;
+    }
+
+    /* ===== GRILLA DE TARJETAS MEJORADA ===== */
+    /* ===== GRILLA DE TARJETAS CON ANIMACIONES MEJORADAS ===== */
+    .featured-words-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-bottom: 60px;
+        padding: 0 20px;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        justify-items: center;
+        align-items: stretch;
+    }
+
+    .featured-word-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transition: var(--transition-elastic);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        /* Mejorando animación de entrada */
+        animation: enhancedSlideInUp 0.8s ease-out forwards;
+        opacity: 0;
+        transform: translateY(50px);
+        width: 100%;
+        max-width: 400px;
+        height: 320px;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+    }
+
+    .featured-word-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s;
+    }
+
+    .featured-word-card:hover::before {
+        left: 100%;
+    }
+
+    .featured-word-card:nth-child(1) { animation-delay: 0.1s; }
+    .featured-word-card:nth-child(2) { animation-delay: 0.2s; }
+    .featured-word-card:nth-child(3) { animation-delay: 0.3s; }
+    .featured-word-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes enhancedSlideInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .featured-word-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    /* Agregando animaciones para elementos internos de las tarjetas */
+    .featured-word-card .word-kichwa {
+        transition: var(--transition-smooth);
+    }
+
+    .featured-word-card:hover .word-kichwa {
+        transform: scale(1.05);
+        color: #667eea;
+    }
+
+    .featured-word-card .word-spanish {
+        transition: var(--transition-smooth);
+    }
+
+    .featured-word-card:hover .word-spanish {
+        transform: translateX(5px);
+    }
+
+
+    .word-header {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-right: 60px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .word-categories {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    /* ===== CHIPS DE CATEGORÍA ===== */
+    .word-category-tag {
+        padding: 8px 14px;
+        border-radius: 16px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-general {
+        background: #8b5cf6;
+        color: white;
+    }
+
+    .category-familia {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .category-naturaleza {
+        background: #10b981;
+        color: white;
+    }
+
+    .category-animales {
+        background: #ef4444;
+        color: white;
+    }
+
+    .difficulty-tag {
+        background: #f59e0b;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 14px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .word-main-content {
+        flex: 1;
+        text-align: center;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .word-kichwa {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 12px;
+        line-height: 1.2;
+    }
+
+    .word-spanish-label {
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    .word-spanish {
+        color: #374151;
+        font-size: 1.3rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .word-actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    /* ===== BOTÓN "VER MÁS DETALLES" CONSISTENTE ===== */
+    .btn-details {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 180px;
+        height: 44px;
+    }
+
+    .btn-details::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        transform: translate(-50%, -50%);
+    }
+
+    .btn-details:hover::before {
+        width: 100%;
+        height: 100%;
+    }
+
+    .btn-details:hover {
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-details:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+    }
+
+    /* ===== BOTÓN EXPLORAR ===== */
+    .btn-explore {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+        backdrop-filter: blur(15px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 18px 36px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .btn-explore::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-explore:hover::before {
+        left: 100%;
+    }
+
+    .btn-explore:hover {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.25));
+        color: white;
+        text-decoration: none;
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 1024px) {
+        .featured-words-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            max-width: 800px;
+        }
+        
+        .featured-section-new .section-title {
+            font-size: 3.2rem;
+        }
+
+        .floating-badge {
+            width: 120px;
+            height: 120px;
+        }
+
+        .floating-badge.left {
+            left: 30px;
+        }
+
+        .floating-badge.right {
+            right: 30px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .featured-words-grid {
+            grid-template-columns: 1fr;
+            gap: 25px;
+            padding: 0 15px;
+        }
+        
+        .featured-section-new .section-title {
+            font-size: 2.8rem;
+        }
+        
+        .featured-section-new .section-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .featured-section-new {
+            padding: 80px 0 100px;
+        }
+
+        .featured-word-card {
+            max-width: 100%;
+            height: 300px;
+        }
+
+        .floating-badge {
+            width: 100px;
+            height: 100px;
+        }
+
+        .floating-badge.left {
+            left: 20px;
+            bottom: 20px;
+        }
+
+        .floating-badge.right {
+            right: 20px;
+            bottom: 20px;
+        }
+
+        .floating-badge-icon {
+            font-size: 1.8rem;
+        }
+
+        .floating-badge-number {
+            font-size: 1.2rem;
+        }
+
+        .floating-badge-label {
+            font-size: 0.7rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .featured-word-card {
+            height: 280px;
+            padding: 20px;
+        }
+
+        .word-kichwa {
+            font-size: 1.9rem;
+        }
+
+        .btn-details {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            width: 160px;
+            height: 40px;
+        }
+        
+        .search-filters {
+            grid-template-columns: 1fr;
+        }
+        
+        .featured-section-new .section-title {
+            font-size: 2.4rem;
+        }
+        
+        .featured-section-new .section-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .floating-badge {
+            width: 80px;
+            height: 80px;
+        }
+
+        .floating-badge-icon {
+            font-size: 1.4rem;
+        }
+
+        .floating-badge-number {
+            font-size: 1rem;
+        }
+
+        .floating-badge-label {
+            font-size: 0.6rem;
+        }
+    }
+
+    /* ===== SEARCH SUGGESTIONS ===== */
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+
+    .suggestion-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f7fafc;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .suggestion-item:hover {
+        background: #f8faff;
+        color: #667eea;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-word {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .suggestion-translation {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    .highlight {
+        background: linear-gradient(120deg, #ffd700 0%, #ffed4e 100%);
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .search-loading {
+        display: none;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e2e8f0;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .search-stats {
+        padding: 8px 16px;
+        background: #f8faff;
+        color: #667eea;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .no-results {
+        padding: 20px;
+        text-align: center;
+        color: #718096;
+    }
+
+    /* ===== UTILIDADES ===== */
+    .text-gradient {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .btn-gradient {
+        background: var(--primary-gradient);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* ===== ACCESIBILIDAD ===== */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    .search-input:focus-visible,
+    .filter-select:focus-visible,
+    .search-btn:focus-visible,,
+    .btn-details:focus-visible {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+
+    /* ===== SAFE AREA INFERIOR ===== */
+    .featured-section-new {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Agregando efectos de scroll suave */
+    @media (prefers-reduced-motion: no-preference) {
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+    }
+
+    /* Agregando animaciones responsivas */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .featured-words-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .floating-badge {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .floating-badge.left {
+            left: 20px;
+        }
+        
+        .floating-badge.right {
+            right: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Diccionario <span class="text-warning">Kichwa</span>
+            </h1>
+            <p class="hero-subtitle">
+                Descubre la riqueza del idioma Kichwa
+            </p>
+            <p class="hero-description">
+                Una experiencia moderna que conecta a los jóvenes con su herencia
+                cultural a través de la tecnología interactiva.
+            </p>
+
+            <div class="search-container">
+                <div class="search-header">
+                    <div class="search-icon-large">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Buscar Palabras</h3>
+                </div>
+                <p class="search-subtitle">
+                    Explora nuestro diccionario de {{ total_palabras|default:"4.509" }} palabras en Kichwa
+                </p>
+
+                <form class="search-form" id="searchForm" method="get" action="{% url 'diccionario:buscar' %}">
+                    <div class="search-input-container">
+                        <input type="text" 
+                               class="search-input" 
+                               id="searchInput"
+                               name="termino"
+                               placeholder="Buscar palabra en Kichwa o español..."
+                               autocomplete="off"
+                               aria-label="Buscar palabra en Kichwa o español">
+                        <div class="search-loading" id="searchLoading" aria-hidden="true">
+                            <div class="loading-spinner"></div>
+                        </div>
+                        <button type="submit" class="search-btn" title="Buscar" aria-label="Buscar palabra">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </button>
+                        
+                        <div class="search-suggestions" id="searchSuggestions" role="listbox" aria-label="Sugerencias de búsqueda"></div>
+                    </div>
+
+                    <div class="search-filters">
+                        <div class="filter-group">
+                            <select name="categoria" id="categoria" class="filter-select" aria-label="Seleccionar categoría">
+                                <option value="">Todas las categorías</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.pk }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <select name="dificultad" id="dificultad" class="filter-select" aria-label="Seleccionar dificultad">
+                                <option value="">Todas las dificultades</option>
+                                <option value="facil">Fácil</option>
+                                <option value="medio">Medio</option>
+                                <option value="dificil">Difícil</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="featured-section-new">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-star" aria-hidden="true"></i>
+            </div>
+            <h2 class="section-title">Palabras Destacadas</h2>
+            <p class="section-subtitle">
+                Descubre algunas de las palabras más comunes y fáciles de nuestro diccionario
+            </p>
+        </div>
+
+        <div class="featured-words-grid">
+            {% for palabra in palabras_destacadas %}
+            <div class="featured-word-card">
+                <div class="word-header">
+                    <div class="word-categories">
+                        <span class="word-category-tag" {% if palabra.categoria %}style="background-color: {{ palabra.categoria.color }};"{% endif %}>
+                            {{ palabra.categoria.nombre|default:'General' }}
+                        </span>
+                        <span class="difficulty-tag">{{ palabra.get_dificultad_display }}</span>
+                    </div>
+                </div>
+                <div class="word-main-content">
+                    <h3 class="word-kichwa">{{ palabra.palabra_kichwa }}</h3>
+                    <div class="word-spanish-label">Español:</div>
+                    <p class="word-spanish">{{ palabra.traduccion_espanol }}</p>
+                </div>
+                <div class="word-actions">
+                    <a href="{{ palabra.get_absolute_url }}" class="btn-details" title="Ver detalles de {{ palabra.palabra_kichwa }}" aria-label="Ver detalles de {{ palabra.palabra_kichwa }}">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        Ver más detalles
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted">Aún no hay palabras destacadas disponibles.</p>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'diccionario:buscar' %}" class="btn-explore" title="Explorar todas las palabras del diccionario" aria-label="Explorar todas las palabras disponibles">
+                <i class="fas fa-search me-2" aria-hidden="true"></i>
+                Explorar todas las palabras
+            </a>
+        </div>
+    </div>
+
+    <div class="section-floating-badges">
+        <div class="floating-badge left">
+            <i class="fas fa-book floating-badge-icon" aria-hidden="true"></i>
+            <div class="floating-badge-number">{{ total_palabras }}</div>
+            <div class="floating-badge-label">Palabras</div>
+        </div>
+        <div class="floating-badge right">
+            <i class="fas fa-gamepad floating-badge-icon" aria-hidden="true"></i>
+            <div class="floating-badge-number">5</div>
+            <div class="floating-badge-label">Juegos</div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    const searchLoading = document.getElementById('searchLoading');
+    let searchTimeout;
+    let currentRequest;
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (currentRequest) {
+            currentRequest.abort();
+        }
+        
+        if (query.length < 2) {
+            hideSuggestions();
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            showLoading();
+            fetchSuggestions(query);
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-input-container')) {
+            hideSuggestions();
+        }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        const suggestions = searchSuggestions.querySelectorAll('.suggestion-item');
+        const current = searchSuggestions.querySelector('.suggestion-item.active');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (current) {
+                current.classList.remove('active');
+                const next = current.nextElementSibling;
+                if (next) {
+                    next.classList.add('active');
+                } else {
+                    suggestions[0]?.classList.add('active');
+                }
+            } else {
+                suggestions[0]?.classList.add('active');
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (current) {
+                current.classList.remove('active');
+                const prev = current.previousElementSibling;
+                if (prev && !prev.classList.contains('search-stats')) {
+                    prev.classList.add('active');
+                } else {
+                    suggestions[suggestions.length - 1]?.classList.add('active');
+                }
+            } else {
+                suggestions[suggestions.length - 1]?.classList.add('active');
+            }
+        } else if (e.key === 'Enter') {
+            if (current) {
+                e.preventDefault();
+                current.click();
+            }
+        } else if (e.key === 'Escape') {
+            hideSuggestions();
+        }
+    });
+
+    function fetchSuggestions(query) {
+        currentRequest = new AbortController();
+        fetch(`{% url 'diccionario:obtener_sugerencias_ajax' %}?q=${encodeURIComponent(query)}`, {
+            headers: { 'Accept': 'application/json' },
+            signal: currentRequest.signal,
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('No se pudieron obtener sugerencias.');
+            return response.json();
+        })
+        .then(data => {
+            if (searchInput.value.trim() === query) showSuggestions(data);
+        })
+        .catch(error => {
+            if (error.name !== 'AbortError') {
+                console.error('Error de sugerencias:', error);
+                showNoResults('No se pudieron cargar sugerencias.');
+            }
+        })
+        .finally(() => {
+            if (searchInput.value.trim() === query) hideLoading();
+        });
+    }
+
+    function showSuggestions(data) {
+        if (!data.palabras || data.palabras.length === 0) {
+            showNoResults();
+            return;
+        }
+
+        searchSuggestions.replaceChildren();
+        const stats = document.createElement('div');
+        stats.className = 'search-stats';
+        stats.textContent = `${data.palabras.length} sugerencia${data.palabras.length === 1 ? '' : 's'} encontrada${data.palabras.length === 1 ? '' : 's'}`;
+        searchSuggestions.appendChild(stats);
+
+        data.palabras.forEach(palabra => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'suggestion-item';
+            item.setAttribute('role', 'option');
+            item.setAttribute('aria-label', `Seleccionar ${palabra.palabra_kichwa}`);
+
+            const text = document.createElement('span');
+            const kichwa = document.createElement('span');
+            kichwa.className = 'suggestion-word';
+            kichwa.textContent = palabra.palabra_kichwa;
+            const espanol = document.createElement('span');
+            espanol.className = 'suggestion-translation';
+            espanol.textContent = palabra.traduccion_espanol;
+            text.append(kichwa, espanol);
+
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-arrow-right text-muted';
+            icon.setAttribute('aria-hidden', 'true');
+            item.append(text, icon);
+            item.addEventListener('click', () => selectSuggestion(palabra.palabra_kichwa));
+            searchSuggestions.appendChild(item);
+        });
+        searchSuggestions.style.display = 'block';
+        searchSuggestions.setAttribute('role', 'listbox');
+    }
+
+    function showNoResults(message = 'No se encontraron resultados') {
+        searchSuggestions.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search text-muted mb-2" aria-hidden="true"></i>
+                <div>${message}</div>
+            </div>
+        `;
+        searchSuggestions.style.display = 'block';
+    }
+
+    function selectSuggestion(word) {
+        searchInput.value = word;
+        hideSuggestions();
+        document.getElementById('searchForm').submit();
+    }
+
+    function showLoading() {
+        searchLoading.style.display = 'block';
+    }
+
+    function hideLoading() {
+        searchLoading.style.display = 'none';
+    }
+
+    function hideSuggestions() {
+        searchSuggestions.style.display = 'none';
+        searchSuggestions.querySelectorAll('.suggestion-item').forEach(item => {
+            item.classList.remove('active');
+        });
+    }
+
+    searchSuggestions.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.target.click();
+        }
+    });
+});
+
+function toggleFavorite(wordId, button) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        return;
+    }
+
+    const icon = button.querySelector('i');
+    const originalClass = icon.className;
+    
+    // Mostrar loading
+    icon.className = 'fas fa-spinner fa-spin';
+
+    fetch(`/favoritas/toggle/${wordId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.es_favorita) {
+                icon.className = 'fas fa-heart';
+                button.classList.add('active');
+                button.setAttribute('aria-label', button.getAttribute('aria-label').replace('Agregar', 'Quitar'));
+                button.setAttribute('title', button.getAttribute('title').replace('Agregar', 'Quitar'));
+            } else {
+                icon.className = 'far fa-heart';
+                button.classList.remove('active');
+                button.setAttribute('aria-label', button.getAttribute('aria-label').replace('Quitar', 'Agregar'));
+                button.setAttribute('title', button.getAttribute('title').replace('Quitar', 'Agregar'));
+            }
+            
+            // Animación de éxito
+            button.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+            
+            showNotification(data.message, 'success');
+            announceToScreenReader(data.message);
+        } else if (data.login_required) {
+            showLoginModal();
+            icon.className = originalClass;
+        } else {
+            showNotification(data.message, 'error');
+            icon.className = originalClass;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al procesar la solicitud', 'error');
+        icon.className = originalClass;
+    });
+}
+
+function showLoginModal() {
+    const modalExistente = document.getElementById('loginModal');
+    if (modalExistente) {
+        bootstrap.Modal.getOrCreateInstance(modalExistente).show();
+        return;
+    }
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div class="modal fade" id="loginModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-heart text-danger"></i>
+                            ¡Guarda tus palabras favoritas!
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <p>Para guardar palabras en tu lista de favoritas necesitas tener una cuenta.</p>
+                        <p class="text-muted small">Es gratis y solo toma unos segundos.</p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <a href="{% url 'usuarios:login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bootstrapModal = new bootstrap.Modal(document.getElementById('loginModal'));
+    bootstrapModal.show();
+    
+    document.getElementById('loginModal').addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        ${message}
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+    }, 3000);
+}
+
+function announceToScreenReader(message) {
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'sr-only';
+    announcement.textContent = message;
+    
+    document.body.appendChild(announcement);
+    
+    setTimeout(() => {
+        document.body.removeChild(announcement);
+    }, 1000);
+}
+
+window.selectSuggestion = function(word) {
+    document.getElementById('searchInput').value = word;
+    document.getElementById('searchSuggestions').style.display = 'none';
+    document.getElementById('searchForm').submit();
+};
+
+if ('ontouchstart' in window) {
+    document.addEventListener('touchstart', function() {}, {passive: true});
+}
+</script>
+{% endblock %}

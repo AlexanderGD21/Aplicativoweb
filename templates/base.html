@@ -1,0 +1,415 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="csrf-token" content="{{ csrf_token }}">
+   <title>{% block title %}Diccionario Kichwa{% endblock %}</title>
+   
+   <!-- Bootstrap CSS -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   
+   <!-- Font Awesome -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   
+   <!-- Google Fonts -->
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   
+   <!-- CSS personalizado -->
+   <link rel="stylesheet" href="{% static 'css/main.css' %}">
+   
+   {% block extra_css %}{% endblock %}
+   
+   <style>
+       /* Estilos base para asegurar que el contenido se muestre */
+       * {
+           box-sizing: border-box;
+       }
+       
+       html, body {
+           margin: 0;
+           padding: 0;
+           font-family: 'Inter', sans-serif;
+           line-height: 1.6;
+           /* Removido el gradiente de fondo que causaba el problema */
+           background-color: #f8f9fa; /* Color de fondo neutro por defecto */
+       }
+       
+       /* Navegación */
+       .navbar {
+           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+           padding: 1rem 0;
+           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+           position: relative;
+           z-index: 1000;
+       }
+       
+       .navbar-brand {
+           color: #ffc107 !important;
+           font-weight: bold;
+           font-size: 1.5rem;
+           text-decoration: none;
+       }
+       
+       .navbar-nav .nav-link {
+           color: #ffffff !important;
+           font-weight: 500;
+           margin: 0 0.5rem;
+           transition: all 0.3s ease;
+           text-decoration: none;
+       }
+       
+       .navbar-nav .nav-link:hover {
+           color: #ffc107 !important;
+           transform: translateY(-2px);
+       }
+       
+       .navbar-toggler {
+           border: none;
+           color: #ffffff;
+       }
+       
+       .navbar-toggler:focus {
+           box-shadow: none;
+       }
+       
+       .navbar-toggler-icon {
+           background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+       }
+       
+       /* Dropdown menu styling */
+       .dropdown-menu {
+           background-color: rgba(26, 26, 46, 0.95);
+           backdrop-filter: blur(10px);
+           border: 1px solid rgba(255, 255, 255, 0.1);
+           border-radius: 8px;
+       }
+       
+       .dropdown-item {
+           color: #ffffff !important;
+           transition: all 0.3s ease;
+       }
+       
+       .dropdown-item:hover {
+           background-color: rgba(255, 193, 7, 0.2);
+           color: #ffc107 !important;
+       }
+       
+       .dropdown-divider {
+           border-color: rgba(255, 255, 255, 0.2);
+       }
+       
+       /* Contenido principal */
+       main {
+           min-height: calc(100vh - 80px);
+           position: relative;
+           z-index: 1;
+           /* Removido el padding que podría interferir con los estilos de las páginas */
+       }
+       
+       /* Mensajes de Django */
+       .messages {
+           position: fixed;
+           top: 80px;
+           right: 20px;
+           z-index: 1050;
+           max-width: 400px;
+       }
+       
+       .alert {
+           margin-bottom: 10px;
+           border-radius: 10px;
+           backdrop-filter: blur(10px);
+           border: none;
+       }
+       
+       .alert-success {
+           background: rgba(40, 167, 69, 0.9);
+           color: #ffffff;
+           box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+       }
+       
+       .alert-danger {
+           background: rgba(220, 53, 69, 0.9);
+           color: #ffffff;
+           box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+       }
+       
+       .alert-info {
+           background: rgba(23, 162, 184, 0.9);
+           color: #ffffff;
+           box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+       }
+       
+       .alert-warning {
+           background: rgba(255, 193, 7, 0.9);
+           color: #212529;
+           box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+       }
+       
+       /* Footer */
+       footer {
+           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+           color: #ffffff;
+           padding: 3rem 0 1rem 0;
+           margin-top: auto;
+       }
+       
+       footer h5, footer h6 {
+           font-weight: 600;
+       }
+       
+       footer a {
+           transition: all 0.3s ease;
+       }
+       
+       footer a:hover {
+           color: #ffc107 !important;
+           transform: translateX(5px);
+       }
+       
+       footer .fab, footer .fas {
+           transition: all 0.3s ease;
+       }
+       
+       footer a:hover .fab, footer a:hover .fas {
+           transform: scale(1.1);
+       }
+       
+       footer .d-flex a {
+           width: 40px;
+           height: 40px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           background: rgba(255, 255, 255, 0.1);
+           border-radius: 50%;
+           transition: all 0.3s ease;
+       }
+       
+       footer .d-flex a:hover {
+           background: rgba(255, 193, 7, 0.2);
+           transform: translateY(-3px);
+       }
+       
+       /* Responsive */
+       @media (max-width: 768px) {
+           .navbar-nav {
+               text-align: center;
+               padding-top: 1rem;
+           }
+           
+           .navbar-nav .nav-link {
+               margin: 0.25rem 0;
+           }
+           
+           .messages {
+               right: 10px;
+               left: 10px;
+               max-width: none;
+           }
+       }
+   </style>
+</head>
+<body>
+   <a class="skip-link" href="#contenido-principal">Saltar al contenido principal</a>
+   <!-- Navegación -->
+   <nav class="navbar navbar-expand-lg" aria-label="Navegación principal">
+       <div class="container">
+           <a class="navbar-brand" href="{% url 'diccionario:home' %}">
+               <i class="fas fa-book"></i> Diccionario <span style="color: #ffc107;">Kichwa</span>
+           </a>
+           
+           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir menú de navegación">
+               <span class="navbar-toggler-icon"></span>
+           </button>
+           
+           <div class="collapse navbar-collapse" id="navbarNav">
+               <ul class="navbar-nav me-auto">
+                   <li class="nav-item">
+                       <a class="nav-link" href="{% url 'diccionario:home' %}">
+                           <i class="fas fa-home"></i> Inicio
+                       </a>
+                   </li>
+                   <li class="nav-item">
+                       <a class="nav-link" href="{% url 'diccionario:buscar' %}">
+                           <i class="fas fa-search"></i> Buscar
+                       </a>
+                   </li>
+                   <li class="nav-item">
+                       <a class="nav-link" href="{% url 'diccionario:juegos' %}">
+                           <i class="fas fa-gamepad"></i> Juegos
+                       </a>
+                   </li>
+               </ul>
+               
+               <ul class="navbar-nav">
+                   {% if user.is_authenticated %}
+                       <li class="nav-item dropdown">
+                           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                               <i class="fas fa-user"></i> {{ user.username }}
+                           </a>
+                           <ul class="dropdown-menu">
+                               <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi Perfil</a></li>
+                               <li><a class="dropdown-item" href="{% url 'diccionario:mis_favoritas' %}">Mis Favoritas</a></li>
+                               <li><hr class="dropdown-divider"></li>
+                               <li>
+                                   <form method="post" action="{% url 'usuarios:logout' %}">
+                                       {% csrf_token %}
+                                       <button class="dropdown-item" type="submit">Cerrar Sesión</button>
+                                   </form>
+                               </li>
+                           </ul>
+                       </li>
+                   {% else %}
+                       <li class="nav-item">
+                           <a class="nav-link" href="{% url 'usuarios:login' %}">
+                               <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                           </a>
+                       </li>
+                       <li class="nav-item">
+                           <a class="nav-link" href="{% url 'usuarios:registro' %}">
+                               <i class="fas fa-user-plus"></i> Registrarse
+                           </a>
+                       </li>
+                   {% endif %}
+               </ul>
+           </div>
+       </div>
+   </nav>
+
+   <!-- Mensajes -->
+   {% if messages %}
+       <div class="messages" aria-live="polite" aria-atomic="true">
+           {% for message in messages %}
+               <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                   {{ message }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar mensaje"></button>
+               </div>
+           {% endfor %}
+       </div>
+   {% endif %}
+
+   <!-- Contenido principal -->
+   <main id="contenido-principal" tabindex="-1">
+       {% block content %}
+       <!-- El contenido de las páginas se insertará aquí -->
+       {% endblock %}
+   </main>
+
+   <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalTitle" aria-hidden="true">
+       <div class="modal-dialog modal-dialog-centered">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h2 class="modal-title fs-5" id="loginModalTitle">Guarda tus palabras favoritas</h2>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+               </div>
+               <div class="modal-body">Para guardar palabras necesitas iniciar sesión o crear una cuenta.</div>
+               <div class="modal-footer">
+                   <a href="{% url 'usuarios:login' %}" class="btn btn-primary">Iniciar sesión</a>
+                   <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-primary">Registrarse</a>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- Footer -->
+   <footer>
+       <div class="container">
+           <div class="row">
+               <!-- Información del Proyecto -->
+               <div class="col-md-5 mb-4">
+                   <h5 class="text-warning mb-3">
+                       <i class="fas fa-book"></i> Diccionario Kichwa
+                   </h5>
+                   <p class="mb-3">
+                       Plataforma digital moderna diseñada para que los jóvenes transicionen del diccionario tradicional 
+                       a una experiencia tecnológica innovadora. Aprende Kichwa con herramientas del siglo XXI.
+                   </p>
+               </div>
+               
+               <!-- Enlaces Rápidos -->
+               <div class="col-md-4 mb-4">
+                   <h6 class="text-warning mb-3">Enlaces Rápidos</h6>
+                   <ul class="list-unstyled">
+                       <li class="mb-2">
+                           <a href="{% url 'diccionario:home' %}" class="text-light text-decoration-none">
+                               <i class="fas fa-home fa-sm me-2"></i>Inicio
+                           </a>
+                       </li>
+                       <li class="mb-2">
+                           <a href="{% url 'diccionario:buscar' %}" class="text-light text-decoration-none">
+                               <i class="fas fa-search fa-sm me-2"></i>Buscar Palabras
+                           </a>
+                       </li>
+                       <li class="mb-2">
+                           <a href="{% url 'diccionario:juegos' %}" class="text-light text-decoration-none">
+                               <i class="fas fa-gamepad fa-sm me-2"></i>Juegos
+                           </a>
+                       </li>
+                   </ul>
+               </div>
+               
+               <!-- Información Legal -->
+               <div class="col-md-3 mb-4">
+                   <h6 class="text-warning mb-3">Información</h6>
+                   <ul class="list-unstyled">
+                       <li class="mb-2">
+                           <a href="{% url 'usuarios:terminos' %}" class="text-light text-decoration-none">
+                               <i class="fas fa-file-contract fa-sm me-2"></i>Términos y Condiciones
+                           </a>
+                       </li>
+                       <li class="mb-2">
+                           <a href="{% url 'usuarios:privacidad' %}" class="text-light text-decoration-none">
+                               <i class="fas fa-shield-alt fa-sm me-2"></i>Política de Privacidad
+                           </a>
+                       </li>
+                   </ul>
+               </div>
+           </div>
+           
+           <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.2);">
+           
+           <!-- Copyright y estadísticas -->
+           <div class="row align-items-center">
+               <div class="col-md-6">
+                   <p class="mb-0">&copy; 2025 Diccionario Kichwa. Tu diccionario Digital.</p>
+                   <small class="text-muted">Preservando y promoviendo la lengua Kichwa</small>
+               </div>
+               <div class="col-md-6 text-md-end">
+                   <small class="text-light">
+                       <i class="fas fa-database me-1"></i>Corpus en curación continua
+                       <span class="mx-2">|</span>
+                       <i class="fas fa-users me-1"></i>Comunidad activa
+                       <span class="mx-2">|</span>
+                       <i class="fas fa-heart me-1 text-danger"></i>Hecho con amor
+                   </small>
+               </div>
+           </div>
+       </div>
+   </footer>
+
+   <!-- Bootstrap JS -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+   <!-- Utilidades globales y mejoras progresivas -->
+   <script src="{% static 'js/main.js' %}"></script>
+   
+   <!-- JavaScript personalizado -->
+   {% block extra_js %}{% endblock %}
+   
+   <script>
+       // Auto-ocultar mensajes después de 5 segundos
+       document.addEventListener('DOMContentLoaded', function() {
+           const alerts = document.querySelectorAll('.alert');
+           alerts.forEach(function(alert) {
+               setTimeout(function() {
+                   const bsAlert = new bootstrap.Alert(alert);
+                   bsAlert.close();
+               }, 5000);
+           });
+       });
+   </script>
+</body>
+</html>

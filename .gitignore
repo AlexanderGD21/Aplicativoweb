@@ -1,0 +1,26 @@
+# Python y entorno local
+__pycache__/
+*.py[cod]
+venv/
+venv_corrupto_*/
+
+# Secretos y datos generados
+.env
+*.sqlite3
+backups/
+staticfiles/
+media/
+*.log
+logs/
+
+# Editor y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Herramientas de calidad
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/

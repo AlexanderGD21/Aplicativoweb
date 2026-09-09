@@ -1,0 +1,98 @@
+/* Estilos para la página de juegos */
+.game-card {
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.game-card-primary {
+  border-left: 4px solid #007bff;
+}
+
+.game-card-secondary {
+  border-left: 4px solid #6c757d;
+}
+
+.game-card-success {
+  border-left: 4px solid #28a745;
+}
+
+.game-card-danger {
+  border-left: 4px solid #dc3545;
+}
+
+.game-icon {
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+.game-card:hover .game-icon {
+  color: #007bff;
+}
+
+.game-btn {
+  transition: all 0.3s ease;
+  border-radius: 25px;
+  padding: 10px 25px;
+}
+
+.game-btn:hover {
+  transform: scale(1.05);
+}
+
+.badge-hard {
+  background-color: #28a745;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .game-card {
+    margin-bottom: 1rem;
+  }
+
+  .display-4 {
+    font-size: 2rem;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.game-card {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.game-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.game-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.game-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.game-card:nth-child(4) {
+  animation-delay: 0.4s;
+}

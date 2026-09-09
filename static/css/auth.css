@@ -1,0 +1,1032 @@
+/* Reset y variables básicas */
+* {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+:root {
+  --color-primario: #ff6b35;
+  --color-secundario: #f7931e;
+  --color-exito: #28a745;
+  --color-peligro: #dc3545;
+  --color-advertencia: #ffc107;
+  --color-info: #17a2b8;
+  --color-gris: #6c757d;
+  --color-gris-claro: #f8f9fa;
+  --color-blanco: #ffffff;
+  --color-negro: #212529;
+}
+
+/* Fondo de autenticación mejorado - respeta el navbar */
+.auth-background {
+  min-height: calc(100vh - 80px);
+  width: 100%;
+  max-width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #553774 5%, #310b362a 5%, #652b3393 5%, #4facfe 5%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+  margin-top: 0;
+  position: relative;
+}
+
+/* Animación del fondo gradiente más suave */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 25% 0%;
+  }
+  15% {
+    background-position: 25% 0%;
+  }
+  15% {
+    background-position: 0% 0%;
+  }
+  15% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Partículas flotantes mejoradas */
+.auth-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  animation: float 25s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-20px) rotate(1deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-40px) rotate(-1deg);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translateY(-20px) rotate(1deg);
+    opacity: 0.8;
+  }
+}
+
+/* Contenedor principal sin overflow */
+.auth-container {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 10;
+}
+
+/* Tarjeta de autenticación sin overflow - CORREGIDA */
+.auth-card {
+  background: var(--color-blanco);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  /* CAMBIO CRÍTICO: overflow hidden para forzar bordes redondeados */
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+  opacity: 1;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 100%;
+  width: 100%;
+  /* Asegurar que todos los elementos hijos respeten los bordes */
+  position: relative;
+}
+
+/* Animaciones de entrada y salida */
+.auth-card.fade-out {
+  opacity: 0;
+  transform: translateY(-30px) scale(0.95);
+}
+
+.auth-card.fade-in {
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animación de deslizamiento lateral */
+.auth-card.slide-left {
+  animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.auth-card.slide-right {
+  animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Header con altura reducida y mejor proporción */
+.auth-header {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8c42 100%);
+  /* PADDING REDUCIDO: de 35px a 25px para mejor proporción */
+  padding: 10px 10px;
+  text-align: center;
+  color: var(--color-blanco);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  z-index: 5;
+  /* BORDES REDONDEADOS SUPERIORES */
+  border-radius: 20px 20px 0 0;
+}
+
+.auth-header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  animation: shine 4s ease-in-out infinite;
+}
+
+.auth-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35, #f7931e, #ff8c42, #ff6b35);
+  background-size: 200% 100%;
+  animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+}
+
+.auth-title {
+  /* TAMAÑO LIGERAMENTE REDUCIDO para mejor proporción */
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+}
+
+/* Cuerpo compacto */
+.auth-body {
+  padding: 25px 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Grupos de formulario compactos */
+.form-group {
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease forwards;
+  position: relative;
+}
+
+.form-group:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.form-group:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.form-group:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.form-group:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.form-group:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.form-group:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--color-negro);
+  font-size: 0.9rem;
+}
+
+/* Tooltip COMPLETAMENTE REDISEÑADO - COMPACTO Y FUNCIONAL */
+.tooltip-trigger {
+  display: inline-block;
+  margin-left: 8px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-advertencia);
+  border-radius: 50%;
+  color: var(--color-blanco);
+  font-size: 0.65rem;
+  text-align: center;
+  line-height: 16px;
+  cursor: help;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tooltip-trigger:hover {
+  transform: scale(1.1);
+  background: var(--color-primario);
+}
+
+/* Tooltip COMPLETAMENTE REDISEÑADO - COMPACTO Y FUNCIONAL */
+.tooltip-content {
+  position: fixed;
+  bottom: auto;
+  top: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 37, 41, 0.95);
+  color: var(--color-blanco);
+  /* PADDING MEJORADO para cubrir todo el texto */
+  padding: 8px 14px;
+  border-radius: 6px;
+  /* FONT SIZE REDUCIDO */
+  font-size: 0.75rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999999;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  /* SIZING MEJORADO - se ajusta al contenido */
+  max-width: 200px;
+  min-width: 120px;
+  width: max-content;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.3;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.tooltip-content::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(33, 37, 41, 0.95);
+}
+
+.tooltip-trigger:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  /* POSICIONAMIENTO DINÁMICO MEJORADO */
+  top: -45px;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip específico para campos superiores - MÁS ARRIBA */
+.tooltip-trigger.tooltip-top .tooltip-content {
+  top: auto;
+  bottom: 130%;
+}
+
+.tooltip-trigger.tooltip-top:hover .tooltip-content {
+  bottom: 130%;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Campos de entrada compactos con animaciones */
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: var(--color-blanco);
+  position: relative;
+  z-index: 1;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  transform: translateY(-1px);
+}
+
+.form-control.valid {
+  border-color: var(--color-exito);
+  background: rgba(40, 167, 69, 0.05);
+}
+
+.form-control.invalid {
+  border-color: var(--color-peligro);
+  background: rgba(220, 53, 69, 0.05);
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Animación de vibración para campos inválidos */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Contenedor de contraseña */
+.password-container {
+  position: relative;
+  z-index: 1;
+}
+
+.password-container .form-control {
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-gris);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  color: var(--color-primario);
+  background: rgba(255, 107, 53, 0.1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle .toggle-icon::before {
+  content: "👁";
+  font-size: 16px;
+}
+
+.password-toggle[data-visible="true"] .toggle-icon::before {
+  content: "🙈";
+}
+
+/* Validaciones compactas */
+.email-validation,
+.password-match,
+.field-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: none;
+  animation: slideDown 0.3s ease;
+}
+
+.email-validation.valid,
+.password-match.match {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--color-exito);
+  border: 1px solid var(--color-exito);
+  display: block;
+}
+
+.email-validation.invalid,
+.password-match.no-match,
+.field-error.show {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--color-peligro);
+  border: 1px solid var(--color-peligro);
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Indicador de fortaleza de contraseña compacto */
+.password-strength {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--color-gris-claro);
+  display: none;
+  animation: slideDown 0.4s ease;
+}
+
+.password-strength.show {
+  display: block;
+}
+
+.strength-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #dee2e6;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-weak .strength-fill {
+  width: 33%;
+  background: var(--color-peligro);
+}
+
+.strength-medium .strength-fill {
+  width: 66%;
+  background: var(--color-advertencia);
+}
+
+.strength-strong .strength-fill {
+  width: 100%;
+  background: var(--color-exito);
+}
+
+.strength-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.strength-weak .strength-text {
+  color: var(--color-peligro);
+}
+.strength-medium .strength-text {
+  color: #856404;
+}
+.strength-strong .strength-text {
+  color: var(--color-exito);
+}
+
+.strength-message {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.strength-suggestions {
+  font-size: 0.75rem;
+  color: var(--color-gris);
+  margin-top: 5px;
+  line-height: 1.3;
+}
+
+/* Mensajes de error compactos */
+.error-message {
+  color: var(--color-peligro);
+  font-size: 0.8rem;
+  margin-top: 5px;
+  padding: 6px 10px;
+  background: rgba(220, 53, 69, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-peligro);
+  display: none;
+}
+
+.error-message.show {
+  display: block;
+}
+
+/* Checkbox compacto */
+.custom-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.custom-checkbox input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+}
+
+.custom-checkbox input[type="checkbox"]:hover {
+  border-color: var(--color-primario);
+  transform: scale(1.05);
+}
+
+.custom-checkbox input[type="checkbox"]:checked {
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+  transform: scale(1.05);
+}
+
+.custom-checkbox input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-blanco);
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.custom-checkbox label {
+  font-size: 0.85rem;
+  color: var(--color-gris);
+  cursor: pointer;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* Tooltip para términos */
+.terms-tooltip {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--color-peligro);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-top: 8px;
+  border: 1px solid var(--color-peligro);
+  display: none;
+  animation: pulse 1s infinite;
+}
+
+.terms-tooltip.show {
+  display: block;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Botones compactos con animaciones mejoradas */
+.auth-btn {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 15px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 0.6s, height 0.6s;
+  transform: translate(-50%, -50%);
+}
+
+.auth-btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.auth-btn-primary {
+  background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+  color: var(--color-blanco);
+  box-shadow: 0 2px 10px rgba(255, 107, 53, 0.3);
+}
+
+.auth-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.auth-btn-secondary {
+  background: transparent;
+  border: 2px solid var(--color-primario);
+  color: var(--color-primario);
+}
+
+.auth-btn-secondary:hover {
+  background: var(--color-primario);
+  color: var(--color-blanco);
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+/* Enlaces con animaciones */
+.auth-link {
+  color: var(--color-primario);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.auth-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primario), var(--color-secundario));
+  transition: width 0.3s ease;
+}
+
+.auth-link:hover {
+  color: var(--color-secundario);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.auth-link:hover::after {
+  width: 100%;
+}
+
+/* Separador */
+.auth-divider {
+  text-align: center;
+  margin: 20px 0;
+  position: relative;
+  color: var(--color-gris);
+  font-size: 0.9rem;
+}
+
+.auth-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #dee2e6;
+}
+
+.auth-divider span {
+  background: var(--color-blanco);
+  padding: 0 15px;
+  position: relative;
+}
+
+/* Footer con bordes redondeados inferiores - CORREGIDO */
+.auth-footer {
+  text-align: center;
+  padding: 15px 20px;
+  background: rgba(248, 249, 250, 0.8);
+  color: #8e9aaf;
+  font-size: 0.8rem;
+  backdrop-filter: blur(5px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  /* BORDES REDONDEADOS INFERIORES - FORZADOS */
+  border-radius: 0 0 20px 20px !important;
+  /* Asegurar que no se extienda fuera de la tarjeta */
+  margin: 0;
+  /* Evitar que el background se extienda */
+  background-clip: padding-box;
+  /* Asegurar que esté contenido dentro de la tarjeta */
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-footer p {
+  margin: 5px 0;
+  opacity: 0.8;
+}
+
+/* Alertas */
+.alert {
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  animation: slideDown 0.4s ease;
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--color-exito);
+  border: 1px solid var(--color-exito);
+}
+
+.alert-error {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--color-peligro);
+  border: 1px solid var(--color-peligro);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-background {
+    padding: 15px;
+    min-height: calc(100vh - 60px);
+  }
+
+  .auth-container {
+    max-width: 100%;
+    width: calc(100vw - 30px);
+  }
+
+  .auth-card {
+    border-radius: 15px;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Ajustar bordes redondeados en móvil con padding reducido */
+  .auth-header {
+    /* PADDING REDUCIDO EN MÓVIL: de 25px a 20px */
+    padding: 20px 20px;
+    border-radius: 15px 15px 0 0;
+  }
+
+  .auth-title {
+    font-size: 1.4rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .auth-footer {
+    border-radius: 0 0 15px 15px !important;
+    background-clip: padding-box;
+    overflow: hidden;
+    padding: 12px 15px;
+    font-size: 0.75rem;
+  }
+
+  .auth-body {
+    padding: 20px 15px;
+  }
+
+  .form-control {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .password-container .form-control {
+    padding-right: 45px;
+  }
+
+  .password-toggle {
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  /* Tooltips en móvil - centrados en pantalla */
+  .tooltip-content {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: 250px;
+    z-index: 9999999;
+    white-space: normal;
+    bottom: auto !important;
+    right: auto !important;
+  }
+
+  .tooltip-trigger.tooltip-top .tooltip-content {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .tooltip-trigger:hover .tooltip-content,
+  .tooltip-trigger.tooltip-top:hover .tooltip-content {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .tooltip-content::after {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-background {
+    padding: 10px;
+    min-height: calc(100vh - 50px);
+  }
+
+  .auth-container {
+    width: calc(100vw - 20px);
+  }
+
+  .auth-card {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .auth-header {
+    /* PADDING MÁS REDUCIDO EN MÓVIL PEQUEÑO: 18px */
+    padding: 18px 15px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .auth-title {
+    font-size: 1.3rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .auth-footer {
+    border-radius: 0 0 12px 12px !important;
+    background-clip: padding-box;
+    overflow: hidden;
+    padding: 10px 12px;
+    font-size: 0.7rem;
+  }
+
+  .auth-body {
+    padding: 15px 12px;
+  }
+
+  .form-control {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Animaciones de carga de página */
+.page-transition {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: pageLoad 0.8s ease forwards;
+}
+
+@keyframes pageLoad {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efectos de partículas flotantes */
+.floating-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  animation: floatUp 4s linear forwards;
+}
+
+@keyframes floatUp {
+  to {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Asegurar que no hay overflow horizontal */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Asegurar que el main content permita scroll vertical */
+main.container-fluid {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+}

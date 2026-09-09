@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Estadísticas - Diccionario Kichwa{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="text-center mb-4">Mis Estadísticas</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-primary">{{ total_partidas }}</h2>
+                    <p class="card-text">Partidas Jugadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-success">{{ total_puntos }}</h2>
+                    <p class="card-text">Puntos Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 class="text-warning">{{ favoritas_count }}</h2>
+                    <p class="card-text">Palabras Favoritas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if partidas %}
+        <div class="card">
+            <div class="card-header">
+                <h3>Últimas Partidas</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Juego</th>
+                                <th>Puntuación</th>
+                                <th>Tiempo</th>
+                                <th>Correctas</th>
+                                <th>Incorrectas</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for partida in partidas %}
+                                <tr>
+                                    <td>{{ partida.get_tipo_juego_display }}</td>
+                                    <td>{{ partida.puntuacion }}</td>
+                                    <td>{{ partida.tiempo_jugado }}s</td>
+                                    <td class="text-success">{{ partida.palabras_correctas }}</td>
+                                    <td class="text-danger">{{ partida.palabras_incorrectas }}</td>
+                                    <td>{{ partida.fecha_partida|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <h4>No has jugado ninguna partida aún</h4>
+            <p>¡Comienza a jugar para ver tus estadísticas!</p>
+            <a href="{% url 'diccionario:juegos' %}" class="btn btn-primary">
+                <i class="fas fa-gamepad"></i> Ir a Juegos
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

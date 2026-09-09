@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Buscar Palabras | Diccionario Kichwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #1d3b9eba 0%, #0060bfdd 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+
+    .hero-section {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 4rem 0 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .search-form {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(255, 0, 0, 0.1);
+        margin-top: 2rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #1532b0ff;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: translateY(-2px);
+    }
+
+    /* BOTÓN DE BÚSQUEDA - Para cambiar color, modifica las siguientes propiedades:
+       - background: cambia el color de fondo del botón
+       - border: cambia el color del borde
+       - color: cambia el color del texto/icono
+       - box-shadow en hover: cambia la sombra al pasar el mouse */
+    .btn-search {
+        background: var(--primary-gradient); /* ← CAMBIAR AQUÍ: color de fondo del botón */
+        border: none; /* ← CAMBIAR AQUÍ: agregar border: 2px solid #color para borde */
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white; /* ← CAMBIAR AQUÍ: color del texto del botón */
+        transition: all 0.3s ease;
+    }
+
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* ← CAMBIAR AQUÍ: color de sombra al hover */
+        color: white; /* ← CAMBIAR AQUÍ: color del texto al hover */
+    }
+
+    .results-header {
+        background: var(--info-gradient);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: #2d3748;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .palabra-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(90, 90, 90, 1);
+        transition: all 0.3s ease;
+        border: 1px solid #003cffff;
+    }
+
+    .palabra-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(255, 255, 255, 0.15);
+    }
+
+    .palabra-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000ff;
+        margin-bottom: 0.5rem;
+    }
+
+    .palabra-spanish {
+        font-size: 1.2rem;
+        color: #4a5568;
+        margin-bottom: 1rem;
+    }
+
+    .pronunciation {
+        color: #718096;
+        font-style: italic;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge-categoria {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: white;
+        margin-right: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .badge-categoria:hover {
+        transform: scale(1.05);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* ETIQUETAS DE DIFICULTAD MEJORADAS - Visibilidad corregida */
+    .badge-dificultad {
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Colores específicos para cada dificultad con mejor contraste */
+    .badge-dificultad.bg-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    }
+
+    .badge-dificultad.bg-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: white !important;
+    }
+
+    .badge-dificultad.bg-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    }
+
+    /* BOTÓN VER DETALLES - Para cambiar color, modifica las siguientes propiedades:
+       - background: cambia el color de fondo del botón
+       - color: cambia el color del texto
+       - box-shadow: cambia la sombra del botón */
+    .btn-details {
+        background: var(--success-gradient); /* ← CAMBIAR AQUÍ: color de fondo del botón detalles */
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        color: white; /* ← CAMBIAR AQUÍ: color del texto del botón detalles */
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3); /* ← CAMBIAR AQUÍ: color de sombra al hover */
+        color: white; /* ← CAMBIAR AQUÍ: color del texto al hover */
+        text-decoration: none;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin: 3rem 0;
+    }
+
+    .pagination {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* ENLACES DE PAGINACIÓN - Para cambiar color, modifica las siguientes propiedades:
+       - color: cambia el color del texto de los enlaces
+       - background en hover: cambia el color de fondo al pasar el mouse */
+    .page-link {
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        color: #667eea; /* ← CAMBIAR AQUÍ: color del texto de paginación */
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .page-link:hover {
+        background: var(--primary-gradient); /* ← CAMBIAR AQUÍ: color de fondo al hover */
+        color: white; /* ← CAMBIAR AQUÍ: color del texto al hover */
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-gradient); /* ← CAMBIAR AQUÍ: color de fondo del elemento activo */
+        color: white; /* ← CAMBIAR AQUÍ: color del texto del elemento activo */
+    }
+
+    .page-item.disabled .page-link {
+        color: #cbd5e0;
+        cursor: not-allowed;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #718096;
+    }
+
+    .no-results i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #e2e8f0;
+    }
+
+    /* Indicador de coincidencia exacta */
+    .exact-match {
+        border: 3px solid #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+        position: relative;
+    }
+
+    .exact-match::before {
+        content: "Coincidencia exacta";
+        position: absolute;
+        top: -10px;
+        right: 15px;
+        background: #10b981;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 2rem 0 1rem;
+        }
+        
+        .search-form {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+        
+        .palabra-card {
+            margin: 1rem;
+            padding: 1rem;
+        }
+        
+        .pagination {
+            padding: 0.5rem;
+            gap: 0.25rem;
+        }
+        
+        .page-link {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    .search-stats {
+        background: rgba(255,255,255,0.9);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-search me-3"></i>Buscar Palabras
+            </h1>
+            <p class="lead mb-0">Explora nuestro diccionario de {{ total_resultados|default:"4509" }} palabras en kichwa</p>
+            
+            <div class="search-form">
+                <form method="get" id="searchForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="id_termino" class="form-label fw-bold">
+                                <i class="fas fa-keyboard me-2"></i>Término de búsqueda
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="id_termino" 
+                                   name="termino" 
+                                   value="{{ request.GET.termino }}"
+                                   placeholder="Buscar palabra en kichwa o español...">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="id_categoria" class="form-label fw-bold">
+                                <i class="fas fa-tags me-2"></i>Categoría
+                            </label>
+                            <select class="form-select" id="id_categoria" name="categoria">
+                                <option value="">Todas las categorías</option>
+                                {% for categoria in form.categoria.field.queryset %}
+                                    <option value="{{ categoria.pk }}" 
+                                            {% if request.GET.categoria == categoria.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ categoria.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="id_nivel_pronunciacion" class="form-label fw-bold">
+                                <i class="fas fa-volume-up me-2"></i>Nivel de pronunciación
+                            </label>
+                            <select class="form-select" id="id_nivel_pronunciacion" name="nivel_pronunciacion">
+                                <option value="">Todos los niveles</option>
+                                <option value="basico" {% if request.GET.nivel_pronunciacion == 'basico' %}selected{% endif %}>Básico</option>
+                                <option value="intermedio" {% if request.GET.nivel_pronunciacion == 'intermedio' %}selected{% endif %}>Intermedio</option>
+                                <option value="avanzado" {% if request.GET.nivel_pronunciacion == 'avanzado' %}selected{% endif %}>Avanzado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_dificultad" class="form-label fw-bold">
+                                <i class="fas fa-chart-line me-2"></i>Dificultad
+                            </label>
+                            <select class="form-select" id="id_dificultad" name="dificultad">
+                                <option value="">Todas las dificultades</option>
+                                <option value="facil" {% if request.GET.dificultad == 'facil' %}selected{% endif %}>Fácil</option>
+                                <option value="medio" {% if request.GET.dificultad == 'medio' %}selected{% endif %}>Medio</option>
+                                <option value="dificil" {% if request.GET.dificultad == 'dificil' %}selected{% endif %}>Difícil</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-search btn-lg">
+                            <i class="fas fa-search me-2"></i>Buscar Palabras
+                        </button>
+                    </div>
+                </form>
+                {% if form.errors %}
+                    <div class="alert alert-warning mt-3 mb-0" role="alert">
+                        Revisa los filtros seleccionados; se ignoraron los valores no válidos.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% if page_obj %}
+        <div class="results-header">
+            <i class="fas fa-list-ul me-2"></i>
+            {{ total_resultados }} palabra{{ total_resultados|pluralize }} encontrada{{ total_resultados|pluralize }}
+            {% if request.GET.termino %}
+                <br><small class="text-muted">Búsqueda: "{{ request.GET.termino }}" - Coincidencias exactas aparecen primero</small>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            {% for palabra in page_obj %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="palabra-card {% if request.GET.termino and palabra.palabra_kichwa|lower == request.GET.termino|lower or palabra.traduccion_espanol|lower == request.GET.termino|lower %}exact-match{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            {% if palabra.categoria %}
+                                <span class="badge-categoria" 
+                                      style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    {{ palabra.categoria.nombre }}
+                                </span>
+                            {% endif %}
+                            <span class="badge-dificultad 
+                                         {% if palabra.dificultad == 'facil' %}bg-success
+                                         {% elif palabra.dificultad == 'medio' %}bg-warning
+                                         {% else %}bg-danger{% endif %}">
+                                {{ palabra.get_dificultad_display|default:"Medio" }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="palabra-title">{{ palabra.palabra_kichwa }}</h3>
+                        <p class="palabra-spanish">
+                            <strong>Español:</strong> {{ palabra.traduccion_espanol }}
+                        </p>
+                        
+                        {% if palabra.pronunciacion %}
+                            <div class="pronunciation">
+                                <i class="fas fa-volume-up"></i>
+                                {{ palabra.pronunciacion }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="text-end">
+                            <a href="{% url 'diccionario:detalle_palabra' palabra.pk %}" 
+                               class="btn-details">
+                                <i class="fas fa-eye"></i>
+                                Ver detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div class="pagination-container">
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination">
+                        {% if page_obj.number > 4 %}
+                            <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET.termino %}termino={{ request.GET.termino }}&{% endif %}{% if request.GET.categoria %}categoria={{ request.GET.categoria }}&{% endif %}{% if request.GET.dificultad %}dificultad={{ request.GET.dificultad }}&{% endif %}{% if request.GET.nivel_pronunciacion %}nivel_pronunciacion={{ request.GET.nivel_pronunciacion }}&{% endif %}page=1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET.termino %}termino={{ request.GET.termino }}&{% endif %}{% if request.GET.categoria %}categoria={{ request.GET.categoria }}&{% endif %}{% if request.GET.dificultad %}dificultad={{ request.GET.dificultad }}&{% endif %}{% if request.GET.nivel_pronunciacion %}nivel_pronunciacion={{ request.GET.nivel_pronunciacion }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num == page_obj.number %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-4' and num < page_obj.number|add:'4' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET.termino %}termino={{ request.GET.termino }}&{% endif %}{% if request.GET.categoria %}categoria={{ request.GET.categoria }}&{% endif %}{% if request.GET.dificultad %}dificultad={{ request.GET.dificultad }}&{% endif %}{% if request.GET.nivel_pronunciacion %}nivel_pronunciacion={{ request.GET.nivel_pronunciacion }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% elif num == page_obj.number|add:'-4' or num == page_obj.number|add:'4' %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.termino %}termino={{ request.GET.termino }}&{% endif %}{% if request.GET.categoria %}categoria={{ request.GET.categoria }}&{% endif %}{% if request.GET.dificultad %}dificultad={{ request.GET.dificultad }}&{% endif %}{% if request.GET.nivel_pronunciacion %}nivel_pronunciacion={{ request.GET.nivel_pronunciacion }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.termino %}termino={{ request.GET.termino }}&{% endif %}{% if request.GET.categoria %}categoria={{ request.GET.categoria }}&{% endif %}{% if request.GET.dificultad %}dificultad={{ request.GET.dificultad }}&{% endif %}{% if request.GET.nivel_pronunciacion %}nivel_pronunciacion={{ request.GET.nivel_pronunciacion }}&{% endif %}page={{ page_obj.paginator.num_pages }}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="text-center text-muted mb-4">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }} 
+                ({{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados)
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h3>No se encontraron resultados</h3>
+            <p>Intenta con otros términos de búsqueda o ajusta los filtros.</p>
+            <a href="{% url 'diccionario:buscar' %}" class="btn btn-primary">
+                <i class="fas fa-refresh me-2"></i>Nueva búsqueda
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animaciones de entrada
+    const cards = document.querySelectorAll('.palabra-card');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+    });
+
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+    // Resaltar coincidencias exactas
+    const searchTerm = '{{ request.GET.termino|escapejs }}';
+    if (searchTerm) {
+        const exactMatches = document.querySelectorAll('.exact-match');
+        exactMatches.forEach(match => {
+            match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registro - Diccionario Kichwa{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+/* Ocultar el footer en páginas de autenticación */
+footer {
+    display: none !important;
+}
+
+/* Ajustar el body para ocupar toda la altura sin footer */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-background">
+    <div class="auth-container">
+        <div class="auth-card fade-in">
+            <div class="auth-header">
+                <h1 class="auth-title">Crear Cuenta</h1>
+                <p class="auth-subtitle">Únete a nuestra comunidad Kichwa</p>
+            </div>
+            
+            <div class="auth-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="registroForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">
+                            Nombre de Usuario
+                            <span class="tooltip-trigger">
+                                ?
+                                <span class="tooltip-content">3+ caracteres</span>
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            id="id_username"
+                            class="form-control" 
+                            placeholder="Ingresa tu nombre de usuario"
+                            required
+                            autocomplete="username"
+                            minlength="3"
+                        >
+                        <div class="field-error" id="usernameError"></div>
+                        {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_first_name" class="form-label">
+                            Nombre
+                            <span class="tooltip-trigger">
+                                ?
+                                <span class="tooltip-content">Solo letras</span>
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="first_name" 
+                            id="id_first_name"
+                            class="form-control" 
+                            placeholder="Tu nombre"
+                            required
+                            autocomplete="given-name"
+                            pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+"
+                        >
+                        <div class="field-error" id="firstNameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_last_name" class="form-label">
+                            Apellido
+                            <span class="tooltip-trigger">
+                                ?
+                                <span class="tooltip-content">Solo letras</span>
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="last_name" 
+                            id="id_last_name"
+                            class="form-control" 
+                            placeholder="Tu apellido"
+                            required
+                            autocomplete="family-name"
+                            pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+"
+                        >
+                        <div class="field-error" id="lastNameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email" class="form-label">
+                            Email
+                            <span class="tooltip-trigger">
+                                ?
+                                <span class="tooltip-content">Email válido</span>
+                            </span>
+                        </label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            id="id_email"
+                            class="form-control" 
+                            placeholder="tu@email.com"
+                            required
+                            autocomplete="email"
+                        >
+                        <div class="email-validation" id="emailValidation"></div>
+                        <div class="field-error" id="emailError"></div>
+                        {% if form.email.errors %}<div class="field-error">{{ form.email.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password1" class="form-label">
+                            Contraseña
+                            <span class="tooltip-trigger tooltip-top">
+                                ?
+                                <span class="tooltip-content">8+ caracteres</span>
+                            </span>
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                name="password1" 
+                                id="id_password1"
+                                class="form-control" 
+                                placeholder="Crea una contraseña segura"
+                                required
+                                autocomplete="new-password"
+                                minlength="8"
+                            >
+                            <button type="button" class="password-toggle" data-target="id_password1">
+                                <span class="toggle-icon"></span>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <div class="field-error" id="password1Error"></div>
+                        {% if form.password1.errors %}<div class="field-error">{{ form.password1.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password2" class="form-label">
+                            Confirmar Contraseña
+                            <span class="tooltip-trigger tooltip-top">
+                                ?
+                                <span class="tooltip-content">Debe coincidir</span>
+                            </span>
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                name="password2" 
+                                id="id_password2"
+                                class="form-control" 
+                                placeholder="Confirma tu contraseña"
+                                required
+                                autocomplete="new-password"
+                            >
+                            <button type="button" class="password-toggle" data-target="id_password2">
+                                <span class="toggle-icon"></span>
+                            </button>
+                        </div>
+                        <div class="password-match" id="passwordMatch"></div>
+                        <div class="field-error" id="password2Error"></div>
+                        {% if form.password2.errors %}<div class="field-error">{{ form.password2.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <div class="custom-checkbox">
+                        <input type="checkbox" id="id_acepto_terminos" name="acepto_terminos" required>
+                        <label for="id_acepto_terminos">
+                            Acepto los <a href="{% url 'usuarios:terminos' %}" class="auth-link" target="_blank">términos y condiciones</a> 
+                            y la <a href="{% url 'usuarios:privacidad' %}" class="auth-link" target="_blank">política de privacidad</a>
+                        </label>
+                    </div>
+                    <div class="terms-tooltip" id="termsTooltip">
+                        Debes aceptar los términos y condiciones para continuar
+                    </div>
+                    {% if form.acepto_terminos.errors %}
+                        <div class="field-error">{{ form.acepto_terminos.errors|join:', ' }}</div>
+                    {% endif %}
+
+                    <button type="submit" class="auth-btn auth-btn-primary">
+                        Crear Cuenta
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>¿Ya tienes cuenta?</span>
+                </div>
+
+                <a href="{% url 'usuarios:login' %}" class="auth-btn auth-btn-secondary">
+                    Ya tengo una cuenta
+                </a>
+            </div>
+
+            <div class="auth-footer">
+                <p><a href="{% url 'diccionario:home' %}" class="auth-link">← Volver al inicio</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth.js' %}"></script>
+{% endblock %}

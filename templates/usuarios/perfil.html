@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if es_propio %}
+        Mi Perfil - Diccionario Kichwa
+    {% else %}
+        Perfil de {{ usuario.get_full_name|default:usuario.username }} - Diccionario Kichwa
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --surface-color: #ffffff;
+        --background-color: #f8fafc;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border-color: rgba(148, 163, 184, 0.2);
+        --shadow-color: rgba(100, 116, 139, 0.1);
+        --shadow-hover: rgba(100, 116, 139, 0.2);
+    }
+
+    body {
+        background: var(--background-color);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--text-primary);
+    }
+
+    .profile-container {
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .profile-content {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .profile-header {
+        background: var(--surface-color);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 30px var(--shadow-color);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: var(--primary-gradient);
+    }
+
+    .profile-info {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .profile-avatar {
+        position: relative;
+    }
+
+    .avatar-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid transparent;
+        background: var(--primary-gradient);
+        padding: 4px;
+    }
+
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+
+    .profile-details h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .profile-username {
+        color: var(--text-secondary);
+        font-size: 1.125rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .meta-item i {
+        color: var(--primary-gradient);
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .profile-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .stat-card {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        min-width: 140px;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .profile-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .action-card {
+        background: var(--surface-color);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px var(--shadow-color);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .action-card:hover {
+        box-shadow: 0 8px 30px var(--shadow-hover);
+        transform: translateY(-4px);
+    }
+
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .action-icon.edit {
+        background: var(--primary-gradient);
+    }
+
+    .action-icon.favorites {
+        background: var(--secondary-gradient);
+    }
+
+    .action-icon.games {
+        background: var(--warning-gradient);
+    }
+
+    .action-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .action-description {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        color: white;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--secondary-gradient);
+        box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+    }
+
+    .btn-success {
+        background: var(--warning-gradient);
+        box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .privacy-notice {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .privacy-notice i {
+        color: #f59e0b;
+        font-size: 1.5rem;
+    }
+
+    .privacy-text {
+        color: #92400e;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1rem 0;
+        }
+
+        .profile-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .profile-info {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 1.5rem;
+        }
+
+        .profile-meta {
+            justify-content: center;
+        }
+
+        .profile-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .action-card {
+            padding: 1.5rem;
+        }
+
+        .profile-details h1 {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .avatar-image,
+        .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+        }
+
+        .avatar-placeholder {
+            font-size: 2.5rem;
+        }
+
+        .profile-details h1 {
+            font-size: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-content">
+        {% if not es_propio and not perfil.perfil_publico %}
+        <div class="privacy-notice">
+            <i class="fas fa-lock"></i>
+            <div class="privacy-text">
+                Este perfil es privado y no está disponible para visualización pública.
+            </div>
+        </div>
+        {% else %}
+        
+        <!-- Header del Perfil -->
+        <div class="profile-header">
+            <div class="profile-info">
+                <div class="profile-avatar">
+                    {% if perfil.avatar %}
+                        <img src="{{ perfil.avatar.url }}" alt="Avatar de {{ usuario.get_full_name|default:usuario.username }}" class="avatar-image">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="profile-details">
+                    <h1>
+                        {% if usuario.get_full_name %}
+                            {{ usuario.get_full_name }}
+                        {% else %}
+                            {{ usuario.username }}
+                        {% endif %}
+                    </h1>
+                    <div class="profile-username">@{{ usuario.username }}</div>
+                    
+                    <div class="profile-meta">
+                        {% if usuario.email and es_propio %}
+                        <div class="meta-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ usuario.email }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Miembro desde {{ usuario.date_joined|date:"F Y" }}</span>
+                        </div>
+                        
+                        {% if perfil.ubicacion %}
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ perfil.ubicacion }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if perfil.biografia %}
+                    <div class="profile-bio">
+                        <p>{{ perfil.biografia }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ perfil.palabras_aprendidas|default:0 }}</div>
+                        <div class="stat-label">Palabras Aprendidas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones del Perfil -->
+        {% if es_propio %}
+        <div class="profile-actions">
+            <div class="action-card">
+                <div class="action-icon edit">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <h3 class="action-title">Editar Perfil</h3>
+                <p class="action-description">
+                    Actualiza tu información personal, foto de perfil y configuraciones de privacidad.
+                </p>
+                <a href="{% url 'usuarios:editar_perfil' %}" class="btn-action btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Editar Perfil
+                </a>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon favorites">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3 class="action-title">Mis Favoritas</h3>
+                <p class="action-description">
+                    Revisa y gestiona tu colección de palabras favoritas del diccionario Kichwa.
+                </p>
+                <a href="{% url 'diccionario:mis_favoritas' %}" class="btn-action btn-secondary">
+                    <i class="fas fa-heart"></i>
+                    Ver Favoritas
+                </a>
+            </div>
+            
+            <div class="action-card">
+                <div class="action-icon games">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3 class="action-title">Juegos Educativos</h3>
+                <p class="action-description">
+                    Practica y mejora tu conocimiento del Kichwa con nuestros juegos interactivos.
+                </p>
+                <a href="{% url 'diccionario:juegos' %}" class="btn-action btn-success">
+                    <i class="fas fa-gamepad"></i>
+                    Jugar Ahora
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

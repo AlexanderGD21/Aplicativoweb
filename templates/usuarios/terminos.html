@@ -1,0 +1,1211 @@
+{% extends 'base.html' %}
+
+{% block title %}Términos y Condiciones - Diccionario Kichwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Ocultar navegación y footer completamente */
+    .navbar {
+        display: none !important;
+    }
+    
+    .footer {
+        display: none !important;
+    }
+    
+    /* Ajustar body sin navbar */
+    body {
+        padding-top: 0 !important;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Contenedor principal */
+    .terms-container {
+        display: flex;
+        min-height: 100vh;
+        max-width: 1400px;
+        margin: 0 auto;
+        gap: 2rem;
+        padding: 2rem;
+    }
+    
+    /* Sidebar del índice */
+    .terms-sidebar {
+        position: sticky;
+        top: 20px;
+        width: 280px;
+        height: fit-content;
+        max-height: calc(100vh - 40px);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .terms-sidebar-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        padding: 1.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .terms-nav {
+        padding: 1rem 0;
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+    }
+    
+    .terms-nav::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .terms-nav::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    
+    .terms-nav::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 2px;
+    }
+    
+    .terms-nav .nav-link {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        color: #4b5563;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+        margin: 2px 0;
+        font-size: 0.9rem;
+    }
+    
+    .terms-nav .nav-link:hover {
+        background: #f8fafc;
+        color: #2563eb;
+        border-left-color: #93c5fd;
+    }
+    
+    .terms-nav .nav-link.active {
+        background: linear-gradient(90deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1d4ed8;
+        border-left-color: #2563eb;
+        font-weight: 500;
+        margin-left: 5px;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+    }
+    
+    /* Contenido principal */
+    .terms-content {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .terms-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .terms-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .terms-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .terms-body {
+        padding: 2rem;
+        line-height: 1.7;
+        color: #1f2937;
+    }
+    
+    .terms-body h2 {
+        color: #1d4ed8;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 2.5rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .terms-body h3 {
+        color: #2563eb;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 2rem 0 1rem 0;
+    }
+    
+    .terms-body p {
+        margin-bottom: 1rem;
+        color: #4b5563;
+        font-size: 1rem;
+    }
+    
+    .terms-body ul {
+        margin: 1rem 0 1.5rem 1.5rem;
+        color: #4b5563;
+    }
+    
+    .terms-body li {
+        margin-bottom: 0.5rem;
+        padding-left: 0.5rem;
+    }
+    
+    .terms-body strong {
+        color: #1f2937;
+        font-weight: 600;
+    }
+    
+    .highlight-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border: 1px solid #93c5fd;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .highlight-box h4 {
+        color: #1d4ed8;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+    }
+    
+    .contact-section {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-success {
+        background: #059669;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #047857;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Definiciones */
+    .definitions dl {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    
+    .definitions dt {
+        color: #1f2937;
+        font-weight: 600;
+        padding: 0.5rem 0;
+    }
+    
+    .definitions dd {
+        color: #4b5563;
+        padding: 0.5rem 0;
+    }
+    
+    /* Tablas */
+    .table-container {
+        overflow-x: auto;
+        margin: 1.5rem 0;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+    
+    .table th {
+        background-color: #f8fafc;
+        color: #1f2937;
+        font-weight: 600;
+        border-bottom: 2px solid #e5e7eb;
+        padding: 0.75rem;
+        text-align: left;
+    }
+    
+    .table td {
+        color: #4b5563;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    /* Alertas */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+    }
+    
+    .alert-info {
+        background-color: #eff6ff;
+        color: #1e40af;
+        border-left: 4px solid #2563eb;
+    }
+    
+    .alert-success {
+        background-color: #ecfdf5;
+        color: #065f46;
+        border-left: 4px solid #059669;
+    }
+    
+    .alert-warning {
+        background-color: #fffbeb;
+        color: #92400e;
+        border-left: 4px solid #d97706;
+    }
+    
+    .alert-danger {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left: 4px solid #dc2626;
+    }
+    
+    /* Tarjetas de información */
+    .info-card {
+        background-color: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .info-card h5 {
+        color: #2563eb;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-card p {
+        color: #4b5563;
+        margin-bottom: 1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .terms-container {
+            flex-direction: column;
+            padding: 1rem;
+        }
+        
+        .terms-sidebar {
+            position: static;
+            width: 100%;
+            max-height: none;
+        }
+        
+        .terms-nav {
+            max-height: 200px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .terms-header h1 {
+            font-size: 2rem;
+        }
+        
+        .terms-body {
+            padding: 1.5rem;
+        }
+        
+        .terms-body h2 {
+            font-size: 1.5rem;
+        }
+        
+        .definitions dl {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn {
+            width: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-container">
+    <!-- Sidebar con índice -->
+    <div class="terms-sidebar">
+        <div class="terms-sidebar-header">
+            Índice de Contenidos
+        </div>
+        <nav class="terms-nav">
+            <a href="#seccion1" class="nav-link active">1. Aceptación de Términos</a>
+            <a href="#seccion2" class="nav-link">2. Definiciones</a>
+            <a href="#seccion3" class="nav-link">3. Registro y Cuenta de Usuario</a>
+            <a href="#seccion4" class="nav-link">4. Uso del Servicio</a>
+            <a href="#seccion5" class="nav-link">5. Contenido del Usuario</a>
+            <a href="#seccion6" class="nav-link">6. Propiedad Intelectual</a>
+            <a href="#seccion7" class="nav-link">7. Seguridad y Protección de Datos</a>
+            <a href="#seccion8" class="nav-link">8. Privacidad y Cookies</a>
+            <a href="#seccion9" class="nav-link">9. Prohibiciones y Restricciones</a>
+            <a href="#seccion10" class="nav-link">10. Responsabilidades del Usuario</a>
+            <a href="#seccion11" class="nav-link">11. Limitación de Responsabilidad</a>
+            <a href="#seccion12" class="nav-link">12. Suspensión y Terminación</a>
+            <a href="#seccion13" class="nav-link">13. Modificaciones del Servicio</a>
+            <a href="#seccion14" class="nav-link">14. Ley Aplicable y Jurisdicción</a>
+            <a href="#seccion15" class="nav-link">15. Contacto y Soporte</a>
+        </nav>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="terms-content">
+        <div class="terms-header">
+            <h1>Términos y Condiciones de Uso</h1>
+            <p>Diccionario Kichwa Digital - Modernizando el Aprendizaje Tradicional</p>
+        </div>
+        
+        <div class="terms-body">
+            <div class="alert alert-info">
+                <strong>Última actualización:</strong> {{ "now"|date:"d/m/Y" }}<br>
+                <strong>Versión:</strong> 2.0<br>
+                <strong>Vigencia:</strong> Estos términos entran en vigor inmediatamente al registrarse
+            </div>
+            
+            <!-- Sección 1 -->
+            <section id="seccion1">
+                <h2>1. Aceptación de los Términos</h2>
+                <p>Al acceder, registrarse o utilizar el Diccionario Kichwa Digital (en adelante "el Servicio"), usted acepta estar legalmente vinculado por estos Términos y Condiciones de Uso, nuestra Política de Privacidad y todas las leyes aplicables.</p>
+                
+                <div class="alert alert-warning">
+                    <strong>Importante:</strong> Si no está de acuerdo con alguno de estos términos, no debe utilizar nuestro servicio.
+                </div>
+
+                <p>Estos términos constituyen un acuerdo legal entre usted ("Usuario") y el Diccionario Kichwa Digital ("Nosotros", "Nuestro", "Servicio").</p>
+                
+                <div class="highlight-box">
+                    <h4>Compromiso con la Modernización Digital</h4>
+                    <p>Nuestro proyecto tiene como misión facilitar la transición de los jóvenes del uso de diccionarios tradicionales hacia una experiencia digital moderna, interactiva y tecnológicamente avanzada para el aprendizaje del idioma Kichwa.</p>
+                </div>
+            </section>
+
+            <!-- Sección 2 -->
+            <section id="seccion2">
+                <h2>2. Definiciones</h2>
+                <div class="definitions">
+                    <dl>
+                        <dt>Servicio Digital:</dt>
+                        <dd>La plataforma digital Diccionario Kichwa, incluyendo sitio web, aplicaciones móviles y todas sus funcionalidades tecnológicas modernas.</dd>
+                        
+                        <dt>Usuario:</dt>
+                        <dd>Cualquier persona, especialmente jóvenes, que acceda o utilice nuestro servicio digital para aprender Kichwa de manera moderna.</dd>
+                        
+                        <dt>Cuenta Digital:</dt>
+                        <dd>Perfil de usuario registrado con credenciales de acceso únicas para personalizar la experiencia de aprendizaje digital.</dd>
+                        
+                        <dt>Contenido Interactivo:</dt>
+                        <dd>Toda información, texto, imágenes, audio, traducciones, juegos educativos y elementos gamificados disponibles en la plataforma.</dd>
+                        
+                        <dt>Experiencia Gamificada:</dt>
+                        <dd>Elementos de juego, puntuaciones, logros, niveles y actividades interactivas diseñadas para hacer el aprendizaje más atractivo para los jóvenes.</dd>
+                        
+                        <dt>Tecnología Educativa:</dt>
+                        <dd>Herramientas digitales, algoritmos de aprendizaje, inteligencia artificial y funcionalidades tecnológicas que mejoran la experiencia educativa.</dd>
+                    </dl>
+                </div>
+            </section>
+
+            <!-- Sección 3 -->
+            <section id="seccion3">
+                <h2>3. Registro y Cuenta de Usuario Digital</h2>
+                
+                <h3>3.1 Requisitos de Registro</h3>
+                <ul>
+                    <li>Debe ser mayor de 13 años o tener consentimiento parental</li>
+                    <li>Proporcionar información veraz y actualizada</li>
+                    <li>Mantener la confidencialidad de sus credenciales digitales</li>
+                    <li>Ser responsable de toda actividad en su cuenta</li>
+                    <li>Tener acceso a dispositivos digitales modernos (smartphone, tablet, computadora)</li>
+                </ul>
+
+                <h3>3.2 Seguridad Digital Avanzada</h3>
+                <div class="alert alert-success">
+                    <strong>Medidas de Seguridad Tecnológicas:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Encriptación avanzada de contraseñas con algoritmos modernos</li>
+                        <li>Verificación de email obligatoria</li>
+                        <li>Autenticación de dos factores opcional</li>
+                        <li>Monitoreo automático con inteligencia artificial</li>
+                        <li>Sesiones seguras con tokens únicos</li>
+                        <li>Cierre automático por inactividad</li>
+                        <li>Detección de dispositivos sospechosos</li>
+                    </ul>
+                </div>
+
+                <h3>3.3 Perfil Digital Personalizado</h3>
+                <p>Su cuenta digital incluye:</p>
+                <ul>
+                    <li>Dashboard personalizado con progreso de aprendizaje visual</li>
+                    <li>Historial inteligente de búsquedas y palabras favoritas</li>
+                    <li>Estadísticas detalladas de uso y logros obtenidos</li>
+                    <li>Configuración avanzada de preferencias de aprendizaje</li>
+                    <li>Sincronización automática entre todos sus dispositivos</li>
+                    <li>Recomendaciones personalizadas basadas en IA</li>
+                </ul>
+            </section>
+
+            <!-- Sección 4 -->
+            <section id="seccion4">
+                <h2>4. Uso del Servicio Digital Moderno</h2>
+                
+                <h3>4.1 Propósito de la Plataforma Digital</h3>
+                <p>El Diccionario Kichwa Digital está diseñado específicamente para:</p>
+                <ul>
+                    <li>Modernizar el aprendizaje del idioma Kichwa para las nuevas generaciones</li>
+                    <li>Facilitar la transición de diccionarios físicos tradicionales a la era digital</li>
+                    <li>Ofrecer una experiencia interactiva, gamificada y tecnológicamente avanzada</li>
+                    <li>Proporcionar herramientas de aprendizaje adaptativo con inteligencia artificial</li>
+                    <li>Crear una comunidad digital global de aprendices del Kichwa</li>
+                    <li>Apoyar la investigación lingüística moderna con análisis de datos</li>
+                </ul>
+
+                <h3>4.2 Funcionalidades Tecnológicas Avanzadas</h3>
+                <p>Nuestra plataforma digital ofrece:</p>
+                <ul>
+                    <li>Búsqueda inteligente con sugerencias automáticas y corrección ortográfica</li>
+                    <li>Pronunciación con audio de alta calidad y reconocimiento de voz</li>
+                    <li>Juegos interactivos de memoria, traducción y comprensión</li>
+                    <li>Sistema de puntuaciones, logros, niveles y competencias</li>
+                    <li>Modo offline avanzado para uso sin conexión a internet</li>
+                    <li>Integración con redes sociales para compartir progreso</li>
+                    <li>Notificaciones push personalizadas e inteligentes</li>
+                    <li>Realidad aumentada para experiencias inmersivas (próximamente)</li>
+                </ul>
+
+                <h3>4.3 Disponibilidad y Rendimiento Tecnológico</h3>
+                <p>Nos comprometemos a mantener:</p>
+                <ul>
+                    <li>Disponibilidad del servicio 99.5% del tiempo con monitoreo 24/7</li>
+                    <li>Actualizaciones regulares de contenido y funcionalidades</li>
+                    <li>Soporte técnico especializado multicanal</li>
+                    <li>Compatibilidad con múltiples dispositivos y sistemas operativos</li>
+                    <li>Respaldo automático en la nube de todos los datos</li>
+                    <li>Optimización continua de rendimiento y velocidad</li>
+                </ul>
+            </section>
+
+            <!-- Sección 5 -->
+            <section id="seccion5">
+                <h2>5. Contenido del Usuario y Contribuciones Digitales</h2>
+                
+                <h3>5.1 Tipos de Contribuciones Digitales</h3>
+                <p>Los usuarios pueden contribuir con:</p>
+                <ul>
+                    <li>Traducciones y definiciones mejoradas colaborativamente</li>
+                    <li>Grabaciones de pronunciación de alta calidad</li>
+                    <li>Ejemplos de uso contemporáneo y contextual</li>
+                    <li>Correcciones colaborativas verificadas por la comunidad</li>
+                    <li>Comentarios, valoraciones y reseñas constructivas</li>
+                    <li>Contenido multimedia (imágenes, videos, audios)</li>
+                    <li>Sugerencias de nuevas funcionalidades tecnológicas</li>
+                    <li>Creación de lecciones y ejercicios personalizados</li>
+                </ul>
+
+                <h3>5.2 Sistema de Moderación Digital Avanzado</h3>
+                <div class="alert alert-info">
+                    <strong>Tecnología de Moderación de Vanguardia:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Inteligencia artificial para detección automática de contenido inapropiado</li>
+                        <li>Moderación humana por expertos lingüistas certificados</li>
+                        <li>Sistema de reportes de la comunidad con votación democrática</li>
+                        <li>Verificación automática de exactitud lingüística</li>
+                        <li>Algoritmos anti-spam y anti-abuso avanzados</li>
+                        <li>Machine learning para mejora continua de la calidad</li>
+                    </ul>
+                </div>
+
+                <h3>5.3 Derechos de Contenido Digital</h3>
+                <p>Al contribuir con contenido digital, usted:</p>
+                <ul>
+                    <li>Garantiza tener derechos legales completos sobre el contenido</li>
+                    <li>Otorga licencia para uso educativo, tecnológico y de investigación</li>
+                    <li>Permite mejoras mediante inteligencia artificial y machine learning</li>
+                    <li>Acepta la distribución en múltiples plataformas y dispositivos</li>
+                    <li>Contribuye al desarrollo de la comunidad digital global</li>
+                    <li>Participa en el avance tecnológico del aprendizaje de idiomas</li>
+                </ul>
+            </section>
+
+            <!-- Sección 6 -->
+            <section id="seccion6">
+                <h2>6. Propiedad Intelectual y Tecnología</h2>
+                
+                <h3>6.1 Derechos de la Plataforma Digital</h3>
+                <p>Son propiedad exclusiva del Diccionario Kichwa Digital:</p>
+                <ul>
+                    <li>Código fuente, arquitectura de software y algoritmos propietarios</li>
+                    <li>Sistemas de inteligencia artificial y machine learning</li>
+                    <li>Diseño de interfaz de usuario (UI/UX) y experiencia digital</li>
+                    <li>Base de datos estructurada y sistemas de indexación</li>
+                    <li>Metodologías de gamificación y sistemas de recompensas</li>
+                    <li>Marca, logotipos, elementos gráficos y identidad visual</li>
+                    <li>Metodología de enseñanza digital y pedagogía tecnológica</li>
+                    <li>APIs, integraciones y servicios web desarrollados</li>
+                </ul>
+
+                <h3>6.2 Innovación Tecnológica Continua</h3>
+                <p>Nuestro enfoque de innovación tecnológica incluye:</p>
+                <ul>
+                    <li>Desarrollo de herramientas de aprendizaje adaptativo con IA</li>
+                    <li>Implementación de realidad aumentada y virtual (futuro)</li>
+                    <li>Integración con asistentes virtuales y dispositivos IoT</li>
+                    <li>Análisis predictivo de datos para optimizar el aprendizaje</li>
+                    <li>APIs abiertas para desarrolladores y colaboradores terceros</li>
+                    <li>Blockchain para certificaciones y logros verificables</li>
+                </ul>
+
+                <h3>6.3 Respeto Cultural en la Era Digital</h3>
+                <p>Reconocemos que el idioma Kichwa es patrimonio cultural, por lo que:</p>
+                <ul>
+                    <li>Digitalizamos respetuosamente el conocimiento tradicional</li>
+                    <li>Facilitamos el acceso tecnológico a las nuevas generaciones</li>
+                    <li>Colaboramos activamente con comunidades y educadores tradicionales</li>
+                    <li>Promovemos el uso responsable y ético de la tecnología</li>
+                    <li>Mantenemos la autenticidad cultural en el entorno digital</li>
+                </ul>
+            </section>
+
+            <!-- Sección 7 -->
+            <section id="seccion7">
+                <h2>7. Seguridad Digital y Protección de Datos</h2>
+                
+                <h3>7.1 Infraestructura de Seguridad de Clase Mundial</h3>
+                <div class="alert alert-success">
+                    <strong>Tecnologías de Seguridad de Vanguardia:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Encriptación SSL/TLS 256-bit de extremo a extremo</li>
+                        <li>Servidores seguros con certificaciones ISO 27001 y SOC 2</li>
+                        <li>Firewall de aplicaciones web (WAF) y detección de intrusiones</li>
+                        <li>Monitoreo 24/7 con inteligencia artificial y machine learning</li>
+                        <li>Respaldo automático en múltiples ubicaciones geográficas</li>
+                        <li>Auditorías de seguridad regulares por terceros certificados</li>
+                        <li>Pruebas de penetración y evaluaciones de vulnerabilidades</li>
+                    </ul>
+                </div>
+
+                <h3>7.2 Protección Avanzada de Datos Personales</h3>
+                <ul>
+                    <li><strong>Minimización de Datos:</strong> Recopilamos solo información estrictamente necesaria</li>
+                    <li><strong>Anonimización Inteligente:</strong> Datos estadísticos sin identificación personal</li>
+                    <li><strong>Consentimiento Granular:</strong> Control detallado sobre el uso de sus datos</li>
+                    <li><strong>Transparencia Total:</strong> Información clara y accesible sobre el procesamiento</li>
+                    <li><strong>Portabilidad Completa:</strong> Exportación fácil en formatos estándar</li>
+                    <li><strong>Derecho al Olvido:</strong> Eliminación completa y verificable de datos</li>
+                </ul>
+
+                <h3>7.3 Cumplimiento Legal Digital Internacional</h3>
+                <p>Cumplimos rigurosamente con:</p>
+                <ul>
+                    <li>Reglamento General de Protección de Datos (GDPR) de la UE</li>
+                    <li>Ley de Privacidad del Consumidor de California (CCPA)</li>
+                    <li>Lei Geral de Proteção de Dados (LGPD) de Brasil</li>
+                    <li>Ley de Protección de Datos Personales local aplicable</li>
+                    <li>Estándares internacionales de ciberseguridad (NIST, ISO)</li>
+                    <li>Regulaciones específicas de aplicaciones móviles</li>
+                </ul>
+            </section>
+
+            <!-- Sección 8 -->
+            <section id="seccion8">
+                <h2>8. Privacidad Digital y Tecnologías de Seguimiento</h2>
+                
+                <h3>8.1 Datos que Recopilamos para Mejorar su Experiencia</h3>
+                <p>Para personalizar y optimizar su experiencia de aprendizaje digital:</p>
+                <ul>
+                    <li>Información de registro y configuración de perfil personalizado</li>
+                    <li>Patrones de uso, navegación y comportamiento de aprendizaje</li>
+                    <li>Progreso detallado, estadísticas de rendimiento y logros</li>
+                    <li>Preferencias de configuración y personalización avanzada</li>
+                    <li>Datos técnicos del dispositivo para optimización</li>
+                    <li>Interacciones con contenido y elementos gamificados</li>
+                    <li>Feedback y evaluaciones para mejora continua</li>
+                </ul>
+
+                <h3>8.2 Tecnologías de Seguimiento Modernas</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tecnología</th>
+                                <th>Propósito</th>
+                                <th>Duración</th>
+                                <th>Control del Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Cookies Esenciales</td>
+                                <td>Funcionamiento básico y seguridad</td>
+                                <td>Sesión</td>
+                                <td>Necesarias para el servicio</td>
+                            </tr>
+                            <tr>
+                                <td>Cookies de Personalización</td>
+                                <td>Experiencia personalizada</td>
+                                <td>1 año</td>
+                                <td>Totalmente configurable</td>
+                            </tr>
+                            <tr>
+                                <td>Analytics Avanzados</td>
+                                <td>Mejora del servicio con IA</td>
+                                <td>2 años</td>
+                                <td>Opcional y desactivable</td>
+                            </tr>
+                            <tr>
+                                <td>Local Storage</td>
+                                <td>Modo offline y sincronización</td>
+                                <td>Permanente</td>
+                                <td>Configurable por dispositivo</td>
+                            </tr>
+                            <tr>
+                                <td>Session Storage</td>
+                                <td>Datos temporales de sesión</td>
+                                <td>Sesión activa</td>
+                                <td>Automático</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>8.3 Control Total de Privacidad</h3>
+                <p>Usted tiene control completo y puede:</p>
+                <ul>
+                    <li>Configurar preferencias detalladas de cookies y tracking</li>
+                    <li>Desactivar completamente el seguimiento opcional</li>
+                    <li>Exportar todos sus datos en formatos estándar</li>
+                    <li>Eliminar su cuenta y datos de forma permanente</li>
+                    <li>Controlar notificaciones push y comunicaciones</li>
+                    <li>Gestionar la sincronización entre dispositivos</li>
+                </ul>
+            </section>
+
+            <!-- Sección 9 -->
+            <section id="seccion9">
+                <h2>9. Prohibiciones y Restricciones en el Entorno Digital</h2>
+                
+                <h3>9.1 Uso Prohibido de la Tecnología</h3>
+                <div class="alert alert-danger">
+                    <strong>Está estrictamente prohibido:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Intentar hackear, comprometer o vulnerar la seguridad del sistema</li>
+                        <li>Usar bots, scrapers o automatización no autorizada</li>
+                        <li>Realizar ingeniería inversa del software o algoritmos</li>
+                        <li>Distribuir malware, virus o código malicioso</li>
+                        <li>Crear cuentas falsas, múltiples o automatizadas</li>
+                        <li>Spam, phishing o comportamiento abusivo digital</li>
+                        <li>Violación de derechos de propiedad intelectual</li>
+                        <li>Uso comercial no autorizado de APIs o contenido</li>
+                        <li>Scraping masivo o extracción no autorizada de datos</li>
+                        <li>Interferir con el funcionamiento normal del servicio</li>
+                    </ul>
+                </div>
+
+                <h3>9.2 Contenido Digital Inapropiado</h3>
+                <p>No está permitido en nuestra plataforma digital:</p>
+                <ul>
+                    <li>Contenido ofensivo, discriminatorio o que incite al odio</li>
+                    <li>Información falsa, engañosa o desinformación</li>
+                    <li>Violación de privacidad o datos personales de terceros</li>
+                    <li>Contenido no relacionado con el aprendizaje del Kichwa</li>
+                    <li>Material protegido por derechos de autor sin autorización</li>
+                    <li>Contenido que viole términos de app stores o plataformas</li>
+                    <li>Publicidad no autorizada o contenido comercial</li>
+                </ul>
+
+                <h3>9.3 Consecuencias Digitales y Medidas Automatizadas</h3>
+                <p>Las violaciones pueden resultar en:</p>
+                <ul>
+                    <li>Advertencia automática del sistema con notificación</li>
+                    <li>Suspensión temporal de funcionalidades específicas</li>
+                    <li>Limitación de acceso a características avanzadas</li>
+                    <li>Eliminación permanente de la cuenta y datos asociados</li>
+                    <li>Bloqueo de dispositivo, IP o identificadores únicos</li>
+                    <li>Reporte a autoridades competentes cuando sea necesario</li>
+                    <li>Acciones legales por daños o perjuicios causados</li>
+                </ul>
+            </section>
+
+            <!-- Sección 10 -->
+            <section id="seccion10">
+                <h2>10. Responsabilidades del Usuario Digital</h2>
+                
+                <h3>10.1 Uso Responsable de la Tecnología Educativa</h3>
+                <p>Como usuario de nuestra plataforma digital moderna, usted se compromete a:</p>
+                <ul>
+                    <li>Utilizar la tecnología de manera ética, constructiva y educativa</li>
+                    <li>Respetar a otros miembros de la comunidad digital global</li>
+                    <li>Contribuir positivamente al aprendizaje colaborativo</li>
+                    <li>Reportar problemas técnicos, errores o contenido inapropiado</li>
+                    <li>Mantener actualizada su aplicación móvil y software</li>
+                    <li>Usar contraseñas seguras, únicas y autenticación de dos factores</li>
+                    <li>Proteger sus dispositivos con medidas de seguridad adecuadas</li>
+                </ul>
+
+                <h3>10.2 Responsabilidad Digital y Ciudadanía Online</h3>
+                <p>Usted es responsable de:</p>
+                <ul>
+                    <li>La exactitud y veracidad de sus contribuciones digitales</li>
+                    <li>El uso apropiado de todas las funcionalidades tecnológicas</li>
+                    <li>La seguridad de sus dispositivos y conexiones de red</li>
+                    <li>El cumplimiento de términos de app stores y plataformas</li>
+                    <li>La veracidad de su información de perfil y datos personales</li>
+                    <li>El respeto de los derechos de propiedad intelectual</li>
+                    <li>El uso ético de herramientas de inteligencia artificial</li>
+                </ul>
+
+                <h3>10.3 Requisitos Técnicos y Compatibilidad</h3>
+                <p>Para una experiencia óptima en la era digital, debe:</p>
+                <ul>
+                    <li>Mantener dispositivos actualizados con últimas versiones de OS</li>
+                    <li>Contar con conexión estable a internet de banda ancha</li>
+                    <li>Tener espacio suficiente para la aplicación y contenido offline</li>
+                    <li>Permitir permisos necesarios (audio, cámara, almacenamiento, ubicación)</li>
+                    <li>Usar navegadores modernos compatibles y actualizados</li>
+                    <li>Configurar correctamente la sincronización entre dispositivos</li>
+                </ul>
+            </section>
+
+            <!-- Sección 11 -->
+            <section id="seccion11">
+                <h2>11. Limitación de Responsabilidad Tecnológica</h2>
+                
+                <h3>11.1 Naturaleza del Servicio Digital</h3>
+                <div class="alert alert-warning">
+                    <strong>Importante:</strong> El servicio digital se proporciona "tal como está" y "según disponibilidad", sin garantías absolutas de funcionamiento perfecto en todos los dispositivos y circunstancias.
+                </div>
+
+                <h3>11.2 Limitaciones Técnicas del Entorno Digital</h3>
+                <p>No somos responsables por:</p>
+                <ul>
+                    <li>Interrupciones del servicio por mantenimiento programado o emergencias</li>
+                    <li>Problemas de conectividad, velocidad o estabilidad del usuario</li>
+                    <li>Incompatibilidad con dispositivos obsoletos o no soportados</li>
+                    <li>Pérdida de datos por fallas del dispositivo del usuario</li>
+                    <li>Errores en traducciones automáticas o sugerencias de IA</li>
+                    <li>Problemas con app stores, plataformas o servicios de terceros</li>
+                    <li>Cambios en APIs, servicios o políticas de terceros</li>
+                    <li>Limitaciones de funcionalidades en versiones gratuitas</li>
+                </ul>
+
+                <h3>11.3 Límites de Responsabilidad Digital</h3>
+                <p>Nuestra responsabilidad se limita a:</p>
+                <ul>
+                    <li>Proporcionar el servicio según se describe en estos términos</li>
+                    <li>Mantener estándares razonables de seguridad y disponibilidad</li>
+                    <li>Ofrecer soporte técnico básico dentro de horarios establecidos</li>
+                    <li>Corregir errores críticos reportados en tiempo razonable</li>
+                    <li>Proteger datos personales según nuestras políticas</li>
+                </ul>
+
+                <h3>11.4 Fuerza Mayor Tecnológica</h3>
+                <p>No somos responsables por interrupciones causadas por:</p>
+                <ul>
+                    <li>Fallas masivas de infraestructura de internet o telecomunicaciones</li>
+                    <li>Ataques cibernéticos masivos, DDoS o guerra cibernética</li>
+                    <li>Desastres naturales que afecten centros de datos</li>
+                    <li>Cambios en regulaciones gubernamentales o censura</li>
+                    <li>Fallas de proveedores críticos de servicios en la nube</li>
+                    <li>Pandemias u otras emergencias de salud pública</li>
+                </ul>
+            </section>
+
+            <!-- Sección 12 -->
+            <section id="seccion12">
+                <h2>12. Suspensión y Terminación Digital</h2>
+                
+                <h3>12.1 Terminación Voluntaria por el Usuario</h3>
+                <p>Usted puede terminar su cuenta digital de las siguientes maneras:</p>
+                <ul>
+                    <li>Desde la configuración avanzada de su perfil digital</li>
+                    <li>Desinstalando la aplicación móvil (eliminación parcial)</li>
+                    <li>Contactando nuestro soporte técnico especializado</li>
+                    <li>Mediante solicitud formal por email con verificación de identidad</li>
+                    <li>Usando herramientas de autoservicio en el dashboard</li>
+                </ul>
+
+                <h3>12.2 Suspensión Automática del Sistema</h3>
+                <p>Nuestro sistema puede suspender automáticamente cuentas por:</p>
+                <ul>
+                    <li>Detección de actividad sospechosa o patrones anómalos</li>
+                    <li>Violación detectada de términos de uso o políticas</li>
+                    <li>Inactividad prolongada (más de 24 meses sin uso)</li>
+                    <li>Problemas de seguridad o compromiso de cuenta</li>
+                    <li>Solicitud de autoridades competentes o orden judicial</li>
+                    <li>Uso excesivo de recursos o abuso del servicio</li>
+                </ul>
+
+                <h3>12.3 Proceso de Terminación Digital Completa</h3>
+                <p>Al terminar su cuenta completamente:</p>
+                <ul>
+                    <li>Se eliminarán todos sus datos personales de forma segura</li>
+                    <li>Se desactivarán todas las notificaciones push y comunicaciones</li>
+                    <li>Se revocará acceso a funcionalidades premium y contenido exclusivo</li>
+                    <li>Sus contribuciones pueden permanecer de forma anónima</li>
+                    <li>Se proporcionará confirmación de eliminación completa</li>
+                    <li>Se desvinculará de integraciones con redes sociales</li>
+                </ul>
+
+                <h3>12.4 Recuperación y Apelación de Cuenta</h3>
+                <p>Dentro de 30 días calendario puede:</p>
+                <ul>
+                    <li>Solicitar reactivación de cuenta con verificación de identidad</li>
+                    <li>Recuperar datos de respaldo automático disponibles</li>
+                    <li>Apelar suspensiones automáticas con evidencia</li>
+                    <li>Contactar soporte para resolver malentendidos</li>
+                </ul>
+            </section>
+
+            <!-- Sección 13 -->
+            <section id="seccion13">
+                <h2>13. Evolución y Actualizaciones Tecnológicas</h2>
+                
+                <h3>13.1 Desarrollo Tecnológico Continuo</h3>
+                <p>Nos comprometemos firmemente a:</p>
+                <ul>
+                    <li>Actualizar regularmente la aplicación con nuevas funcionalidades</li>
+                    <li>Agregar tecnologías emergentes (IA, AR, VR, blockchain)</li>
+                    <li>Mejorar continuamente la experiencia de usuario (UX/UI)</li>
+                    <li>Optimizar el rendimiento y velocidad en todos los dispositivos</li>
+                    <li>Corregir errores, vulnerabilidades y problemas de seguridad</li>
+                    <li>Adaptar a nuevas tecnologías y estándares de la industria</li>
+                    <li>Integrar feedback de usuarios para mejoras dirigidas</li>
+                </ul>
+
+                <h3>13.2 Actualizaciones de Términos y Políticas</h3>
+                <div class="alert alert-info">
+                    <strong>Sistema de Notificación Digital Avanzado:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Notificación push inmediata en la aplicación móvil</li>
+                        <li>Email personalizado a todos los usuarios registrados</li>
+                        <li>Aviso prominente en el sitio web y dashboard</li>
+                        <li>Período de gracia de 30 días antes de implementación</li>
+                        <li>Opción de exportar datos antes de cambios significativos</li>
+                        <li>Resumen de cambios en lenguaje claro y comprensible</li>
+                    </ul>
+                </div>
+
+                <h3>13.3 Roadmap de Innovación Futura</h3>
+                <p>En nuestro plan de desarrollo tecnológico incluimos:</p>
+                <ul>
+                    <li>Inteligencia artificial avanzada para aprendizaje personalizado</li>
+                    <li>Realidad aumentada para inmersión cultural y contextual</li>
+                    <li>Reconocimiento de voz y procesamiento de lenguaje natural</li>
+                    <li>Integración con asistentes virtuales (Alexa, Google, Siri)</li>
+                    <li>Análisis predictivo y recomendaciones inteligentes</li>
+                    <li>Blockchain para certificaciones verificables de competencia</li>
+                    <li>Metaverso educativo para experiencias inmersivas</li>
+                </ul>
+
+                <h3>13.4 Migración y Compatibilidad Tecnológica</h3>
+                <p>En caso de cambios tecnológicos mayores:</p>
+                <ul>
+                    <li>Proporcionaremos herramientas automáticas de migración</li>
+                    <li>Mantendremos compatibilidad temporal con versiones anteriores</li>
+                    <li>Ofreceremos soporte especializado durante la transición</li>
+                    <li>Garantizaremos la preservación completa de todos los datos</li>
+                    <li>Comunicaremos cambios con suficiente anticipación</li>
+                </ul>
+            </section>
+
+            <!-- Sección 14 -->
+            <section id="seccion14">
+                <h2>14. Marco Legal Digital Internacional</h2>
+                
+                <h3>14.1 Jurisdicción y Ley Aplicable</h3>
+                <p>Estos términos se rigen por las leyes aplicables, considerando específicamente:</p>
+                <ul>
+                    <li>Regulaciones internacionales de servicios digitales</li>
+                    <li>Leyes de protección de datos y privacidad digital</li>
+                    <li>Normativas de aplicaciones móviles y app stores</li>
+                    <li>Derechos del consumidor en el entorno digital</li>
+                    <li>Regulaciones de contenido educativo y tecnología educativa</li>
+                    <li>Tratados internacionales de propiedad intelectual</li>
+                </ul>
+
+                <h3>14.2 Resolución de Disputas en la Era Digital</h3>
+                <p>Para resolver conflictos de manera eficiente, seguimos este proceso:</p>
+                <ul>
+                    <li><strong>Soporte técnico automatizado:</strong> Chatbot y FAQ inteligentes 24/7</li>
+                    <li><strong>Soporte humano especializado:</strong> Agentes capacitados en horario extendido</li>
+                    <li><strong>Mediación digital:</strong> Plataforma online de resolución de conflictos</li>
+                    <li><strong>Arbitraje tecnológico:</strong> Si es mutuamente acordado</li>
+                    <li><strong>Tribunales competentes:</strong> Como último recurso legal</li>
+                </ul>
+
+                <h3>14.3 Derechos del Usuario en el Entorno Digital</h3>
+                <p>Como usuario de servicios digitales educativos, usted tiene derecho a:</p>
+                <ul>
+                    <li>Servicio funcional y accesible según se describe</li>
+                    <li>Protección robusta de datos personales y privacidad</li>
+                    <li>Soporte técnico razonable y oportuno</li>
+                    <li>Transparencia completa en el uso de datos y algoritmos</li>
+                    <li>Portabilidad e interoperabilidad de información</li>
+                    <li>Accesibilidad digital para personas con discapacidades</li>
+                </ul>
+
+                <h3>14.4 Cumplimiento Regulatorio Internacional</h3>
+                <p>Cumplimos rigurosamente con estándares y regulaciones:</p>
+                <ul>
+                    <li>GDPR (Reglamento General de Protección de Datos - UE)</li>
+                    <li>CCPA (Ley de Privacidad del Consumidor de California)</li>
+                    <li>LGPD (Lei Geral de Proteção de Dados - Brasil)</li>
+                    <li>PIPEDA (Personal Information Protection - Canadá)</li>
+                    <li>Regulaciones locales de cada país donde operamos</li>
+                    <li>Estándares de accesibilidad web (WCAG 2.1)</li>
+                </ul>
+            </section>
+
+            <!-- Sección 15 -->
+            <section id="seccion15">
+                <h2>15. Soporte Técnico Digital y Contacto</h2>
+                
+                <h3>15.1 Canales de Soporte Digital Multicanal</h3>
+                <div class="info-card">
+                    <h5>🔧 Soporte Técnico Especializado</h5>
+                    <p>Para problemas técnicos, errores de aplicación, bugs y consultas de funcionamiento</p>
+                    
+                    <h5>📱 Soporte de Aplicaciones Móviles</h5>
+                    <p>Específico para iOS, Android, problemas de sincronización y compatibilidad</p>
+                    
+                    <h5>🔒 Seguridad Digital y Privacidad</h5>
+                    <p>Para ejercer derechos de datos, reportar vulnerabilidades y consultas de seguridad</p>
+                    
+                    <h5>🎓 Soporte Educativo y Pedagógico</h5>
+                    <p>Ayuda con funcionalidades de aprendizaje, gamificación y metodología</p>
+                    
+                    <h5>🤖 Inteligencia Artificial y Algoritmos</h5>
+                    <p>Consultas sobre recomendaciones, personalización y funcionamiento de IA</p>
+                    
+                    <h5>⚖️ Asuntos Legales y Compliance</h5>
+                    <p>Consultas sobre términos, derechos, obligaciones y cumplimiento regulatorio</p>
+                </div>
+
+                <h3>15.2 Tiempos de Respuesta Garantizados</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Consulta</th>
+                                <th>Tiempo de Respuesta</th>
+                                <th>Canal Recomendado</th>
+                                <th>Disponibilidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Emergencias de seguridad críticas</td>
+                                <td>Inmediato (24/7)</td>
+                                <td>Email urgente + Chat</td>
+                                <td>24/7/365</td>
+                            </tr>
+                            <tr>
+                                <td>Errores técnicos bloqueantes</td>
+                                <td>2-6 horas</td>
+                                <td>Formulario técnico</td>
+                                <td>Lun-Dom 6AM-11PM</td>
+                            </tr>
+                            <tr>
+                                <td>Consultas generales de uso</td>
+                                <td>12-24 horas</td>
+                                <td>Chat en línea</td>
+                                <td>Lun-Vie 8AM-8PM</td>
+                            </tr>
+                            <tr>
+                                <td>Solicitudes de datos/privacidad</td>
+                                <td>72 horas - 30 días</td>
+                                <td>Formulario GDPR</td>
+                                <td>Proceso automatizado</td>
+                            </tr>
+                            <tr>
+                                <td>Consultas educativas</td>
+                                <td>24-48 horas</td>
+                                <td>Foro comunitario</td>
+                                <td>Lun-Vie 9AM-6PM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>15.3 Recursos de Autoayuda Digital</h3>
+                <p>Disponibles 24/7 para resolución inmediata:</p>
+                <ul>
+                    <li>Centro de ayuda interactivo con búsqueda inteligente</li>
+                    <li>Tutoriales en video HD con subtítulos en múltiples idiomas</li>
+                    <li>FAQ dinámicas actualizadas automáticamente</li>
+                    <li>Foro de la comunidad con moderación activa</li>
+                    <li>Guías paso a paso para resolución de problemas</li>
+                    <li>Chatbot inteligente con procesamiento de lenguaje natural</li>
+                    <li>Base de conocimientos con artículos técnicos detallados</li>
+                    <li>Videos de demostración de funcionalidades avanzadas</li>
+                </ul>
+
+                <h3>15.4 Soporte Multiidioma y Cultural</h3>
+                <p>Ofrecemos atención especializada en:</p>
+                <ul>
+                    <li><strong>Español:</strong> Soporte completo con agentes nativos</li>
+                    <li><strong>Kichwa:</strong> Soporte especializado con hablantes nativos</li>
+                    <li><strong>Inglés:</strong> Soporte técnico internacional</li>
+                    <li><strong>Portugués:</strong> Soporte básico para usuarios de Brasil</li>
+                    <li><strong>Francés:</strong> Soporte limitado para usuarios internacionales</li>
+                </ul>
+
+                <h3>15.5 Canales de Comunicación Modernos</h3>
+                <p>Múltiples formas de contactarnos:</p>
+                <ul>
+                    <li>Chat en vivo integrado en la aplicación</li>
+                    <li>WhatsApp Business para consultas rápidas</li>
+                    <li>Email con sistema de tickets automatizado</li>
+                    <li>Formularios web especializados por tipo de consulta</li>
+                    <li>Redes sociales (Twitter, Facebook, Instagram)</li>
+                    <li>Videollamadas programadas para casos complejos</li>
+                </ul>
+            </section>
+
+            <div class="contact-section">
+                <h3>¡Bienvenido a la Revolución Digital del Aprendizaje Kichwa!</h3>
+                <p>Gracias por unirte a nuestra comunidad digital global. Juntos estamos transformando la forma en que las nuevas generaciones aprenden y preservan el idioma Kichwa mediante tecnología de vanguardia.</p>
+                
+                <div class="highlight-box">
+                    <h4>🚀 Tu Viaje Digital Comienza Aquí</h4>
+                    <p>Desde diccionarios tradicionales hasta experiencias interactivas con inteligencia artificial, estás a punto de vivir una revolución educativa que combina tradición cultural con innovación tecnológica.</p>
+                </div>
+                
+                <div class="btn-group">
+                    <a href="{% url 'usuarios:privacidad' %}" class="btn btn-primary">
+                        📋 Política de Privacidad Digital
+                    </a>
+                    <a href="{% url 'usuarios:registro' %}" class="btn btn-success">
+                        🚀 Comenzar Experiencia Digital
+                    </a>
+                    <a href="{% url 'diccionario:home' %}" class="btn btn-secondary">
+                        🏠 Volver al Diccionario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navegación suave con offset
+    const navLinks = document.querySelectorAll('.terms-nav .nav-link');
+    const sections = document.querySelectorAll('section[id]');
+    
+    // Manejar clics en navegación
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetSection = document.getElementById(targetId);
+            
+            if (targetSection) {
+                const offsetTop = targetSection.offsetTop - 20;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+                
+                // Actualizar navegación activa
+                updateActiveNav(this);
+            }
+        });
+    });
+    
+    // Actualizar navegación activa al hacer scroll
+    window.addEventListener('scroll', function() {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            const sectionHeight = section.offsetHeight;
+            if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionTop + sectionHeight) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        if (current) {
+            const activeLink = document.querySelector(`.terms-nav .nav-link[href="#${current}"]`);
+            if (activeLink) {
+                updateActiveNav(activeLink);
+            }
+        }
+    });
+    
+    function updateActiveNav(activeLink) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        activeLink.classList.add('active');
+    }
+});
+</script>
+{% endblock %}

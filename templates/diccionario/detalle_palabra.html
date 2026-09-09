@@ -1,0 +1,1078 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ palabra.palabra_kichwa }} - {{ palabra.traduccion_espanol }} | Diccionario Kichwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --info-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --stats-gradient: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+        --actions-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        
+        /* Paleta de colores moderna y elegante */
+        --main-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --surface-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --elevated-bg: #f1f5f9;
+        --accent-bg: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+        --border-color: rgba(102, 126, 234, 0.15);
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --text-accent: #5b21b6;
+        
+        --shadow-sm: 0 2px 4px rgba(102, 126, 234, 0.1);
+        --shadow-md: 0 8px 25px rgba(102, 126, 234, 0.15);
+        --shadow-lg: 0 20px 40px rgba(102, 126, 234, 0.2);
+        --shadow-xl: 0 25px 50px rgba(102, 126, 234, 0.25);
+    }
+
+    body {
+        background: var(--surface-bg);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.6;
+        color: var(--text-primary);
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        color: white;
+        padding: 4rem 0 3rem;
+        margin-bottom: 0;
+        position: relative;
+        overflow: hidden;
+        min-height: 320px;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .palabra-principal {
+        font-size: 4.2rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    .traduccion-principal {
+        font-size: 2.4rem;
+        font-weight: 400;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+        letter-spacing: -0.01em;
+    }
+
+    .pronunciacion {
+        font-size: 1.4rem;
+        font-style: italic;
+        opacity: 0.9;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255,255,255,0.15);
+        padding: 0.8rem 1.8rem;
+        border-radius: 30px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .audio-pronunciacion {
+        display: block;
+        width: min(100%, 360px);
+        margin: 1rem auto 0;
+    }
+
+    .main-content {
+        background: var(--card-bg);
+        margin-top: -2rem;
+        position: relative;
+        z-index: 3;
+        border-radius: 25px 25px 0 0;
+        box-shadow: var(--shadow-xl);
+        padding: 3rem 0 2rem;
+    }
+
+    /* Layout optimizado - Grid principal */
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .content-area {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .content-area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+    }
+
+    .sidebar-area {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* Sección de metadatos optimizada */
+    .meta-section {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1.8rem;
+        background: var(--accent-bg);
+        border-radius: 18px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .categoria-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .badge-categoria {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 1.4rem;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: white;
+        background: var(--primary-gradient);
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .badge-categoria:hover {
+        transform: translateY(-2px) scale(1.05);
+        color: white;
+        text-decoration: none;
+        box-shadow: var(--shadow-md);
+    }
+
+    .badge-dificultad {
+        padding: 0.6rem 1.2rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-favorita {
+        background: var(--danger-gradient);
+        color: white;
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-favorita::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-favorita:hover::before {
+        left: 100%;
+    }
+
+    .btn-favorita:hover {
+        transform: scale(1.15) rotate(10deg);
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .word-detail-header {
+        background: var(--main-bg);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .favorite-btn {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    
+    .favorite-btn:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .word-card {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+    }
+    
+    .category-badge {
+        background: #667eea;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .category-badge:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .details-grid {
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .sidebar-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .meta-section {
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+        }
+
+        .btn-favorita {
+            grid-column: 1 / -1;
+            justify-self: center;
+            margin-top: 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .palabra-principal {
+            font-size: 3rem;
+        }
+        
+        .traduccion-principal {
+            font-size: 1.8rem;
+        }
+        
+        .pronunciacion {
+            font-size: 1.1rem;
+            padding: 0.6rem 1.2rem;
+        }
+        
+        .main-content {
+            padding: 2rem 0 1.5rem;
+            margin-top: -1.5rem;
+        }
+
+        .content-area {
+            padding: 1.8rem;
+        }
+
+        .meta-section {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .sidebar-area {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title h3 {
+            font-size: 2.2rem;
+        }
+
+        .hero-section {
+            padding: 3rem 0 2rem;
+            min-height: 280px;
+        }
+
+        /* Ajustes móviles para estadísticas */
+        .stat-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 1rem 0;
+        }
+
+        .stat-label {
+            margin-right: 0;
+        }
+
+        .stat-badge {
+            align-self: flex-end;
+            max-width: none;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .palabra-principal {
+            font-size: 2.4rem;
+        }
+        
+        .traduccion-principal {
+            font-size: 1.5rem;
+        }
+
+        .content-area, .stats-content, .actions-content {
+            padding: 1.2rem;
+        }
+
+        .related-card {
+            padding: 1.5rem;
+        }
+
+        .btn-favorita {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+
+        .definition-box {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Scrollbar personalizado elegante */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--surface-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--primary-gradient);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+    }
+
+    /* Definición mejorada */
+    .definition-section {
+        margin-top: 1rem;
+    }
+
+    .definition-box {
+        background: var(--accent-bg);
+        border-radius: 18px;
+        padding: 2.2rem;
+        color: var(--text-primary);
+        border-left: 5px solid #667eea;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+
+    .definition-box::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 80px;
+        height: 80px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 50%;
+    }
+
+    .definition-title {
+        color: var(--text-accent);
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .definition-text {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+        color: var(--text-secondary);
+    }
+
+    /* Sidebar compacto y eficiente - CORREGIDO */
+    .stats-card, .actions-card {
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 0;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover, .actions-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .stats-header {
+        background: var(--stats-gradient);
+        color: white;
+        padding: 1.3rem 1.8rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .actions-header {
+        background: var(--actions-gradient);
+        color: white;
+        padding: 1.3rem 1.8rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .stats-content, .actions-content {
+        padding: 1.5rem;
+        background: var(--card-bg);
+    }
+
+    /* CORREGIDO: Estadísticas con mejor alineación */
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.95rem;
+        min-height: 50px; /* Altura mínima para consistencia */
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .stat-label {
+        font-weight: 500;
+        color: var(--text-secondary);
+        flex: 1;
+        margin-right: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stat-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-sm);
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: fit-content;
+        max-width: 120px; /* Ancho máximo para evitar desbordamiento */
+        text-align: center;
+    }
+
+    .btn-action {
+        border-radius: 14px;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-action:hover::before {
+        left: 100%;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        text-decoration: none;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-action:last-child {
+        margin-bottom: 0;
+    }
+
+    .btn-success {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .btn-success:hover {
+        color: white;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--info-gradient);
+        color: white;
+    }
+
+    .btn-info:hover {
+        color: white;
+    }
+
+    /* Palabras relacionadas */
+    .related-section {
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-title h3 {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title h3::after {
+        content: '';
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+
+    .related-card {
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .related-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .related-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .related-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .related-card h6 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+        color: var(--text-accent);
+    }
+
+    .related-card p {
+        font-size: 1.05rem;
+        color: #000000ff;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .related-card .btn {
+        background: var(--elevated-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .related-card .btn:hover {
+        background: var(--primary-gradient);
+        border-color: transparent;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Mejoras para badges de dificultad con colores vibrantes */
+    .bg-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: white !important;
+    }
+
+    .bg-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: white !important;
+    }
+
+    .bg-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        color: white !important;
+    }
+
+    .bg-primary {
+        background: var(--primary-gradient) !important;
+        color: white !important;
+    }
+
+    .bg-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="palabra-principal">{{ palabra.palabra_kichwa }}</h1>
+            <h2 class="traduccion-principal">{{ palabra.traduccion_espanol }}</h2>
+            {% if palabra.pronunciacion %}
+                <div class="pronunciacion">
+                    <i class="fas fa-volume-up"></i>
+                    {{ palabra.pronunciacion }}
+                </div>
+            {% endif %}
+            {% if palabra.audio %}
+                <audio class="audio-pronunciacion" controls preload="metadata">
+                    <source src="{{ palabra.audio.url }}" type="audio/mpeg">
+                    Tu navegador no admite audio HTML5.
+                </audio>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="container">
+        <!-- Grid principal optimizado -->
+        <div class="details-grid">
+            <!-- Área de contenido principal -->
+            <div class="content-area">
+                <!-- Sección de metadatos optimizada -->
+                <div class="meta-section">
+                    <div class="categoria-info">
+                        {% if palabra.categoria %}
+                            <a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}" 
+                               class="badge-categoria">
+                                <i class="fas fa-tag"></i>
+                                {{ palabra.categoria.nombre }}
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    <span class="badge-dificultad 
+                                 {% if palabra.dificultad == 'facil' %}bg-success
+                                 {% elif palabra.dificultad == 'medio' %}bg-warning
+                                 {% else %}bg-danger{% endif %}">
+                        {{ palabra.get_dificultad_display|default:"Medio" }}
+                    </span>
+                    
+                    <!-- Mejorado botón de favoritos para usuarios autenticados y no autenticados -->
+                    <button id="favorite-button" class="btn-favorita" type="button" onclick="toggleFavorita({{ palabra.id }})" aria-pressed="{{ es_favorita|yesno:'true,false' }}" title="{% if es_favorita %}Quitar de favoritas{% else %}Agregar a favoritas{% endif %}">
+                        {% csrf_token %}
+                        {% if user.is_authenticated %}
+                            {% if es_favorita %}
+                                <i id="heart-icon" class="fas fa-heart" style="color: #dc3545;"></i>
+                            {% else %}
+                                <i id="heart-icon" class="far fa-heart" style="color: #6c757d;"></i>
+                            {% endif %}
+                        {% else %}
+                            <i id="heart-icon" class="far fa-heart" style="color: #6c757d;"></i>
+                        {% endif %}
+                    </button>
+                </div>
+                
+                <!-- Definición -->
+                {% if palabra.definicion %}
+                    <div class="definition-section">
+                        <div class="definition-box">
+                            <h5 class="definition-title">
+                                <i class="fas fa-book-open"></i>
+                                Definición
+                            </h5>
+                            <p class="definition-text">{{ palabra.definicion }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="definition-section">
+                        <div class="definition-box">
+                            <h5 class="definition-title">
+                                <i class="fas fa-info-circle"></i>
+                                Información
+                            </h5>
+                            <p class="definition-text">
+                                Esta palabra en kichwa "<strong>{{ palabra.palabra_kichwa }}</strong>" 
+                                se traduce al español como "<strong>{{ palabra.traduccion_espanol }}</strong>". 
+                                Forma parte de la categoría {{ palabra.categoria.nombre|default:"General" }} 
+                                y tiene un nivel de dificultad {{ palabra.get_dificultad_display|lower|default:"medio" }}.
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Sidebar optimizado -->
+            <div class="sidebar-area">
+                <!-- Estadísticas compactas CORREGIDAS -->
+                <div class="stats-card">
+                    <div class="stats-header">
+                        <i class="fas fa-chart-bar"></i>
+                        Estadísticas
+                    </div>
+                    <div class="stats-content">
+                        <div class="stat-item">
+                            <span class="stat-label">Vistas totales:</span>
+                            <span class="stat-badge bg-secondary text-white">{{ palabra.veces_vista|default:0 }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">En favoritos:</span>
+                            <span class="stat-badge bg-danger text-white">{{ palabra.favoritos_count|default:0 }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Categoría:</span>
+                            <span class="stat-badge bg-primary text-white">{{ palabra.categoria.nombre|default:"General" }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Nivel:</span>
+                            <span class="stat-badge 
+                                         {% if palabra.dificultad == 'facil' %}bg-success
+                                         {% elif palabra.dificultad == 'medio' %}bg-warning
+                                         {% else %}bg-danger{% endif %} text-white">
+                                {{ palabra.get_dificultad_display|default:"Medio" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Acciones rápidas compactas -->
+                <div class="actions-card">
+                    <div class="actions-header">
+                        <i class="fas fa-bolt"></i>
+                        Acciones Rápidas
+                    </div>
+                    <div class="actions-content">
+                        <a href="{% url 'diccionario:juegos' %}" class="btn-action btn-success">
+                            <i class="fas fa-gamepad"></i>
+                            Practicar en Juegos
+                        </a>
+                        <a href="{% url 'diccionario:buscar' %}" class="btn-action btn-info">
+                            <i class="fas fa-search"></i>
+                            Buscar Más Palabras
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Palabras Relacionadas -->
+        {% if palabras_relacionadas %}
+            <div class="related-section">
+                <div class="section-title">
+                    <h3>
+                        <i class="fas fa-link me-3"></i>Palabras Relacionadas
+                    </h3>
+                </div>
+                <div class="row">
+                    {% for palabra_rel in palabras_relacionadas %}
+                        <div class="col-md-6 col-lg-3 mb-4">
+                            <div class="related-card">
+                                <h6>{{ palabra_rel.palabra_kichwa }}</h6>
+                                <p>{{ palabra_rel.traduccion_espanol }}</p>
+                                <a href="{% url 'diccionario:detalle_palabra' palabra_rel.pk %}" 
+                                   class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mostrar notificación si es palabra nueva
+{% if es_palabra_nueva %}
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof showNotification === 'function') {
+            showNotification('¡Palabra nueva aprendida! +10 puntos', 'success');
+        }
+        if (typeof updateUserPoints === 'function') {
+            updateUserPoints();
+        }
+    });
+{% endif %}
+
+function toggleFavorita(palabraId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        return;
+    }
+
+    const heartIcon = document.getElementById('heart-icon');
+    const favoriteButton = document.getElementById('favorite-button');
+    const originalClass = heartIcon.className;
+    const originalColor = heartIcon.style.color;
+    
+    // Mostrar loading
+    heartIcon.className = 'fas fa-spinner fa-spin';
+    heartIcon.style.color = '#667eea';
+    favoriteButton.disabled = true;
+
+    fetch(`/favoritas/toggle/${palabraId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.es_favorita) {
+                heartIcon.className = 'fas fa-heart';
+                heartIcon.style.color = '#dc3545';
+            } else {
+                heartIcon.className = 'far fa-heart';
+                heartIcon.style.color = '#6c757d';
+            }
+            favoriteButton.setAttribute('aria-pressed', String(data.es_favorita));
+            favoriteButton.title = data.es_favorita ? 'Quitar de favoritas' : 'Agregar a favoritas';
+            showNotification(data.message, 'success');
+        } else if (data.login_required) {
+            showLoginModal();
+            heartIcon.className = originalClass;
+            heartIcon.style.color = originalColor;
+        } else {
+            showNotification(data.message, 'error');
+            heartIcon.className = originalClass;
+            heartIcon.style.color = originalColor;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error al procesar la solicitud', 'error');
+        heartIcon.className = originalClass;
+        heartIcon.style.color = originalColor;
+    }).finally(() => { favoriteButton.disabled = false; });
+}
+
+function showLoginModal() {
+    const modalExistente = document.getElementById('loginModal');
+    if (modalExistente) {
+        bootstrap.Modal.getOrCreateInstance(modalExistente).show();
+        return;
+    }
+    const modal = document.createElement('div');
+    modal.innerHTML = `
+        <div class="modal fade" id="loginModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: var(--shadow-xl);">
+                    <div class="modal-header" style="background: var(--primary-gradient); color: white; border-radius: 18px 18px 0 0; border: none;">
+                        <h5 class="modal-title">
+                            <i class="fas fa-heart"></i>
+                            ¡Guarda tus palabras favoritas!
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-heart" style="font-size: 3rem; color: var(--danger-gradient);"></i>
+                        </div>
+                        <h6>Para guardar palabras en tu lista de favoritas necesitas tener una cuenta.</h6>
+                        <p class="text-muted">Es gratis y solo toma unos segundos.</p>
+                    </div>
+                    <div class="modal-footer justify-content-center" style="border: none; padding-bottom: 2rem;">
+                        <a href="{% url 'usuarios:login' %}" class="btn me-2" style="background: var(--primary-gradient); color: white; border-radius: 14px; padding: 0.8rem 1.5rem;">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="{% url 'usuarios:registro' %}" class="btn" style="background: var(--success-gradient); color: white; border-radius: 14px; padding: 0.8rem 1.5rem;">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bootstrapModal = new bootstrap.Modal(document.getElementById('loginModal'));
+    bootstrapModal.show();
+    
+    document.getElementById('loginModal').addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modal);
+    });
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        border-radius: 14px;
+        box-shadow: var(--shadow-lg);
+        border: none;
+        background: ${type === 'success' ? 'var(--success-gradient)' : 'var(--danger-gradient)'};
+        color: white;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.remove();
+        }
+    }, 4000);
+}
+</script>
+{% endblock %}

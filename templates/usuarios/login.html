@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - Diccionario Kichwa{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+/* Ocultar el footer en páginas de autenticación */
+footer {
+    display: none !important;
+}
+
+/* Ajustar el body para ocupar toda la altura sin footer */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-background">
+    <div class="auth-container">
+        <div class="auth-card fade-in">
+            <div class="auth-header">
+                <h1 class="auth-title">Iniciar Sesión</h1>
+                <p class="auth-subtitle">Accede a tu cuenta Kichwa</p>
+            </div>
+            
+            <div class="auth-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="loginForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">
+                            Usuario o Email
+                            <span class="tooltip-trigger">
+                                ?
+                                <span class="tooltip-content">Usuario o email</span>
+                            </span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            id="id_username"
+                            class="form-control" 
+                            placeholder="Usuario o email"
+                            required
+                            autocomplete="username"
+                        >
+                        <div class="field-error" id="usernameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password" class="form-label">
+                            Contraseña
+                            <span class="tooltip-trigger tooltip-top">
+                                ?
+                                <span class="tooltip-content">Tu contraseña</span>
+                            </span>
+                        </label>
+                        <div class="password-container">
+                            <input 
+                                type="password" 
+                                name="password" 
+                                id="id_password"
+                                class="form-control" 
+                                placeholder="Tu contraseña"
+                                required
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="password-toggle" data-target="id_password">
+                                <span class="toggle-icon"></span>
+                            </button>
+                        </div>
+                        <div class="field-error" id="passwordError"></div>
+                    </div>
+
+                    <button type="submit" class="auth-btn auth-btn-primary">
+                        Iniciar Sesión
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <span>¿No tienes cuenta?</span>
+                </div>
+
+                <p class="text-center mb-3"><a href="{% url 'usuarios:password_reset' %}" class="auth-link">¿Olvidaste tu contraseña?</a></p>
+
+                <a href="{% url 'usuarios:registro' %}" class="auth-btn auth-btn-secondary">
+                    Crear cuenta nueva
+                </a>
+            </div>
+
+            <div class="auth-footer">
+                <p><a href="{% url 'diccionario:home' %}" class="auth-link">← Volver al inicio</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth.js' %}"></script>
+{% endblock %}

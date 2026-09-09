@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ categoria.nombre }} - Palabras por Categoría | Diccionario Kichwa{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --light-bg: #f8f9fa;
+        --card-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        --hover-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    }
+
+    body {
+        background-color: var(--light-bg);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .hero-section {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 4rem 0 3rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        min-height: 250px;
+        display: flex;
+        align-items: center;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .category-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .category-description {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+
+    .breadcrumb-custom {
+        background: rgba(255,255,255,0.1);
+        padding: 1rem 1.5rem;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .breadcrumb-custom a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .breadcrumb-custom a:hover {
+        color: white;
+    }
+
+    .word-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.8rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .word-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .word-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .word-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .word-kichwa {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .word-spanish {
+        font-size: 1.1rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    .word-pronunciation {
+        font-style: italic;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-details {
+        background: var(--success-gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-details:hover {
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+    }
+
+    .stats-bar {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .stats-item {
+        display: inline-block;
+        margin: 0 2rem;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        display: block;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .pagination-custom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 3rem 0;
+        flex-wrap: wrap;
+    }
+
+    .page-link-custom {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e9ecef;
+    }
+
+    .page-link-custom:hover {
+        background: var(--primary-gradient);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-link-custom.active {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-link-custom.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .page-link-custom.disabled:hover {
+        background: white;
+        color: #667eea;
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .back-button {
+        background: var(--info-gradient);
+        color: #2d3748;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(168, 237, 234, 0.3);
+    }
+
+    .back-button:hover {
+        color: #2d3748;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(168, 237, 234, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .category-title {
+            font-size: 2.5rem;
+        }
+        
+        .category-description {
+            font-size: 1.1rem;
+        }
+        
+        .word-card {
+            margin-bottom: 1.5rem;
+            padding: 1.2rem;
+        }
+        
+        .hero-section {
+            padding: 3rem 0 2rem;
+        }
+
+        .stats-item {
+            margin: 0 1rem;
+        }
+
+        .stats-number {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <div class="breadcrumb-custom">
+                <a href="{% url 'diccionario:home' %}">
+                    <i class="fas fa-home"></i>
+                    Inicio
+                </a>
+                <i class="fas fa-chevron-right mx-2"></i>
+                <span>{{ categoria.nombre }}</span>
+            </div>
+            <h1 class="category-title">{{ categoria.nombre }}</h1>
+            <p class="category-description">
+                Explora todas las palabras en la categoría {{ categoria.nombre }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <a href="{% url 'diccionario:home' %}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Volver al Inicio
+    </a>
+
+    <div class="stats-bar">
+        <div class="stats-item">
+            <span class="stats-number">{{ page_obj.paginator.count }}</span>
+            <span class="stats-label">Palabras Totales</span>
+        </div>
+        <div class="stats-item">
+            <span class="stats-number">{{ page_obj.paginator.num_pages }}</span>
+            <span class="stats-label">Páginas</span>
+        </div>
+        <div class="stats-item">
+            <span class="stats-number">{{ page_obj.number }}</span>
+            <span class="stats-label">Página Actual</span>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for palabra in page_obj %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="word-card">
+                    <h5 class="word-kichwa">{{ palabra.palabra_kichwa }}</h5>
+                    <p class="word-spanish">{{ palabra.traduccion_espanol }}</p>
+                    {% if palabra.pronunciacion %}
+                        <div class="word-pronunciation">
+                            <i class="fas fa-volume-up"></i>
+                            {{ palabra.pronunciacion }}
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'diccionario:detalle_palabra' palabra.pk %}" class="btn-details">
+                        <i class="fas fa-eye"></i>
+                        Ver Detalles
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No se encontraron palabras</h4>
+                    <p class="text-muted">No hay palabras disponibles en esta categoría.</p>
+                    <a href="{% url 'diccionario:home' %}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Volver al Inicio
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+        <div class="pagination-custom">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="page-link-custom" title="Primera página">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link-custom" title="Página anterior">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            {% else %}
+                <span class="page-link-custom disabled">
+                    <i class="fas fa-angle-double-left"></i>
+                </span>
+                <span class="page-link-custom disabled">
+                    <i class="fas fa-angle-left"></i>
+                </span>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-link-custom active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-link-custom">{{ num }}</a>
+                {% elif num == 1 %}
+                    <a href="?page={{ num }}" class="page-link-custom">{{ num }}</a>
+                    {% if page_obj.number > 4 %}
+                        <span class="page-link-custom disabled">...</span>
+                    {% endif %}
+                {% elif num == page_obj.paginator.num_pages %}
+                    {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                        <span class="page-link-custom disabled">...</span>
+                    {% endif %}
+                    <a href="?page={{ num }}" class="page-link-custom">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link-custom" title="Página siguiente">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link-custom" title="Última página">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            {% else %}
+                <span class="page-link-custom disabled">
+                    <i class="fas fa-angle-right"></i>
+                </span>
+                <span class="page-link-custom disabled">
+                    <i class="fas fa-angle-double-right"></i>
+                </span>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
