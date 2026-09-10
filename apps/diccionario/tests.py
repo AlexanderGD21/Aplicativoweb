@@ -9,13 +9,14 @@ from django.db.models.deletion import ProtectedError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from .models import Categoria, EstadisticaJuego, HistorialBusqueda, Palabra
+from .models import Categoria, EstadisticaJuego, HistorialBusqueda, Palabra, RelacionPalabra
 from .models import PalabraFavorita
 from .services.clasificacion import (
     calcular_dificultad_pronunciacion,
     clasificar_textos,
 )
 from .services.ia_kichwa import obtener_configuracion_ia
+from .services.relaciones import obtener_palabras_relacionadas
 
 
 class DiccionarioTests(TestCase):
@@ -61,6 +62,43 @@ class DiccionarioTests(TestCase):
         self.client.force_login(usuario)
         respuesta = self.client.get(self.palabra.get_absolute_url())
         self.assertTrue(respuesta.context['es_favorita'])
+
+    def test_relaciones_semanticas_no_rellenan_solo_por_categoria(self):
+        tiempo = Categoria.objects.create(nombre='Tiempo')
+        cuando = Palabra.objects.create(
+            palabra_kichwa='¿hayka?', traduccion_espanol='¿cuándo?',
+            definicion='Interrogativo de tiempo', categoria=tiempo,
+        )
+        equivalente = Palabra.objects.create(
+            palabra_kichwa='hayka', traduccion_espanol='cuándo',
+            definicion='Pregunta por el momento de un evento', categoria=self.categoria,
+        )
+        ahora = Palabra.objects.create(
+            palabra_kichwa='kunan', traduccion_espanol='ahora',
+            definicion='Momento presente', categoria=tiempo,
+        )
+        noviembre = Palabra.objects.create(
+            palabra_kichwa='ayar', traduccion_espanol='noviembre',
+            definicion='Undécimo mes del año', categoria=tiempo,
+        )
+
+        relacionadas = obtener_palabras_relacionadas(cuando)
+        ids = [item.palabra.pk for item in relacionadas]
+        self.assertIn(equivalente.pk, ids)
+        self.assertIn(ahora.pk, ids)
+        self.assertNotIn(noviembre.pk, ids)
+
+    def test_relacion_editorial_tiene_prioridad(self):
+        destino = Palabra.objects.create(
+            palabra_kichwa='yakumama', traduccion_espanol='madre del agua', categoria=self.categoria,
+        )
+        RelacionPalabra.objects.create(
+            origen=self.palabra, destino=destino, tipo='contexto', nota='Concepto cultural asociado',
+        )
+        primera = obtener_palabras_relacionadas(self.palabra)[0]
+        self.assertEqual(primera.palabra, destino)
+        self.assertEqual(primera.motivo, 'Concepto cultural asociado')
+        self.assertEqual(primera.tipo, 'curada')
 
     def test_audio_rechaza_extension_invalida(self):
         self.palabra.audio = SimpleUploadedFile('yaku.txt', b'x')

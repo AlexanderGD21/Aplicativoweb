@@ -37,31 +37,15 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }, 5000)
 
-  // Animación de entrada para cards
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: "0px 0px -50px 0px",
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("fade-in-up")
-        observer.unobserve(entry.target)
-      }
-    })
-  }, observerOptions)
-
-  // Observar todas las cards
-  document.querySelectorAll(".card").forEach((card) => {
-    observer.observe(card)
-  })
-
   // Actualizar puntos del usuario periódicamente
   const updateUserPoints = window.updateUserPoints
   if (typeof updateUserPoints === "function") {
     setInterval(updateUserPoints, 30000) // Cada 30 segundos
   }
+})
+
+window.addEventListener("pageshow", () => {
+  document.body.classList.add("surface-ready")
 })
 
 // Función para copiar texto al portapapeles

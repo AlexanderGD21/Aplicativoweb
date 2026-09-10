@@ -1,63 +1,99 @@
 ---
 name: Diccionario Kichwa
-description: Una mesa de consulta bilingüe clara, sobria y accesible.
+description: Una mesa de consulta bilingüe viva, compacta y confiable.
 colors:
-  ink: "#142923"
-  muted: "#52645f"
-  paper: "#fcfdfa"
-  ground: "#eef2ef"
-  navy: "#151f38"
-  green: "#17684d"
-  green-deep: "#0f533c"
-  gold: "#c48a18"
-  line: "#d9ded8"
+  bosque-accion: "#17684d"
+  bosque-profundo: "#0f533c"
+  azul-noche: "#151f38"
+  ocre-kichwa: "#c48a18"
+  tinta: "#142923"
+  tinta-suave: "#52645f"
+  papel-frio: "#fcfdfa"
+  suelo-frio: "#eef2ef"
+  linea: "#d9ded8"
+  blanco: "#ffffff"
 typography:
   display:
-    fontFamily: "Inter, sans-serif"
-    fontSize: "clamp(2rem, 4vw, 3.7rem)"
-    fontWeight: 760
-    lineHeight: 1.04
-    letterSpacing: "-0.035em"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
+    fontSize: "clamp(3rem, 7vw, 6rem)"
+    fontWeight: 790
+    lineHeight: 0.94
+    letterSpacing: "-0.04em"
   headline:
-    fontFamily: "Inter, sans-serif"
-    fontSize: "clamp(1.45rem, 2.5vw, 2rem)"
-    fontWeight: 760
-    letterSpacing: "-0.025em"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
+    fontSize: "clamp(2.5rem, 5.2vw, 5.25rem)"
+    fontWeight: 780
+    lineHeight: 0.98
+    letterSpacing: "-0.04em"
+  title:
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
+    fontSize: "clamp(1.7rem, 3vw, 2.5rem)"
+    fontWeight: 780
+    letterSpacing: "-0.03em"
   body:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
-    lineHeight: 1.65
+    lineHeight: 1.6
   label:
-    fontFamily: "Inter, sans-serif"
-    fontSize: "0.8rem"
-    fontWeight: 750
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
+    fontSize: "0.72rem"
+    fontWeight: 780
+    letterSpacing: "0.04em"
 rounded:
   control: "10px"
-  field: "13px"
-  surface: "16px"
+  card: "14px"
+  feature: "16px"
   pill: "999px"
 spacing:
-  xs: "0.45rem"
-  sm: "0.85rem"
-  md: "1.25rem"
-  lg: "2.25rem"
-  xl: "4.5rem"
+  xs: "0.25rem"
+  sm: "0.5rem"
+  md: "1rem"
+  lg: "1.5rem"
+  xl: "2rem"
+  2xl: "3rem"
 components:
   button-primary:
-    backgroundColor: "{colors.green}"
-    textColor: "#ffffff"
+    backgroundColor: "{colors.bosque-accion}"
+    textColor: "{colors.blanco}"
     rounded: "{rounded.control}"
+    padding: "0.65rem 0.9rem"
     height: "44px"
-  input-search:
-    backgroundColor: "#ffffff"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.field}"
+  button-primary-hover:
+    backgroundColor: "{colors.bosque-profundo}"
+    textColor: "{colors.blanco}"
+  button-ghost:
+    backgroundColor: "transparent"
+    textColor: "{colors.blanco}"
+    rounded: "{rounded.control}"
+    padding: "0.65rem 0.9rem"
+    height: "44px"
+  search-field:
+    backgroundColor: "{colors.blanco}"
+    textColor: "{colors.tinta}"
+    rounded: "13px"
+    padding: "0.75rem 0.5rem"
     height: "54px"
-  result-surface:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.ink}"
-    rounded: "14px"
+  filter-field:
+    backgroundColor: "{colors.blanco}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.control}"
+    padding: "0.65rem 2.2rem 0.65rem 0.8rem"
+    height: "46px"
+  category-chip:
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.pill}"
+    padding: "0.45rem 0.68rem"
+  result-card:
+    backgroundColor: "{colors.papel-frio}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.card}"
+    padding: "1.3rem"
+  detail-panel:
+    backgroundColor: "{colors.papel-frio}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.feature}"
+    padding: "clamp(1.5rem, 4vw, 2.6rem)"
 ---
 
 # Design System: Diccionario Kichwa
@@ -66,100 +102,146 @@ components:
 
 **Creative North Star: "Mesa de consulta viva"**
 
-El sistema visual convierte el diccionario en un espacio de consulta lingüística: sobrio, ordenado y suficientemente cálido para el aprendizaje cotidiano. La interfaz da prioridad a las palabras, sus equivalencias y los filtros; la ornamentación queda subordinada a esa tarea.
+La interfaz se comporta como una mesa de consulta lingüística: ofrece amplitud para comparar vocabulario, calma para leer una entrada y señales suficientes para entender de dónde viene cada relación. La identidad nace del azul noche, el verde bosque, el ocre y los papeles fríos; el contenido bilingüe, no la decoración, lleva el peso expresivo.
 
-El azul noche conecta con la identidad existente, el verde indica acciones y el ocre aporta un acento Kichwa controlado. Las superficies claras son frías y silenciosas para que las categorías conserven su función semántica.
+Inicio, resultados y detalle comparten una densidad deliberada y una jerarquía compacta. Las palabras Kichwa ambientales pertenecen exclusivamente al Inicio; las categorías tiñen fichas y etiquetas con baja intensidad; el detalle prioriza equivalencia, significado y evidencia relacional sin contenedores vacíos.
 
 **Key Characteristics:**
 
-- Jerarquía compacta y legible.
-- Una acción primaria verde por contexto.
-- Categorías expresadas con pequeños marcadores de color.
-- Controles táctiles y foco visible.
+- Azul noche estructural, verde bosque operativo y ocre Kichwa dosificado.
+- Superficies de papel frío con tintes semánticos de categoría y dificultad.
+- Comparación compacta en resultados y lectura serena en detalle.
+- Movimiento de continuidad breve, cancelable y limitado a transformación y opacidad.
+- Relaciones acompañadas por una razón visible; nunca se rellenan al azar.
 
 ## Colors
 
-La paleta combina azul noche, verde bosque y ocre sobre papeles fríos; los colores de categoría solo aparecen en etiquetas o marcadores.
+La paleta combina una base fría y sobria con dos acentos funcionales; los colores de categoría entran sólo como tintes suaves o marcadores pequeños.
 
-**The Semantic Accent Rule.** El verde activa; el ocre orienta; el color de categoría identifica, pero ninguno debe competir con el contenido léxico.
+### Primary
+
+- **Bosque de acción** (`#17684d`): acciones principales, enlaces operativos, foco contextual y selección.
+- **Bosque profundo** (`#0f533c`): estado hover de las acciones verdes.
+
+### Secondary
+
+- **Azul noche** (`#151f38`): mastheads y campos de apertura que enmarcan el vocabulario.
+- **Ocre Kichwa** (`#c48a18`): remates de identidad, iconos y acentos breves sobre azul noche.
+
+### Neutral
+
+- **Tinta** (`#142923`): texto principal y títulos sobre superficies claras.
+- **Tinta suave** (`#52645f`): metadatos, ayuda y contenido secundario.
+- **Papel frío** (`#fcfdfa`): superficies de lectura y consulta.
+- **Suelo frío** (`#eef2ef`): fondo general que separa las superficies.
+- **Línea** (`#d9ded8`): divisores y bordes estructurales.
+- **Blanco** (`#ffffff`): texto sobre fondos oscuros y controles de máxima claridad.
+
+### Named Rules
+
+**The Semantic Tint Rule.** El color de categoría aparece como mezcla suave, etiqueta o marcador; nunca como bloque decorativo dominante.
+
+**The Ocher Measure Rule.** El ocre señala identidad y orientación, pero no compite con el verde reservado para actuar.
 
 ## Typography
 
-**Display Font:** Inter (sans-serif)
-**Body Font:** Inter (sans-serif)
+**Display Font:** Inter (with system sans-serif fallbacks)
 
-**Character:** Una sola familia de trabajo, con títulos densos y texto sereno. El peso y la escala crean la jerarquía sin efectos tipográficos decorativos.
+**Body Font:** Inter (with system sans-serif fallbacks)
+
+**Character:** Una sola familia sostiene toda la experiencia. Los títulos son compactos, pesados y de espaciado cerrado; el cuerpo mantiene una cadencia abierta para definiciones y notas.
 
 ### Hierarchy
 
-- **Display:** peso 760 y escala fluida; reservado para el título principal.
-- **Headline:** peso 760 y tracking compacto; abre resultados y grupos.
-- **Title:** entre 1.05rem y 1.22rem; nombra paneles, entradas y categorías.
-- **Body:** 1rem con línea 1.65 y medida máxima cercana a 70 caracteres.
-- **Label:** 0.8rem y peso 750; identifica filtros y metadatos.
+- **Display** (790, `clamp(3rem, 7vw, 6rem)`, 0.94): la palabra Kichwa protagonista en el detalle.
+- **Headline** (780, `clamp(2.5rem, 5.2vw, 5.25rem)`, 0.98): la invitación principal del Inicio.
+- **Title** (780, `clamp(1.7rem, 3vw, 2.5rem)`): títulos de secciones y grupos.
+- **Body** (400, `1rem`, 1.6): lectura general; definiciones y notas se limitan aproximadamente a 68–72 caracteres.
+- **Label** (780, `0.72rem`, `0.04em`, uppercase cuando nombra un idioma): metadatos compactos y contexto de traducción.
 
-**The One Typeface Rule.** La claridad bilingüe depende de una voz estable; se varían peso y tamaño, no la familia.
+### Named Rules
+
+**The Word Leads Rule.** En una ficha, la palabra Kichwa y su equivalencia preceden a los metadatos y acciones.
 
 ## Layout
 
-El contenido vive en el contenedor Bootstrap del proyecto. El buscador usa dos columnas equilibradas y se convierte en una sola columna bajo 900px; filtros y resultados se apilan bajo 680px. Los objetivos interactivos tienen al menos 44px y las listas conservan densidad de consulta, no densidad de tarjetas promocionales.
+La retícula usa contenedores Bootstrap como marco y CSS propio para la composición. Inicio abre en dos columnas con una demostración de búsqueda y una entrada; resultados forman una cuadrícula compacta de dos columnas que pasa a una a 760px; el detalle combina lectura (`1.55fr`) y rail (`0.55fr`) hasta 900px, cuando ambos se apilan. El Inicio reorganiza su hero y corpus a 980px y completa el apilado móvil a 680px; el detalle completa su adaptación a 620px.
+
+Los objetivos interactivos mantienen un mínimo de 44px. La separación crece de controles compactos a secciones amplias usando la escala de `0.25rem` a `3rem`; los bloques de lectura evitan anchos fijos y las definiciones se mantienen entre 68 y 72 caracteres por línea.
+
+**The Context Density Rule.** Resultados compara en unidades compactas; detalle reduce la densidad y reserva ancho continuo para significado y notas.
 
 ## Elevation & Depth
 
-La profundidad es excepcional. Solo la mesa principal usa una sombra ambiental suave (`0 18px 42px rgba(13, 32, 27, 0.14)`); listas y estados vacíos se separan mediante borde fino.
+El sistema es plano por defecto y separa planos mediante tono, borde y tinte. Cada vista admite una sola superficie elevada en reposo: la demostración de búsqueda en Inicio o el banco de búsqueda en resultados. Menús de sugerencias, foco y transiciones son estados temporales, no una segunda capa permanente.
 
-**The One Lift Rule.** Una vista puede elevar su espacio de trabajo principal; el resto de superficies permanece plano.
+### Shadow Vocabulary
+
+- **Banco de búsqueda** (`box-shadow: 0 18px 42px rgba(13, 32, 27, 0.14)`): única elevación en reposo de la vista de resultados.
+- **Búsqueda de Inicio** (`box-shadow: 0 18px 42px rgba(3, 15, 12, 0.24)`): única elevación en reposo sobre el hero azul noche.
+
+### Named Rules
+
+**The One Resting Elevation Rule.** Cada vista usa como máximo una elevación persistente; el resto de la jerarquía se resuelve con papel, línea y tinte.
 
 ## Shapes
 
-Los controles usan curvas de 10–13px y las superficies principales 14–16px. Las píldoras se reservan para dificultad, filtros activos y categorías. Los marcadores de tema son círculos pequeños, nunca franjas decorativas.
+Los controles usan esquinas contenidas (`10px`), las fichas y rails usan curvas suaves (`14px`) y las superficies protagonistas alcanzan `16px`. Etiquetas de categoría, dificultad y razón usan forma de píldora (`999px`). Los bordes son finos y estructurales; una superficie no combina borde y sombra salvo el banco de búsqueda aprobado.
 
 ## Components
 
 ### Buttons
 
-- **Shape:** control suavemente redondeado (10px), altura mínima de 44px.
-- **Primary:** verde bosque con texto blanco y peso 750.
-- **Hover / Focus:** verde profundo y desplazamiento vertical mínimo; foco ocre de 3px.
+- **Shape:** rectángulo compacto y accesible (`10px`, mínimo `44px`).
+- **Primary:** blanco sobre verde bosque, con padding compacto (`0.65rem 0.9rem`).
+- **Hover / Focus:** el hover profundiza el verde entre 150 y 160ms; el foco visible usa un contorno ocre de 3px con offset de 3px.
+- **Ghost:** fondo transparente, borde fino y texto blanco dentro del masthead.
 
 ### Chips
 
-- **Style:** fondo tintado a partir del color semántico, texto oscuro y forma de píldora.
-- **State:** identifica un filtro o dato; no reemplaza una acción.
+- **Style:** píldora de baja intensidad (`999px`) con mezcla del color semántico sobre blanco.
+- **State:** categoría, dificultad y razón relacional conservan su función textual; el color nunca sustituye la etiqueta.
 
 ### Cards / Containers
 
-- **Corner Style:** 14–16px.
-- **Background:** papel frío.
-- **Shadow Strategy:** solo la mesa de búsqueda; listas con borde fino.
-- **Internal Padding:** entre 1.2rem y 1.65rem.
+- **Corner Style:** fichas compactas (`14px`) y paneles protagonistas (`16px`).
+- **Background:** papel frío o mezcla de 5% del color de categoría con papel frío.
+- **Shadow Strategy:** planas, salvo la única elevación definida para cada vista.
+- **Border:** mezcla de 20% del color semántico con la línea base cuando la categoría aporta contexto.
+- **Internal Padding:** `1.3rem` en fichas compactas y `clamp(1.5rem, 4vw, 2.6rem)` en el significado.
 
 ### Inputs / Fields
 
-- **Style:** fondo blanco, borde gris verdoso y radio de 10–13px.
-- **Focus:** borde verde y halo verde translúcido.
-- **Error / Disabled:** error rojo textual; estado deshabilitado gris verdoso y sin movimiento.
+- **Style:** fondo blanco, trazo gris verdoso, radio de 10–13px y altura de 46–54px.
+- **Focus:** borde verde y halo de 3px con verde al 15%; el foco global conserva el contorno ocre.
+- **Error / Disabled:** los errores usan texto rojo oscuro; las acciones deshabilitadas pierden contraste y no se desplazan.
 
 ### Navigation
 
-La navegación global conserva azul noche, marca ocre y enlaces blancos. En móvil se repliega con el componente Bootstrap existente.
+Enlaces de avance y retorno usan verde bosque, peso alto y objetivos de 44px. View Transitions aporta continuidad entre páginas cuando está disponible; la llegada alternativa dura 240ms y `prefers-reduced-motion` reduce animaciones y transiciones a 0.01ms.
 
-### Bilingual Result Row
+### Ambient Lexeme Field
 
-La palabra Kichwa encabeza; la equivalencia española lleva una etiqueta textual; pronunciación, dificultad, tema y acceso al detalle completan la fila sin crear tarjetas anidadas.
+Sólo el Inicio puede usar palabras Kichwa translúcidas en el fondo azul noche. Se mueven lentamente con opacidad de `0.035–0.085`, duraciones observadas de `17–23s` y se detienen por completo con movimiento reducido.
+
+### Entry Reading + Rail
+
+El detalle abre con un masthead compacto y distribuye definición y notas a la izquierda, datos y acciones en un rail adhesivo a la derecha. Las relaciones usan fichas teñidas y siempre muestran una razón visible antes de la palabra relacionada.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** mantener Kichwa y español visibles en la misma unidad de lectura.
-- **Do** mostrar conteos y filtros activos con numerales tabulares.
-- **Do** usar el color de categoría solo en marcadores y etiquetas pequeñas.
-- **Do** preservar navegación por teclado, foco visible y estados de carga o vacío.
+- **Do** usar el azul noche para abrir la consulta y el verde bosque para actuar.
+- **Do** tintar fichas de resultado y relación con el color real de su categoría a baja intensidad.
+- **Do** mantener resultados en dos columnas compactas y pasarlos a una a 760px.
+- **Do** mostrar una razón visible para cada palabra relacionada.
+- **Do** respetar View Transitions y `prefers-reduced-motion` como un mismo contrato de continuidad.
 
 ### Don't:
 
-- **Don't** duplicar filtros equivalentes de dificultad o pronunciación.
-- **Don't** convertir cada contenido en una tarjeta flotante.
-- **Don't** usar gradientes dominantes, texto degradado ni halos decorativos.
-- **Don't** presentar una clasificación automática como validación lingüística humana.
+- **Don't** usar palabras Kichwa ambientales fuera del Inicio.
+- **Don't** mantener más de una elevación persistente por vista.
+- **Don't** convertir colores de categoría en fondos saturados o bloques decorativos dominantes.
+- **Don't** presentar relaciones sin explicación ni rellenar espacios con coincidencias al azar.
+- **Don't** mostrar contenedores vacíos cuando una definición, nota o relación no existe.

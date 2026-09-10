@@ -1,28 +1,46 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-09T18:45:00-05:00",
+  "generatedAt": "2026-09-09",
   "title": "Design System: Diccionario Kichwa",
   "extensions": {
     "colorMeta": {
-      "navy": { "role": "primary", "displayName": "Azul noche", "canonical": "#151f38" },
-      "green": { "role": "primary", "displayName": "Verde bosque", "canonical": "#17684d" },
-      "gold": { "role": "secondary", "displayName": "Ocre Kichwa", "canonical": "#c48a18" },
-      "ground": { "role": "neutral", "displayName": "Marfil frío", "canonical": "#eef2ef" },
-      "paper": { "role": "neutral", "displayName": "Papel frío", "canonical": "#fcfdfa" }
+      "bosque-accion": { "role": "primary", "displayName": "Bosque de acción", "canonical": "#17684d" },
+      "bosque-profundo": { "role": "primary", "displayName": "Bosque profundo", "canonical": "#0f533c" },
+      "azul-noche": { "role": "secondary", "displayName": "Azul noche", "canonical": "#151f38" },
+      "ocre-kichwa": { "role": "secondary", "displayName": "Ocre Kichwa", "canonical": "#c48a18" },
+      "tinta": { "role": "neutral", "displayName": "Tinta", "canonical": "#142923" },
+      "tinta-suave": { "role": "neutral", "displayName": "Tinta suave", "canonical": "#52645f" },
+      "papel-frio": { "role": "neutral", "displayName": "Papel frío", "canonical": "#fcfdfa" },
+      "suelo-frio": { "role": "neutral", "displayName": "Suelo frío", "canonical": "#eef2ef" },
+      "linea": { "role": "neutral", "displayName": "Línea", "canonical": "#d9ded8" },
+      "blanco": { "role": "neutral", "displayName": "Blanco", "canonical": "#ffffff" }
     },
     "typographyMeta": {
-      "display": { "displayName": "Título principal", "purpose": "Encabezado compacto de la vista." },
-      "body": { "displayName": "Lectura bilingüe", "purpose": "Palabras, equivalencias y explicaciones." }
+      "display": { "displayName": "Palabra protagonista", "purpose": "La palabra Kichwa principal en el detalle." },
+      "headline": { "displayName": "Invitación principal", "purpose": "La apertura de búsqueda en Inicio." },
+      "title": { "displayName": "Título de sección", "purpose": "Agrupa temas, resultados y relaciones." },
+      "body": { "displayName": "Lectura", "purpose": "Definiciones, notas y traducciones." },
+      "label": { "displayName": "Metadato", "purpose": "Idioma, categoría, dificultad y razones." }
     },
     "shadows": [
-      { "name": "workspace-lift", "value": "0 18px 42px rgba(13, 32, 27, 0.14)", "purpose": "Elevar únicamente la mesa de búsqueda." }
+      { "name": "search-workbench", "value": "0 18px 42px rgba(13, 32, 27, 0.14)", "purpose": "Única elevación en reposo de resultados." },
+      { "name": "home-search", "value": "0 18px 42px rgba(3, 15, 12, 0.24)", "purpose": "Única elevación en reposo del Inicio." }
     ],
     "motion": [
-      { "name": "control-ease", "value": "160ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Respuesta breve de botones y controles." }
+      { "name": "feedback-standard", "value": "160ms ease", "purpose": "Respuesta de color en temas y controles." },
+      { "name": "feedback-expressive", "value": "160ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Respuesta corta de acciones primarias." },
+      { "name": "surface-arrival", "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Llegada de página cuando View Transitions no está disponible." },
+      { "name": "page-departure", "value": "140ms ease-in", "purpose": "Salida de la raíz con View Transitions." },
+      { "name": "page-continuity", "value": "260ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrada de la raíz con View Transitions." },
+      { "name": "lexeme-current", "value": "17s 18s 19s 21s 23s ease-in-out infinite alternate", "purpose": "Deriva ambiental exclusiva del Inicio; se cancela con movimiento reducido." },
+      { "name": "reduced-motion", "value": "0.01ms", "purpose": "Duración global de animación y transición bajo prefers-reduced-motion." }
     ],
     "breakpoints": [
-      { "name": "stack-workbench", "value": "900px" },
-      { "name": "mobile", "value": "680px" }
+      { "name": "home-collapse", "value": "980px" },
+      { "name": "search-detail-stack", "value": "900px" },
+      { "name": "results-single-column", "value": "760px" },
+      { "name": "mobile", "value": "680px" },
+      { "name": "detail-mobile", "value": "620px" }
     ]
   },
   "components": [
@@ -30,51 +48,94 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Acción principal verde y táctil.",
-      "html": "<button class=\"ds-button\">BUSCAR</button>",
-      "css": ".ds-button{min-height:44px;padding:.68rem 1.15rem;color:#fff;background:#17684d;border:0;border-radius:10px;font:750 1rem Inter,sans-serif;transition:background-color 160ms ease,transform 160ms cubic-bezier(.16,1,.3,1)}.ds-button:hover{background:#0f533c;transform:translateY(-1px)}.ds-button:focus-visible{outline:3px solid #e0ad49;outline-offset:3px}"
+      "description": "Acción principal verde, compacta y de 44px como mínimo.",
+      "html": "<button class=\"ds-btn-primary\">Buscar</button>",
+      "css": ".ds-btn-primary { min-height:44px; padding:.65rem .9rem; color:#fff; background:#17684d; border:0; border-radius:10px; font:750 1rem Inter, sans-serif; transition:background-color 160ms ease, transform 160ms cubic-bezier(.16,1,.3,1); } .ds-btn-primary:hover { background:#0f533c; transform:translateY(-1px); } .ds-btn-primary:focus-visible { outline:3px solid #e0ad49; outline-offset:3px; } .ds-btn-primary:active { transform:translateY(0); }"
     },
     {
-      "name": "Search Input",
+      "name": "Bilingual Search Field",
       "kind": "input",
-      "refersTo": "input-search",
-      "description": "Campo bilingüe con foco verde.",
-      "html": "<label class=\"ds-label\">Palabra en Kichwa o español<input class=\"ds-input\" placeholder=\"wasi, casa, yaku o agua\"></label>",
-      "css": ".ds-label{display:grid;gap:.35rem;color:#334842;font:750 .8rem Inter,sans-serif}.ds-input{min-height:54px;padding:.75rem;color:#142923;background:#fff;border:1px solid #aebbb5;border-radius:13px;font:400 1rem Inter,sans-serif}.ds-input:focus-visible{outline:3px solid rgba(23,104,77,.15);border-color:#17684d}"
+      "refersTo": "search-field",
+      "description": "Consulta bilingüe unificada con acción principal integrada.",
+      "html": "<div class=\"ds-search\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z\"/></svg><input aria-label=\"Palabra en Kichwa o español\" placeholder=\"Ejemplo: wasi, casa, yaku o agua\"><button>Buscar</button></div>",
+      "css": ".ds-search { display:grid; grid-template-columns:44px minmax(0,1fr) auto; align-items:center; background:#fff; border:1px solid #aebbb5; border-radius:13px; } .ds-search:focus-within { border-color:#17684d; box-shadow:0 0 0 3px rgba(23,104,77,.15); } .ds-search svg { width:18px; margin:auto; fill:none; stroke:#17684d; stroke-width:2; } .ds-search input { min-height:54px; padding:.75rem .5rem; color:#142923; background:transparent; border:0; outline:0; font:1rem Inter,sans-serif; } .ds-search button { min-height:44px; margin-right:5px; padding:.68rem 1.15rem; color:#fff; background:#17684d; border:0; border-radius:10px; font-weight:750; } .ds-search button:hover { background:#0f533c; } .ds-search button:focus-visible { outline:3px solid #e0ad49; outline-offset:3px; }"
     },
     {
-      "name": "Category Chip",
-      "kind": "chip",
-      "description": "Tema semántico en una píldora discreta.",
-      "html": "<span class=\"ds-chip\">Animales</span>",
-      "css": ".ds-chip{display:inline-flex;padding:.46rem .68rem;color:#142923;background:#e1f0e9;border-radius:999px;font:750 .75rem Inter,sans-serif}"
+      "name": "Filter Select",
+      "kind": "input",
+      "refersTo": "filter-field",
+      "description": "Selector secundario para tema o dificultad.",
+      "html": "<label class=\"ds-filter\"><span>Tema</span><select><option>Todos los temas</option><option>Naturaleza</option></select></label>",
+      "css": ".ds-filter { display:grid; gap:.35rem; color:#334842; font:750 .8rem Inter,sans-serif; } .ds-filter select { min-height:46px; padding:.65rem 2.2rem .65rem .8rem; color:#142923; background:#fff; border:1px solid #b6c0bb; border-radius:10px; font:1rem Inter,sans-serif; } .ds-filter select:focus-visible { outline:3px solid #e0ad49; outline-offset:3px; border-color:#17684d; }"
     },
     {
-      "name": "Result List",
+      "name": "Tinted Result Card",
       "kind": "card",
-      "refersTo": "result-surface",
-      "description": "Lista plana de equivalencias bilingües.",
-      "html": "<article class=\"ds-result\"><strong>misi</strong><span>Español · gato</span><a href=\"#\">Ver entrada</a></article>",
-      "css": ".ds-result{display:grid;grid-template-columns:1fr auto;gap:.5rem 2rem;padding:1.25rem 1.4rem;color:#142923;background:#fcfdfa;border:1px solid #d9ded8;border-radius:14px;font-family:Inter,sans-serif}.ds-result strong{font-size:1.22rem}.ds-result span{grid-column:1;color:#52645f}.ds-result a{grid-column:2;grid-row:1/3;align-self:center;color:#17684d;font-weight:750;text-underline-offset:.2em}.ds-result a:focus-visible{outline:3px solid #e0ad49;outline-offset:3px}"
+      "refersTo": "result-card",
+      "description": "Ficha compacta de resultado tintada por categoría.",
+      "html": "<article class=\"ds-result\" style=\"--ds-word-color:#61736c\"><div><h3>wasi</h3><span class=\"ds-difficulty\">Fácil</span></div><p><small>ESPAÑOL</small> casa</p><a href=\"#\">Ver entrada →</a></article>",
+      "css": ".ds-result { display:grid; gap:1.25rem; padding:1.3rem; color:#142923; background:color-mix(in srgb,var(--ds-word-color) 5%,#fcfdfa); border:1px solid color-mix(in srgb,var(--ds-word-color) 20%,#d9ded8); border-radius:14px; font-family:Inter,sans-serif; transition:background-color 160ms ease,border-color 160ms ease; } .ds-result:hover { background:color-mix(in srgb,var(--ds-word-color) 9%,#fcfdfa); border-color:color-mix(in srgb,var(--ds-word-color) 35%,#d9ded8); } .ds-result div { display:flex; align-items:center; gap:.7rem; } .ds-result h3,.ds-result p { margin:0; } .ds-result h3 { font-size:1.22rem; font-weight:780; letter-spacing:-.015em; } .ds-result small { color:#52645f; font-size:.72rem; font-weight:800; letter-spacing:.04em; } .ds-difficulty { padding:.35rem .5rem; color:#14573f; background:#dcefe5; border-radius:999px; font-size:.75rem; font-weight:750; } .ds-result a { min-height:44px; color:#17684d; font-weight:750; } .ds-result a:focus-visible { outline:3px solid #e0ad49; outline-offset:3px; }"
     },
     {
-      "name": "Search Workspace",
+      "name": "Meaning Panel",
+      "kind": "card",
+      "refersTo": "detail-panel",
+      "description": "Superficie principal de lectura tintada por la categoría de la entrada.",
+      "html": "<section class=\"ds-meaning\" style=\"--ds-entry-color:#61736c\"><h2>Significado</h2><p>Definición clara de la palabra dentro de su contexto lingüístico.</p></section>",
+      "css": ".ds-meaning { padding:clamp(1.5rem,4vw,2.6rem); color:#142923; background:color-mix(in srgb,var(--ds-entry-color) 5%,#fcfdfa); border:1px solid color-mix(in srgb,var(--ds-entry-color) 20%,#d9ded8); border-radius:16px; font-family:Inter,sans-serif; } .ds-meaning h2 { margin:0 0 .75rem; font-size:1.05rem; font-weight:780; letter-spacing:-.015em; } .ds-meaning p { max-width:70ch; margin:0; color:#294139; font-size:clamp(1.1rem,2vw,1.35rem); line-height:1.7; }"
+    },
+    {
+      "name": "Entry Rail",
+      "kind": "card",
+      "description": "Rail compacto de datos y acciones del detalle.",
+      "html": "<aside class=\"ds-rail\"><h2>Datos de la entrada</h2><dl><div><dt>Dificultad</dt><dd>Fácil</dd></div><div><dt>Tema</dt><dd>Vida cotidiana</dd></div></dl><a href=\"#\">Buscar palabras similares</a></aside>",
+      "css": ".ds-rail { padding:1.35rem; color:#142923; background:#fcfdfa; border:1px solid #d9ded8; border-radius:14px; font-family:Inter,sans-serif; } .ds-rail h2 { margin:0 0 .75rem; font-size:1.05rem; font-weight:780; } .ds-rail dl { margin:0; } .ds-rail dl div { display:flex; justify-content:space-between; gap:1rem; padding:.72rem 0; border-top:1px solid #e4e8e4; } .ds-rail dt { color:#52645f; font-size:.78rem; font-weight:600; } .ds-rail dd { margin:0; font-weight:720; text-align:right; } .ds-rail a { display:flex; min-height:44px; align-items:center; margin-top:.55rem; padding:.65rem .75rem; color:#17684d; border-radius:10px; font-weight:730; text-decoration:none; } .ds-rail a:hover { background:#eef5f1; } .ds-rail a:focus-visible { outline:3px solid #e0ad49; outline-offset:3px; }"
+    },
+    {
+      "name": "Related Entry",
+      "kind": "card",
+      "description": "Relación explicada y tintada por categoría, nunca decorativa.",
+      "html": "<article class=\"ds-related\" style=\"--ds-related-color:#61736c\"><span class=\"ds-reason\">Mismo tema</span><h3>yaku</h3><p><small>ESPAÑOL</small> agua</p><a href=\"#\">Ver entrada →</a></article>",
+      "css": ".ds-related { display:grid; gap:.45rem 1rem; min-height:190px; padding:1.3rem; color:#142923; background:color-mix(in srgb,var(--ds-related-color) 5%,#fcfdfa); border:1px solid color-mix(in srgb,var(--ds-related-color) 20%,#d9ded8); border-radius:14px; font-family:Inter,sans-serif; } .ds-reason { width:fit-content; margin-bottom:.4rem; padding:.45rem .68rem; color:#142923; background:color-mix(in srgb,var(--ds-related-color) 14%,#fff); border-radius:999px; font-size:.72rem; font-weight:780; line-height:1; } .ds-related h3,.ds-related p { margin:0; } .ds-related h3 { font-size:1.35rem; font-weight:780; letter-spacing:-.02em; } .ds-related small { display:block; color:#52645f; font-size:.68rem; font-weight:780; } .ds-related a { min-height:44px; color:#17684d; font-weight:760; } .ds-related a:focus-visible { outline:3px solid #e0ad49; outline-offset:3px; }"
+    },
+    {
+      "name": "Ambient Lexeme Field",
       "kind": "custom",
-      "description": "Superficie elevada que reúne consulta y filtros.",
-      "html": "<section class=\"ds-workspace\"><strong>¿Qué palabra buscas?</strong><span>Afinar resultados</span></section>",
-      "css": ".ds-workspace{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;padding:1.65rem;color:#142923;background:#fcfdfa;border-radius:16px;box-shadow:0 18px 42px rgba(13,32,27,.14);font-family:Inter,sans-serif}"
+      "description": "Palabras Kichwa translúcidas, exclusivas del fondo de Inicio.",
+      "html": "<div class=\"ds-lexemes\"><span>alli</span><span>yaku</span><span>wasi</span></div>",
+      "css": ".ds-lexemes { position:relative; overflow:hidden; min-height:180px; background:#151f38; } .ds-lexemes span { position:absolute; color:#fff; font:750 clamp(1.2rem,2.8vw,2.8rem) Inter,sans-serif; opacity:.055; animation:ds-lexeme-current 17s ease-in-out infinite alternate; } .ds-lexemes span:nth-child(1){top:18%;left:7%}.ds-lexemes span:nth-child(2){top:13%;left:78%;animation-duration:21s}.ds-lexemes span:nth-child(3){top:72%;left:61%;animation-duration:19s}@keyframes ds-lexeme-current{0%{transform:translate3d(-.8rem,.6rem,0);opacity:.035}50%{opacity:.085}100%{transform:translate3d(1.2rem,-.8rem,0);opacity:.045}}@media(prefers-reduced-motion:reduce){.ds-lexemes span{animation:none}}"
     }
   ],
   "narrative": {
     "northStar": "Mesa de consulta viva",
-    "overview": "Un sistema sobrio y ordenado que prioriza palabras, equivalencias y filtros. Azul noche, verde bosque y ocre trabajan sobre papeles fríos sin competir con el contenido léxico.",
-    "keyCharacteristics": ["Jerarquía compacta y legible.", "Una acción primaria verde por contexto.", "Categorías expresadas con pequeños marcadores de color.", "Controles táctiles y foco visible."],
-    "rules": [
-      { "name": "Semantic Accent", "body": "El verde activa; el ocre orienta; el color de categoría identifica.", "section": "colors" },
-      { "name": "One Typeface", "body": "La jerarquía varía peso y tamaño, no la familia.", "section": "typography" },
-      { "name": "One Lift", "body": "Solo el espacio de trabajo principal se eleva.", "section": "elevation" }
+    "overview": "La interfaz se comporta como una mesa de consulta lingüística: ofrece amplitud para comparar vocabulario, calma para leer una entrada y señales suficientes para entender de dónde viene cada relación. La identidad nace del azul noche, el verde bosque, el ocre y los papeles fríos; el contenido bilingüe, no la decoración, lleva el peso expresivo.\n\nInicio, resultados y detalle comparten una densidad deliberada y una jerarquía compacta. Las palabras Kichwa ambientales pertenecen exclusivamente al Inicio; las categorías tiñen fichas y etiquetas con baja intensidad; el detalle prioriza equivalencia, significado y evidencia relacional sin contenedores vacíos.",
+    "keyCharacteristics": [
+      "Azul noche estructural, verde bosque operativo y ocre Kichwa dosificado.",
+      "Superficies de papel frío con tintes semánticos de categoría y dificultad.",
+      "Comparación compacta en resultados y lectura serena en detalle.",
+      "Movimiento de continuidad breve, cancelable y limitado a transformación y opacidad.",
+      "Relaciones acompañadas por una razón visible; nunca se rellenan al azar."
     ],
-    "dos": ["Mantener Kichwa y español visibles en la misma unidad de lectura.", "Preservar navegación por teclado y foco visible."],
-    "donts": ["No duplicar filtros equivalentes.", "No presentar una clasificación automática como validación humana."]
+    "rules": [
+      { "name": "The Semantic Tint Rule", "body": "El color de categoría aparece como mezcla suave, etiqueta o marcador; nunca como bloque decorativo dominante.", "section": "colors" },
+      { "name": "The Ocher Measure Rule", "body": "El ocre señala identidad y orientación, pero no compite con el verde reservado para actuar.", "section": "colors" },
+      { "name": "The Word Leads Rule", "body": "En una ficha, la palabra Kichwa y su equivalencia preceden a los metadatos y acciones.", "section": "typography" },
+      { "name": "The Context Density Rule", "body": "Resultados compara en unidades compactas; detalle reduce la densidad y reserva ancho continuo para significado y notas.", "section": "layout" },
+      { "name": "The One Resting Elevation Rule", "body": "Cada vista usa como máximo una elevación persistente; el resto de la jerarquía se resuelve con papel, línea y tinte.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar el azul noche para abrir la consulta y el verde bosque para actuar.",
+      "Do tintar fichas de resultado y relación con el color real de su categoría a baja intensidad.",
+      "Do mantener resultados en dos columnas compactas y pasarlos a una a 760px.",
+      "Do mostrar una razón visible para cada palabra relacionada.",
+      "Do respetar View Transitions y prefers-reduced-motion como un mismo contrato de continuidad."
+    ],
+    "donts": [
+      "Don't usar palabras Kichwa ambientales fuera del Inicio.",
+      "Don't mantener más de una elevación persistente por vista.",
+      "Don't convertir colores de categoría en fondos saturados o bloques decorativos dominantes.",
+      "Don't presentar relaciones sin explicación ni rellenar espacios con coincidencias al azar.",
+      "Don't mostrar contenedores vacíos cuando una definición, nota o relación no existe."
+    ]
   }
 }

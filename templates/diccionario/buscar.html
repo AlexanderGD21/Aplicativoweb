@@ -91,7 +91,7 @@
             {% if page_obj.object_list %}
                 <div class="word-list">
                     {% for palabra in page_obj %}
-                        <article class="word-row">
+                        <article class="word-row" style="--word-color: {{ palabra.categoria.color|default:'#61736c' }}">
                             <div class="word-main">
                                 <div class="word-kichwa-line">
                                     <h3>{{ palabra.palabra_kichwa }}</h3>

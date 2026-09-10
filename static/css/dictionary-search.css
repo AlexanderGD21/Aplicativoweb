@@ -399,7 +399,6 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--tag-color, #61736c) 14%, #fff);
 }
 
-.word-list,
 .category-list {
   overflow: hidden;
   background: var(--dict-paper);
@@ -407,20 +406,27 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
   border-radius: 14px;
 }
 
-.word-row {
+.word-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, auto);
-  align-items: center;
-  gap: 2rem;
-  padding: 1.25rem 1.4rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1rem;
 }
 
-.word-row + .word-row {
-  border-top: 1px solid #e1e5e1;
+.word-row {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 1.25rem;
+  padding: 1.3rem;
+  background: color-mix(in srgb, var(--word-color) 5%, var(--dict-paper));
+  border: 1px solid color-mix(in srgb, var(--word-color) 20%, var(--dict-line));
+  border-radius: 14px;
+  transition: background-color 160ms ease, border-color 160ms ease;
 }
 
 .word-row:hover {
-  background: #fbfcf8;
+  background: color-mix(in srgb, var(--word-color) 9%, var(--dict-paper));
+  border-color: color-mix(in srgb, var(--word-color) 35%, var(--dict-line));
 }
 
 .word-kichwa-line {
@@ -477,9 +483,11 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
 
 .word-meta {
   display: flex;
-  align-items: flex-end;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid color-mix(in srgb, var(--word-color) 14%, var(--dict-line));
 }
 
 .category-tag {
@@ -713,7 +721,6 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
   }
 
   .filter-grid,
-  .word-row,
   .category-row {
     grid-template-columns: 1fr;
   }
@@ -725,10 +732,10 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
   }
 
   .word-row {
+    min-height: 0;
     gap: 1rem;
   }
 
-  .word-meta,
   .category-action {
     align-items: flex-start;
   }
@@ -750,6 +757,12 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
     grid-column: 1 / -1;
     grid-row: 1;
     text-align: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .word-list {
+    grid-template-columns: 1fr;
   }
 }
 

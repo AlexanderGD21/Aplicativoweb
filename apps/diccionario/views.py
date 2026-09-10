@@ -19,6 +19,7 @@ from .models import (
     normalizar_texto_busqueda,
 )
 from .forms import BusquedaForm, ContactoForm
+from .services.relaciones import obtener_palabras_relacionadas
 
 
 logger = logging.getLogger(__name__)
@@ -126,22 +127,35 @@ def _ordenar_categorias(queryset):
         )
     ).order_by('grupo_orden', 'orden', 'nombre')
 
+
+def _seleccionar_palabras_destacadas(limite=6):
+    """Elige entradas útiles y variadas de forma estable, sin azar."""
+    candidatas = list(Palabra.objects.select_related('categoria').filter(
+        activa=True,
+    ).order_by('-veces_vista', '-frecuencia_uso', 'palabra_kichwa', 'pk')[:80])
+    seleccionadas = []
+    categorias_usadas = set()
+    for palabra in candidatas:
+        if palabra.categoria_id in categorias_usadas:
+            continue
+        seleccionadas.append(palabra)
+        categorias_usadas.add(palabra.categoria_id)
+        if len(seleccionadas) == limite:
+            return seleccionadas
+    for palabra in candidatas:
+        if palabra not in seleccionadas:
+            seleccionadas.append(palabra)
+        if len(seleccionadas) == limite:
+            break
+    return seleccionadas
+
 def home(request):
     """Vista principal del diccionario"""
     try:
-        # Obtener palabras destacadas (más vistas o favoritas) - CAMBIADO A 6
-        palabras_destacadas = Palabra.objects.select_related('categoria').filter(
-            activa=True
-        ).order_by('-veces_vista', '-fecha_creacion')[:6]
-        
-        # Si no hay suficientes palabras con vistas, obtener palabras aleatorias
-        if palabras_destacadas.count() < 6:
-            palabras_destacadas = Palabra.objects.select_related('categoria').filter(
-                activa=True
-            ).order_by('?')[:6]
-        
-        # Obtener categorías para los filtros
-        categorias = Categoria.objects.all().order_by('nombre')
+        palabras_destacadas = _seleccionar_palabras_destacadas()
+        categorias = _ordenar_categorias(Categoria.objects.annotate(
+            total_palabras=Count('palabras', filter=Q(palabras__activa=True))
+        ).filter(total_palabras__gt=0))
         
         # Estadísticas generales
         total_palabras = Palabra.objects.filter(activa=True).count()
@@ -151,6 +165,7 @@ def home(request):
         context = {
             'palabras_destacadas': palabras_destacadas,
             'categorias': categorias,
+            'categorias_destacadas': list(categorias[:6]),
             'total_palabras': total_palabras,
             'total_categorias': total_categorias,
             'total_usuarios': User.objects.count(),
@@ -310,15 +325,7 @@ def detalle_palabra(request, pk):
         usuario=request.user, palabra=palabra
     ).exists()
     
-    palabras_relacionadas = []
-    relacionadas_explicitas = RelacionPalabra.objects.filter(origen=palabra).select_related('destino')
-    palabras_relacionadas = [relacion.destino for relacion in relacionadas_explicitas if relacion.destino.activa]
-    if palabra.categoria:
-        sugeridas_categoria = Palabra.objects.filter(
-            categoria=palabra.categoria,
-            activa=True
-        ).exclude(pk__in=[palabra.pk, *[item.pk for item in palabras_relacionadas]])[:4 - len(palabras_relacionadas)]
-        palabras_relacionadas.extend(sugeridas_categoria)
+    palabras_relacionadas = obtener_palabras_relacionadas(palabra)
     
     context = {
         'palabra': palabra,

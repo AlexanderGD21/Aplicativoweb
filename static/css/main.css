@@ -1148,8 +1148,8 @@ footer a:hover {
 
 @media (max-width: 576px) {
   .container {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .card {
@@ -1268,12 +1268,39 @@ footer a:hover {
 }
 
 @keyframes surface-arrival {
-  from { opacity: 0.72; clip-path: inset(0 0 1.25rem 0); }
-  to { opacity: 1; clip-path: inset(0); }
+  from { opacity: 0.82; filter: blur(3px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
 body.surface-ready main > :first-child {
-  animation: surface-arrival 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: surface-arrival 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: page-departure 140ms ease-in both;
+}
+
+::view-transition-new(root) {
+  animation: page-continuity 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes page-departure {
+  to { opacity: 0.72; filter: blur(2px); }
+}
+
+@keyframes page-continuity {
+  from { opacity: 0.72; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@supports (view-transition-name: root) {
+  body.surface-ready main > :first-child {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
