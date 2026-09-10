@@ -1,12 +1,17 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from .forms import UserForm
 from .models import PerfilUsuario
 
 
 class RecuperacionContrasenaTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
     def test_paginas_de_recuperacion_existen(self):
         for ruta in ('password_reset', 'password_reset_done', 'password_reset_complete'):
             with self.subTest(ruta=ruta):
@@ -28,6 +33,18 @@ class RecuperacionContrasenaTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('/usuarios/reset/', mail.outbox[0].body)
 
+    @override_settings(
+        EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+        PASSWORD_RESET_MAX_REQUESTS=1,
+    )
+    def test_recuperacion_limita_solicitudes_sin_revelar_la_cuenta(self):
+        User.objects.create_user('mashi', email='mashi@example.test', password='Clave-segura-123')
+        url = reverse('usuarios:password_reset')
+
+        self.assertRedirects(self.client.post(url, {'email': 'mashi@example.test'}), reverse('usuarios:password_reset_done'))
+        self.assertRedirects(self.client.post(url, {'email': 'mashi@example.test'}), reverse('usuarios:password_reset_done'))
+        self.assertEqual(len(mail.outbox), 1)
+
 
 class PerfilYProgresoTests(TestCase):
     def setUp(self):
@@ -38,20 +55,42 @@ class PerfilYProgresoTests(TestCase):
         self.assertTrue(PerfilUsuario.objects.filter(usuario=self.usuario).exists())
         self.assertEqual(self.client.get(reverse('usuarios:perfil')).status_code, 200)
 
-        respuesta = self.client.post(reverse('usuarios:actualizar_puntos'), {'puntos': 25})
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertEqual(respuesta.json()['puntos_totales'], 25)
+    def test_cambio_de_correo_exige_la_contrasena_actual(self):
+        self.usuario.email = 'sisa@example.test'
+        self.usuario.first_name = 'Sisa'
+        self.usuario.last_name = 'Yaku'
+        self.usuario.save()
+        datos = {
+            'first_name': 'Sisa',
+            'last_name': 'Yaku',
+            'email': 'nuevo@example.test',
+            'current_password': 'incorrecta',
+        }
+        form = UserForm(datos, instance=self.usuario)
+        self.assertFalse(form.is_valid())
+        self.assertIn('current_password', form.errors)
 
-        respuesta = self.client.post(reverse('usuarios:incrementar_palabras'))
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertEqual(respuesta.json()['palabras_aprendidas'], 1)
+        datos['current_password'] = 'clave-segura-123'
+        form = UserForm(datos, instance=self.usuario)
+        self.assertTrue(form.is_valid())
 
-    def test_puntos_negativos_se_rechazan(self):
-        respuesta = self.client.post(reverse('usuarios:actualizar_puntos'), {'puntos': -1})
-        self.assertEqual(respuesta.status_code, 400)
+    def test_el_correo_no_se_puede_vaciar(self):
+        self.usuario.email = 'sisa@example.test'
+        self.usuario.save(update_fields=['email'])
+        form = UserForm({
+            'first_name': 'Sisa',
+            'last_name': 'Yaku',
+            'email': '',
+            'current_password': '',
+        }, instance=self.usuario)
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
 
 
 class RegistroYSesionTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
     def _datos_registro(self, **cambios):
         datos = {
             'username': 'killa',
@@ -74,13 +113,52 @@ class RegistroYSesionTests(TestCase):
 
         respuesta = self.client.post(reverse('usuarios:registro'), self._datos_registro())
         self.assertRedirects(respuesta, reverse('usuarios:login'))
-        self.assertTrue(User.objects.filter(email='killa@example.test').exists())
+        usuario = User.objects.get(email='killa@example.test')
+        self.assertIsNotNone(usuario.perfil.terminos_aceptados_en)
+        self.assertEqual(usuario.perfil.version_terminos, '2026-09-10')
+        self.assertEqual(usuario.perfil.version_privacidad, '2026-09-10')
+        self.assertFalse(usuario.perfil.notificaciones_email)
 
         respuesta = self.client.post(
             reverse('usuarios:registro'), self._datos_registro(username='killa2')
         )
         self.assertEqual(respuesta.status_code, 200)
         self.assertContains(respuesta, 'Ya existe una cuenta registrada con este correo.')
+
+    def test_novedades_son_optativas(self):
+        respuesta = self.client.post(
+            reverse('usuarios:registro'),
+            self._datos_registro(recibir_novedades='on'),
+        )
+        self.assertRedirects(respuesta, reverse('usuarios:login'))
+        self.assertTrue(User.objects.get(username='killa').perfil.notificaciones_email)
+
+    def test_registro_conserva_un_destino_interno_y_descarta_uno_externo(self):
+        destino = reverse('diccionario:mis_favoritas')
+        respuesta = self.client.post(
+            reverse('usuarios:registro'),
+            self._datos_registro(next=destino),
+        )
+        self.assertRedirects(
+            respuesta,
+            f"{reverse('usuarios:login')}?next={destino.replace('/', '%2F')}",
+            fetch_redirect_response=False,
+        )
+
+        cache.clear()
+        respuesta = self.client.post(
+            reverse('usuarios:registro'),
+            self._datos_registro(
+                username='killa2',
+                email='killa2@example.test',
+                next='https://example.com/robo',
+            ),
+        )
+        self.assertRedirects(
+            respuesta,
+            reverse('usuarios:login'),
+            fetch_redirect_response=False,
+        )
 
     def test_cierre_de_sesion_exige_post(self):
         usuario = User.objects.create_user('inti', password='Clave-segura-123')
@@ -92,7 +170,7 @@ class RegistroYSesionTests(TestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_inicio_de_sesion_valida_credenciales(self):
-        User.objects.create_user('runa', password='Clave-segura-123')
+        User.objects.create_user('runa', email='runa@example.test', password='Clave-segura-123')
         respuesta = self.client.post(
             reverse('usuarios:login'),
             {'username': 'runa', 'password': 'Clave-segura-123'},
@@ -106,3 +184,49 @@ class RegistroYSesionTests(TestCase):
         )
         self.assertEqual(respuesta.status_code, 200)
         self.assertNotIn('_auth_user_id', cliente.session)
+
+    def test_inicio_de_sesion_tambien_acepta_correo(self):
+        User.objects.create_user('inti', email='inti@example.test', password='Clave-segura-123')
+        respuesta = self.client.post(
+            reverse('usuarios:login'),
+            {'username': 'INTI@example.test', 'password': 'Clave-segura-123'},
+        )
+        self.assertRedirects(respuesta, reverse('diccionario:home'))
+
+    @override_settings(LOGIN_MAX_ATTEMPTS=2)
+    def test_inicio_de_sesion_bloquea_intentos_repetidos(self):
+        User.objects.create_user('yaku', password='Clave-segura-123')
+        url = reverse('usuarios:login')
+        for _ in range(2):
+            self.assertEqual(
+                self.client.post(url, {'username': 'yaku', 'password': 'incorrecta'}).status_code,
+                200,
+            )
+        respuesta = self.client.post(url, {'username': 'yaku', 'password': 'incorrecta'})
+        self.assertEqual(respuesta.status_code, 429)
+        self.assertContains(respuesta, 'Demasiados intentos', status_code=429)
+
+
+class CuentaYLegalTests(TestCase):
+    def setUp(self):
+        self.usuario = User.objects.create_user('sumak', password='Clave-segura-123')
+        self.client.force_login(self.usuario)
+
+    def test_eliminacion_muestra_confirmacion_y_exige_contrasena_correcta(self):
+        url = reverse('usuarios:eliminar_cuenta')
+        self.assertContains(self.client.get(url), 'name="password"')
+        respuesta = self.client.post(url, {'password': 'incorrecta'})
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(User.objects.filter(pk=self.usuario.pk).exists())
+
+        respuesta = self.client.post(url, {'password': 'Clave-segura-123'})
+        self.assertRedirects(respuesta, reverse('diccionario:home'))
+        self.assertFalse(User.objects.filter(pk=self.usuario.pk).exists())
+
+    def test_paginas_legales_publican_version_y_navegacion(self):
+        for ruta in ('terminos', 'privacidad'):
+            with self.subTest(ruta=ruta):
+                respuesta = self.client.get(reverse(f'usuarios:{ruta}'))
+                self.assertEqual(respuesta.status_code, 200)
+                self.assertContains(respuesta, '2026-09-10')
+                self.assertContains(respuesta, reverse('diccionario:home'))

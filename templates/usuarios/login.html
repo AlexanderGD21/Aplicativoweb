@@ -1,119 +1,84 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Iniciar Sesión - Diccionario Kichwa{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
-<style>
-/* Ocultar el footer en páginas de autenticación */
-footer {
-    display: none !important;
-}
-
-/* Ajustar el body para ocupar toda la altura sin footer */
-body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-main {
-    flex: 1;
-}
-</style>
-{% endblock %}
+{% block title %}Iniciar sesión | Diccionario Kichwa{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=20260910">{% endblock %}
 
 {% block content %}
-<div class="auth-background">
-    <div class="auth-container">
-        <div class="auth-card fade-in">
-            <div class="auth-header">
-                <h1 class="auth-title">Iniciar Sesión</h1>
-                <p class="auth-subtitle">Accede a tu cuenta Kichwa</p>
-            </div>
-            
-            <div class="auth-body">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <form method="post" id="loginForm" novalidate>
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label for="id_username" class="form-label">
-                            Usuario o Email
-                            <span class="tooltip-trigger">
-                                ?
-                                <span class="tooltip-content">Usuario o email</span>
-                            </span>
-                        </label>
-                        <input 
-                            type="text" 
-                            name="username" 
-                            id="id_username"
-                            class="form-control" 
-                            placeholder="Usuario o email"
-                            required
-                            autocomplete="username"
-                        >
-                        <div class="field-error" id="usernameError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="id_password" class="form-label">
-                            Contraseña
-                            <span class="tooltip-trigger tooltip-top">
-                                ?
-                                <span class="tooltip-content">Tu contraseña</span>
-                            </span>
-                        </label>
-                        <div class="password-container">
-                            <input 
-                                type="password" 
-                                name="password" 
-                                id="id_password"
-                                class="form-control" 
-                                placeholder="Tu contraseña"
-                                required
-                                autocomplete="current-password"
-                            >
-                            <button type="button" class="password-toggle" data-target="id_password">
-                                <span class="toggle-icon"></span>
-                            </button>
-                        </div>
-                        <div class="field-error" id="passwordError"></div>
-                    </div>
-
-                    <button type="submit" class="auth-btn auth-btn-primary">
-                        Iniciar Sesión
-                    </button>
-                </form>
-
-                <div class="auth-divider">
-                    <span>¿No tienes cuenta?</span>
-                </div>
-
-                <p class="text-center mb-3"><a href="{% url 'usuarios:password_reset' %}" class="auth-link">¿Olvidaste tu contraseña?</a></p>
-
-                <a href="{% url 'usuarios:registro' %}" class="auth-btn auth-btn-secondary">
-                    Crear cuenta nueva
-                </a>
-            </div>
-
-            <div class="auth-footer">
-                <p><a href="{% url 'diccionario:home' %}" class="auth-link">← Volver al inicio</a></p>
-            </div>
+<section class="auth-page" aria-labelledby="login-page-title">
+  <div class="auth-wrap">
+    <div class="auth-frame">
+      <aside class="auth-orientation">
+        <a class="auth-brand" href="{% url 'diccionario:home' %}">
+          <i class="fas fa-book" aria-hidden="true"></i>
+          <span>Diccionario Kichwa</span>
+        </a>
+        <div class="auth-orientation-copy">
+          <h1 id="login-page-title">Tu aprendizaje continúa aquí.</h1>
+          <p>Inicia sesión para conservar tus favoritas y consultar tu progreso desde una cuenta personal.</p>
         </div>
+        <ul class="auth-benefits" aria-label="Beneficios de la cuenta">
+          <li><i class="fas fa-bookmark" aria-hidden="true"></i><span>Guarda palabras para volver a ellas.</span></li>
+          <li><i class="fas fa-chart-line" aria-hidden="true"></i><span>Conserva tu progreso en los juegos.</span></li>
+        </ul>
+        <span class="auth-lexeme" aria-hidden="true">yachay</span>
+      </aside>
+
+      <div class="auth-panel">
+        <header class="auth-heading">
+          <h2>Iniciar sesión</h2>
+          <p>Puedes usar tu nombre de usuario o el correo asociado a la cuenta.</p>
+        </header>
+
+        {% if form.non_field_errors %}
+          <div class="auth-alert" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <form method="post" class="auth-form" data-auth-form data-loading-text="Comprobando…">
+          {% csrf_token %}
+          {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+          <div class="auth-field{% if form.username.errors %} has-error{% endif %}">
+            <label for="{{ form.username.id_for_label }}">Usuario o correo electrónico</label>
+            {{ form.username }}
+            {% for error in form.username.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
+          </div>
+
+          <div class="auth-field{% if form.password.errors %} has-error{% endif %}">
+            <div class="d-flex align-items-center justify-content-between gap-3">
+              <label for="{{ form.password.id_for_label }}">Contraseña</label>
+              <a class="auth-inline-link small" href="{% url 'usuarios:password_reset' %}{% if next %}?next={{ next|urlencode }}{% endif %}">¿La olvidaste?</a>
+            </div>
+            <div class="password-wrap">
+              {{ form.password }}
+              <button class="password-toggle" type="button" data-password-toggle="id_password" aria-label="Mostrar contraseña" aria-pressed="false">
+                <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            {% for error in form.password.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
+          </div>
+
+          <div class="auth-actions">
+            <button class="auth-button" type="submit" data-loading-text="Comprobando…">
+              <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+              Entrar a mi cuenta
+            </button>
+          </div>
+        </form>
+
+        <p class="auth-safety-note">
+          <i class="fas fa-shield-halved" aria-hidden="true"></i>
+          <span>Si compartes el dispositivo, cierra la sesión al terminar. Nunca envíes tu contraseña por correo.</span>
+        </p>
+
+        <div class="auth-meta">
+          <span>¿Aún no tienes una cuenta?</span>
+          <a href="{% url 'usuarios:registro' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Crear una cuenta</a>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+</section>
 {% endblock %}
 
-{% block extra_js %}
-<script src="{% static 'js/auth.js' %}"></script>
-{% endblock %}
+{% block extra_js %}<script src="{% static 'js/auth.js' %}?v=20260910"></script>{% endblock %}

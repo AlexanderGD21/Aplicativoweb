@@ -390,10 +390,10 @@
                             <span>Miembro desde {{ usuario.date_joined|date:"F Y" }}</span>
                         </div>
                         
-                        {% if perfil.ubicacion %}
+                        {% if perfil.ciudad or perfil.pais %}
                         <div class="meta-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>{{ perfil.ubicacion }}</span>
+                            <span>{% if perfil.ciudad %}{{ perfil.ciudad }}{% endif %}{% if perfil.ciudad and perfil.pais %}, {% endif %}{% if perfil.pais %}{{ perfil.pais }}{% endif %}</span>
                         </div>
                         {% endif %}
                     </div>

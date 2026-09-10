@@ -126,6 +126,25 @@ LOGIN_URL = 'usuarios:login'
 LOGIN_REDIRECT_URL = 'diccionario:home'
 LOGOUT_REDIRECT_URL = 'diccionario:home'
 PASSWORD_RESET_TIMEOUT = int(os.getenv('PASSWORD_RESET_TIMEOUT', '86400'))
+LOGIN_MAX_ATTEMPTS = int(os.getenv('LOGIN_MAX_ATTEMPTS', '5'))
+LOGIN_LOCKOUT_SECONDS = int(os.getenv('LOGIN_LOCKOUT_SECONDS', '300'))
+AUTH_TRUSTED_PROXY_COUNT = int(os.getenv('AUTH_TRUSTED_PROXY_COUNT', '0'))
+PASSWORD_RESET_MAX_REQUESTS = int(os.getenv('PASSWORD_RESET_MAX_REQUESTS', '5'))
+PASSWORD_RESET_RATE_SECONDS = int(os.getenv('PASSWORD_RESET_RATE_SECONDS', '900'))
+REGISTRATION_MAX_REQUESTS = int(os.getenv('REGISTRATION_MAX_REQUESTS', '5'))
+REGISTRATION_RATE_SECONDS = int(os.getenv('REGISTRATION_RATE_SECONDS', '900'))
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('DATA_UPLOAD_MAX_MEMORY_SIZE', str(3 * 1024 * 1024)))
+FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv('FILE_UPLOAD_MAX_MEMORY_SIZE', str(3 * 1024 * 1024)))
+LEGAL_TERMS_VERSION = '2026-09-10'
+LEGAL_PRIVACY_VERSION = '2026-09-10'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.getenv('CACHE_LOCATION', str(BASE_DIR / '.cache' / 'django')),
+        'OPTIONS': {'MAX_ENTRIES': 10_000},
+    }
+}
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
@@ -136,11 +155,16 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-EMAIL_BACKEND = os.getenv(
+_email_backend_value = os.getenv(
     'EMAIL_BACKEND',
     'django.core.mail.backends.console.EmailBackend'
     if DEBUG else 'django.core.mail.backends.smtp.EmailBackend',
 )
+EMAIL_BACKEND = {
+    'console': 'django.core.mail.backends.console.EmailBackend',
+    'smtp': 'django.core.mail.backends.smtp.EmailBackend',
+    'locmem': 'django.core.mail.backends.locmem.EmailBackend',
+}.get(_email_backend_value.strip().lower(), _email_backend_value)
 EMAIL_HOST = os.getenv('EMAIL_HOST', '')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').strip().lower() in {'1', 'true', 'yes', 'on'}

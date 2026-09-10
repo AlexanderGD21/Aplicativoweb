@@ -1,45 +1,48 @@
-from django.core.management.base import BaseCommand
+from getpass import getpass
+
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+
 class Command(BaseCommand):
-    help = 'Crear un superusuario para el diccionario Kichwa'
+    help = 'Crea un superusuario sin exponer la contraseña en argumentos o salida.'
 
     def add_arguments(self, parser):
         parser.add_argument('--username', type=str, help='Nombre de usuario')
-        parser.add_argument('--email', type=str, help='Email del usuario')
-        parser.add_argument('--password', type=str, help='Contraseña')
+        parser.add_argument('--email', type=str, help='Correo electrónico')
 
     def handle(self, *args, **options):
-        username = options.get('username') or input('Username: ')
-        email = options.get('email') or input('Email: ')
-        password = options.get('password') or input('Password: ')
-        
-        if User.objects.filter(username=username).exists():
-            self.stdout.write(
-                self.style.ERROR(f'El usuario {username} ya existe')
-            )
-            return
-        
+        username = (options.get('username') or input('Usuario: ')).strip()
+        email = (options.get('email') or input('Correo: ')).strip()
+
+        if User.objects.filter(username__iexact=username).exists():
+            raise CommandError('Ese nombre de usuario ya existe.')
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise CommandError('Ese correo ya está asociado a otra cuenta.')
+
+        password = getpass('Contraseña: ')
+        confirmation = getpass('Confirma la contraseña: ')
+        if password != confirmation:
+            raise CommandError('Las contraseñas no coinciden.')
+
+        candidate = User(username=username, email=email)
         try:
-            with transaction.atomic():
-                user = User.objects.create_superuser(
-                    username=username,
-                    email=email,
-                    password=password
-                )
-                
-                # Actualizar perfil
-                perfil = user.perfil
-                perfil.nivel_kichwa = 'experto'
-                perfil.biografia = 'Administrador del Diccionario Kichwa'
-                perfil.save()
-                
-                self.stdout.write(
-                    self.style.SUCCESS(f'Superusuario {username} creado exitosamente')
-                )
-                
-        except Exception as e:
-            self.stdout.write(
-                self.style.ERROR(f'Error creando superusuario: {e}')
+            validate_password(password, user=candidate)
+        except ValidationError as exc:
+            raise CommandError(' '.join(exc.messages)) from exc
+
+        with transaction.atomic():
+            user = User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password,
             )
+            perfil = user.perfil
+            perfil.nivel_kichwa = 'avanzado'
+            perfil.biografia = 'Administración del Diccionario Kichwa'
+            perfil.save(update_fields=['nivel_kichwa', 'biografia', 'fecha_actualizacion', 'ultima_actividad'])
+
+        self.stdout.write(self.style.SUCCESS(f'Superusuario {username} creado.'))

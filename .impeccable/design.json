@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-09",
+  "generatedAt": "2026-09-10T21:19:39.9437915Z",
   "title": "Design System: Diccionario Kichwa",
   "extensions": {
     "colorMeta": {
@@ -24,23 +24,31 @@
     },
     "shadows": [
       { "name": "search-workbench", "value": "0 18px 42px rgba(13, 32, 27, 0.14)", "purpose": "Única elevación en reposo de resultados." },
-      { "name": "home-search", "value": "0 18px 42px rgba(3, 15, 12, 0.24)", "purpose": "Única elevación en reposo del Inicio." }
+      { "name": "home-search", "value": "0 18px 42px rgba(3, 15, 12, 0.24)", "purpose": "Única elevación en reposo del Inicio." },
+      { "name": "auth-entry-frame", "value": "0 22px 54px rgba(13, 32, 27, 0.16)", "purpose": "Marco indivisible de orientación y tarea en los recorridos de cuenta." },
+      { "name": "legal-reading-sheet", "value": "0 18px 42px rgba(13, 32, 27, 0.12)", "purpose": "Única elevación de la lectura legal; el índice permanece plano." }
     ],
     "motion": [
       { "name": "feedback-standard", "value": "160ms ease", "purpose": "Respuesta de color en temas y controles." },
       { "name": "feedback-expressive", "value": "160ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Respuesta corta de acciones primarias." },
+      { "name": "auth-feedback", "value": "150ms ease", "purpose": "Foco, validación y envío en formularios de cuenta." },
       { "name": "surface-arrival", "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Llegada de página cuando View Transitions no está disponible." },
       { "name": "page-departure", "value": "140ms ease-in", "purpose": "Salida de la raíz con View Transitions." },
       { "name": "page-continuity", "value": "260ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrada de la raíz con View Transitions." },
       { "name": "lexeme-current", "value": "17s 18s 19s 21s 23s ease-in-out infinite alternate", "purpose": "Deriva ambiental exclusiva del Inicio; se cancela con movimiento reducido." },
+      { "name": "auth-lexeme", "value": "18s ease-in-out infinite alternate", "purpose": "Deriva de un solo lexema fantasma dentro de la orientación de autenticación." },
       { "name": "reduced-motion", "value": "0.01ms", "purpose": "Duración global de animación y transición bajo prefers-reduced-motion." }
     ],
     "breakpoints": [
       { "name": "home-collapse", "value": "980px" },
       { "name": "search-detail-stack", "value": "900px" },
+      { "name": "auth-stack", "value": "860px" },
+      { "name": "legal-stack", "value": "840px" },
       { "name": "results-single-column", "value": "760px" },
       { "name": "mobile", "value": "680px" },
-      { "name": "detail-mobile", "value": "620px" }
+      { "name": "detail-mobile", "value": "620px" },
+      { "name": "auth-mobile", "value": "620px" },
+      { "name": "legal-mobile", "value": "560px" }
     ]
   },
   "components": [
@@ -104,15 +112,30 @@
       "description": "Palabras Kichwa translúcidas, exclusivas del fondo de Inicio.",
       "html": "<div class=\"ds-lexemes\"><span>alli</span><span>yaku</span><span>wasi</span></div>",
       "css": ".ds-lexemes { position:relative; overflow:hidden; min-height:180px; background:#151f38; } .ds-lexemes span { position:absolute; color:#fff; font:750 clamp(1.2rem,2.8vw,2.8rem) Inter,sans-serif; opacity:.055; animation:ds-lexeme-current 17s ease-in-out infinite alternate; } .ds-lexemes span:nth-child(1){top:18%;left:7%}.ds-lexemes span:nth-child(2){top:13%;left:78%;animation-duration:21s}.ds-lexemes span:nth-child(3){top:72%;left:61%;animation-duration:19s}@keyframes ds-lexeme-current{0%{transform:translate3d(-.8rem,.6rem,0);opacity:.035}50%{opacity:.085}100%{transform:translate3d(1.2rem,-.8rem,0);opacity:.045}}@media(prefers-reduced-motion:reduce){.ds-lexemes span{animation:none}}"
+    },
+    {
+      "name": "Trust Access Frame",
+      "kind": "custom",
+      "description": "Una sola superficie elevada divide orientación azul y tarea de cuenta sobre papel frío.",
+      "html": "<section class=\"ds-auth-frame\"><aside class=\"ds-auth-orientation\"><a href=\"#\">Diccionario Kichwa</a><h2>Tu aprendizaje continúa aquí.</h2><p>Conserva tus palabras favoritas y tu progreso.</p><span aria-hidden=\"true\">yachay</span></aside><form class=\"ds-auth-panel\"><h3>Iniciar sesión</h3><label>Usuario o correo<input type=\"email\" placeholder=\"tu@correo.ec\"></label><label>Contraseña<input type=\"password\"></label><button type=\"button\">Entrar a mi cuenta</button></form></section>",
+      "css": ".ds-auth-frame{display:grid;grid-template-columns:minmax(220px,.84fr) minmax(320px,1.16fr);overflow:hidden;max-width:760px;color:#142923;background:#fcfdfa;border-radius:16px;box-shadow:0 22px 54px rgba(13,32,27,.16);font-family:Inter,sans-serif}.ds-auth-orientation{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;padding:2rem;overflow:hidden;color:#fff;background:#151f38}.ds-auth-orientation a{position:relative;z-index:1;color:#fff;font-weight:780}.ds-auth-orientation h2{position:relative;z-index:1;max-width:12ch;margin:2.5rem 0 .75rem;font-size:clamp(2rem,5vw,3.4rem);font-weight:790;line-height:.98;letter-spacing:-.04em}.ds-auth-orientation p{position:relative;z-index:1;margin:0;color:#dbe4e0;line-height:1.6}.ds-auth-orientation>span{position:absolute;right:-1rem;bottom:1rem;color:rgba(255,255,255,.055);font-size:6rem;font-weight:800;transform:rotate(-7deg);animation:ds-auth-lexeme 18s ease-in-out infinite alternate}.ds-auth-panel{display:grid;gap:1rem;padding:2rem}.ds-auth-panel h3{margin:0;font-size:1.8rem;letter-spacing:-.03em}.ds-auth-panel label{display:grid;gap:.4rem;font-size:.88rem;font-weight:730}.ds-auth-panel input{min-height:48px;padding:.72rem .82rem;color:#142923;background:#fff;border:1px solid #bcc8c3;border-radius:10px;font:1rem Inter,sans-serif;transition:border-color 150ms ease,box-shadow 150ms ease}.ds-auth-panel input:focus{border-color:#17684d;box-shadow:0 0 0 3px rgba(23,104,77,.15);outline:0}.ds-auth-panel button{min-height:46px;padding:.68rem 1rem;color:#fff;background:#17684d;border:1px solid #17684d;border-radius:10px;font-weight:760;transition:background-color 150ms ease}.ds-auth-panel button:hover{background:#0f533c}.ds-auth-panel button:focus-visible{outline:3px solid #e0ad49;outline-offset:3px}@keyframes ds-auth-lexeme{to{transform:translate3d(-1.1rem,-.7rem,0) rotate(-7deg)}}@media(max-width:620px){.ds-auth-frame{grid-template-columns:1fr;border-radius:0;box-shadow:none}.ds-auth-orientation,.ds-auth-panel{padding:1.35rem}.ds-auth-orientation>span{display:none}}@media(prefers-reduced-motion:reduce){.ds-auth-orientation>span{animation:none}.ds-auth-panel input,.ds-auth-panel button{transition-duration:.01ms}}"
+    },
+    {
+      "name": "Legal Reading Surface",
+      "kind": "custom",
+      "description": "Índice plano y hoja legal elevada organizan lectura extensa sin competir por profundidad.",
+      "html": "<article class=\"ds-legal-layout\"><aside class=\"ds-legal-index\"><strong>En esta página</strong><nav aria-label=\"Índice\"><a class=\"is-active\" href=\"#\" aria-current=\"location\">Alcance</a><a href=\"#\">Tu cuenta</a><a href=\"#\">Contenido</a></nav></aside><section class=\"ds-legal-document\"><p class=\"ds-legal-summary\">Resumen: puedes consultar el diccionario sin una cuenta.</p><h2>1. Alcance del servicio</h2><p>La información se presenta con lenguaje directo, estructura visible y una longitud de línea serena.</p></section></article>",
+      "css": ".ds-legal-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:1.5rem;align-items:start;max-width:760px;color:#142923;background:#eef2ef;padding:1.5rem;font-family:Inter,sans-serif}.ds-legal-index{padding:1rem;background:#f7faf7;border:1px solid #d9ded8;border-radius:14px}.ds-legal-index strong{display:block;margin-bottom:.7rem;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}.ds-legal-index nav{display:grid;gap:.18rem}.ds-legal-index a{display:flex;align-items:center;min-height:44px;padding:.5rem .65rem;color:#52645f;border-radius:8px;text-decoration:none;transition:color 150ms ease,background-color 150ms ease}.ds-legal-index a:hover,.ds-legal-index a.is-active{color:#0f533c;background:#e7f0ec}.ds-legal-index a:focus-visible{outline:3px solid #e0ad49;outline-offset:3px}.ds-legal-document{min-width:0;padding:2rem;background:#fcfdfa;border-radius:16px;box-shadow:0 18px 42px rgba(13,32,27,.12)}.ds-legal-summary{margin:0 0 2rem;padding:1rem 1.1rem;color:#304b42;background:#edf4f1;border-radius:12px;line-height:1.6}.ds-legal-document h2{margin:0 0 .9rem;font-size:1.6rem;letter-spacing:-.025em}.ds-legal-document p{max-width:72ch;color:#3d514b;line-height:1.72}@media(max-width:560px){.ds-legal-layout{grid-template-columns:1fr;padding:1rem 0 0}.ds-legal-index{margin:0 1rem}.ds-legal-document{padding:1.5rem 1rem;border-radius:0;box-shadow:none}}@media(prefers-reduced-motion:reduce){.ds-legal-index a{transition-duration:.01ms}}"
     }
   ],
   "narrative": {
     "northStar": "Mesa de consulta viva",
-    "overview": "La interfaz se comporta como una mesa de consulta lingüística: ofrece amplitud para comparar vocabulario, calma para leer una entrada y señales suficientes para entender de dónde viene cada relación. La identidad nace del azul noche, el verde bosque, el ocre y los papeles fríos; el contenido bilingüe, no la decoración, lleva el peso expresivo.\n\nInicio, resultados y detalle comparten una densidad deliberada y una jerarquía compacta. Las palabras Kichwa ambientales pertenecen exclusivamente al Inicio; las categorías tiñen fichas y etiquetas con baja intensidad; el detalle prioriza equivalencia, significado y evidencia relacional sin contenedores vacíos.",
+    "overview": "La interfaz se comporta como una mesa de consulta lingüística: ofrece amplitud para comparar vocabulario, calma para leer una entrada y señales suficientes para entender de dónde viene cada relación. La identidad nace del azul noche, el verde bosque, el ocre y los papeles fríos; el contenido bilingüe, no la decoración, lleva el peso expresivo.\n\nInicio, resultados, detalle y recorridos de confianza comparten una densidad deliberada y una jerarquía compacta. El Inicio puede desplegar un campo de palabras Kichwa ambientales; autenticación limita ese recurso a un solo lexema fantasma dentro de su panel de orientación. Las categorías tiñen fichas y etiquetas con baja intensidad; el detalle y los documentos legales priorizan lectura continua sin contenedores vacíos.",
     "keyCharacteristics": [
       "Azul noche estructural, verde bosque operativo y ocre Kichwa dosificado.",
       "Superficies de papel frío con tintes semánticos de categoría y dificultad.",
       "Comparación compacta en resultados y lectura serena en detalle.",
+      "Acceso y registro reúnen orientación y tarea en un solo marco; los documentos legales separan índice y lectura sin perder continuidad.",
       "Movimiento de continuidad breve, cancelable y limitado a transformación y opacidad.",
       "Relaciones acompañadas por una razón visible; nunca se rellenan al azar."
     ],
@@ -121,6 +144,7 @@
       { "name": "The Ocher Measure Rule", "body": "El ocre señala identidad y orientación, pero no compite con el verde reservado para actuar.", "section": "colors" },
       { "name": "The Word Leads Rule", "body": "En una ficha, la palabra Kichwa y su equivalencia preceden a los metadatos y acciones.", "section": "typography" },
       { "name": "The Context Density Rule", "body": "Resultados compara en unidades compactas; detalle reduce la densidad y reserva ancho continuo para significado y notas.", "section": "layout" },
+      { "name": "The Trust Surface Rule", "body": "Autenticación reúne contexto y formulario dentro de un solo marco; los documentos legales mantienen el índice fuera de la única hoja elevada para que la lectura conserve prioridad.", "section": "layout" },
       { "name": "The One Resting Elevation Rule", "body": "Cada vista usa como máximo una elevación persistente; el resto de la jerarquía se resuelve con papel, línea y tinte.", "section": "elevation" }
     ],
     "dos": [
@@ -128,10 +152,11 @@
       "Do tintar fichas de resultado y relación con el color real de su categoría a baja intensidad.",
       "Do mantener resultados en dos columnas compactas y pasarlos a una a 760px.",
       "Do mostrar una razón visible para cada palabra relacionada.",
+      "Do reunir orientación y tarea en una sola superficie elevada en los recorridos de cuenta, y dejar plano el índice de los documentos legales.",
       "Do respetar View Transitions y prefers-reduced-motion como un mismo contrato de continuidad."
     ],
     "donts": [
-      "Don't usar palabras Kichwa ambientales fuera del Inicio.",
+      "Don't extender el campo de palabras Kichwa fuera del Inicio ni usar más de un lexema fantasma en la orientación de autenticación.",
       "Don't mantener más de una elevación persistente por vista.",
       "Don't convertir colores de categoría en fondos saturados o bloques decorativos dominantes.",
       "Don't presentar relaciones sin explicación ni rellenar espacios con coincidencias al azar.",

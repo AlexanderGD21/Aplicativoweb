@@ -104,13 +104,14 @@ components:
 
 La interfaz se comporta como una mesa de consulta lingüística: ofrece amplitud para comparar vocabulario, calma para leer una entrada y señales suficientes para entender de dónde viene cada relación. La identidad nace del azul noche, el verde bosque, el ocre y los papeles fríos; el contenido bilingüe, no la decoración, lleva el peso expresivo.
 
-Inicio, resultados y detalle comparten una densidad deliberada y una jerarquía compacta. Las palabras Kichwa ambientales pertenecen exclusivamente al Inicio; las categorías tiñen fichas y etiquetas con baja intensidad; el detalle prioriza equivalencia, significado y evidencia relacional sin contenedores vacíos.
+Inicio, resultados, detalle y recorridos de confianza comparten una densidad deliberada y una jerarquía compacta. El Inicio puede desplegar un campo de palabras Kichwa ambientales; autenticación limita ese recurso a un solo lexema fantasma dentro de su panel de orientación. Las categorías tiñen fichas y etiquetas con baja intensidad; el detalle y los documentos legales priorizan lectura continua sin contenedores vacíos.
 
 **Key Characteristics:**
 
 - Azul noche estructural, verde bosque operativo y ocre Kichwa dosificado.
 - Superficies de papel frío con tintes semánticos de categoría y dificultad.
 - Comparación compacta en resultados y lectura serena en detalle.
+- Acceso y registro reúnen orientación y tarea en un solo marco; los documentos legales separan índice y lectura sin perder continuidad.
 - Movimiento de continuidad breve, cancelable y limitado a transformación y opacidad.
 - Relaciones acompañadas por una razón visible; nunca se rellenan al azar.
 
@@ -165,20 +166,24 @@ La paleta combina una base fría y sobria con dos acentos funcionales; los color
 
 ## Layout
 
-La retícula usa contenedores Bootstrap como marco y CSS propio para la composición. Inicio abre en dos columnas con una demostración de búsqueda y una entrada; resultados forman una cuadrícula compacta de dos columnas que pasa a una a 760px; el detalle combina lectura (`1.55fr`) y rail (`0.55fr`) hasta 900px, cuando ambos se apilan. El Inicio reorganiza su hero y corpus a 980px y completa el apilado móvil a 680px; el detalle completa su adaptación a 620px.
+La retícula usa contenedores Bootstrap como marco y CSS propio para la composición. Inicio abre en dos columnas con una demostración de búsqueda y una entrada; resultados forman una cuadrícula compacta de dos columnas que pasa a una a 760px; el detalle combina lectura (`1.55fr`) y rail (`0.55fr`) hasta 900px, cuando ambos se apilan. Acceso y registro dividen orientación y tarea hasta 860px; los documentos legales combinan un índice de 250px y lectura flexible hasta 840px. El Inicio completa su apilado móvil a 680px, autenticación y detalle a 620px, y la lectura legal se aplana a 560px.
 
 Los objetivos interactivos mantienen un mínimo de 44px. La separación crece de controles compactos a secciones amplias usando la escala de `0.25rem` a `3rem`; los bloques de lectura evitan anchos fijos y las definiciones se mantienen entre 68 y 72 caracteres por línea.
 
 **The Context Density Rule.** Resultados compara en unidades compactas; detalle reduce la densidad y reserva ancho continuo para significado y notas.
 
+**The Trust Surface Rule.** Autenticación reúne contexto y formulario dentro de un solo marco; los documentos legales mantienen el índice fuera de la única hoja elevada para que la lectura conserve prioridad.
+
 ## Elevation & Depth
 
-El sistema es plano por defecto y separa planos mediante tono, borde y tinte. Cada vista admite una sola superficie elevada en reposo: la demostración de búsqueda en Inicio o el banco de búsqueda en resultados. Menús de sugerencias, foco y transiciones son estados temporales, no una segunda capa permanente.
+El sistema es plano por defecto y separa planos mediante tono, borde y tinte. Cada vista admite una sola superficie elevada en reposo: la demostración de búsqueda en Inicio, el banco de búsqueda en resultados, el marco indivisible de autenticación o la hoja de lectura legal. Menús, índices, foco y transiciones son estados temporales o superficies planas, no una segunda capa permanente.
 
 ### Shadow Vocabulary
 
 - **Banco de búsqueda** (`box-shadow: 0 18px 42px rgba(13, 32, 27, 0.14)`): única elevación en reposo de la vista de resultados.
 - **Búsqueda de Inicio** (`box-shadow: 0 18px 42px rgba(3, 15, 12, 0.24)`): única elevación en reposo sobre el hero azul noche.
+- **Marco de acceso** (`box-shadow: 0 22px 54px rgba(13, 32, 27, 0.16)`): une orientación y tarea como una sola puerta de entrada.
+- **Hoja legal** (`box-shadow: 0 18px 42px rgba(13, 32, 27, 0.12)`): eleva únicamente el documento; el índice permanece plano.
 
 ### Named Rules
 
@@ -218,11 +223,19 @@ Los controles usan esquinas contenidas (`10px`), las fichas y rails usan curvas 
 
 ### Navigation
 
-Enlaces de avance y retorno usan verde bosque, peso alto y objetivos de 44px. View Transitions aporta continuidad entre páginas cuando está disponible; la llegada alternativa dura 240ms y `prefers-reduced-motion` reduce animaciones y transiciones a 0.01ms.
+Enlaces de avance y retorno usan verde bosque, peso alto y objetivos de 44px. El índice legal mantiene el mismo mínimo, usa fondo verde pálido para el apartado activo y comunica la ubicación con `aria-current`. View Transitions aporta continuidad entre páginas cuando está disponible; la llegada alternativa dura 240ms y `prefers-reduced-motion` reduce animaciones y transiciones a 0.01ms.
 
-### Ambient Lexeme Field
+### Ambient Lexeme Accent
 
-Sólo el Inicio puede usar palabras Kichwa translúcidas en el fondo azul noche. Se mueven lentamente con opacidad de `0.035–0.085`, duraciones observadas de `17–23s` y se detienen por completo con movimiento reducido.
+El Inicio puede usar un campo de palabras Kichwa translúcidas sobre azul noche, con opacidad de `0.035–0.085` y duraciones de `17–23s`. Las pantallas de autenticación admiten un solo lexema grande, tenue y recortado dentro del panel azul, con deriva de 18s. Ambos se detienen por completo con movimiento reducido.
+
+### Trust Access Frame
+
+Acceso, registro, recuperación y estados de cuenta comparten un marco de papel frío dividido entre orientación azul noche y tarea. Los formularios usan campos de 48px, botones de al menos 46px, errores próximos al control y agrupaciones compactas; en móvil el marco pierde radio y sombra para convertirse en una sola lectura vertical.
+
+### Legal Reading Surface
+
+Términos y Privacidad abren con un masthead azul noche y continúan en una retícula de índice más documento. El índice es plano y adhesivo sólo cuando hay espacio; la hoja de papel frío concentra la única elevación, limita la prosa a 72 caracteres y usa divisores, resúmenes verdes y llamados ocres para estructurar sin ornamentar.
 
 ### Entry Reading + Rail
 
@@ -236,11 +249,12 @@ El detalle abre con un masthead compacto y distribuye definición y notas a la i
 - **Do** tintar fichas de resultado y relación con el color real de su categoría a baja intensidad.
 - **Do** mantener resultados en dos columnas compactas y pasarlos a una a 760px.
 - **Do** mostrar una razón visible para cada palabra relacionada.
+- **Do** reunir orientación y tarea en una sola superficie elevada en los recorridos de cuenta, y dejar plano el índice de los documentos legales.
 - **Do** respetar View Transitions y `prefers-reduced-motion` como un mismo contrato de continuidad.
 
 ### Don't:
 
-- **Don't** usar palabras Kichwa ambientales fuera del Inicio.
+- **Don't** extender el campo de palabras Kichwa fuera del Inicio ni usar más de un lexema fantasma en la orientación de autenticación.
 - **Don't** mantener más de una elevación persistente por vista.
 - **Don't** convertir colores de categoría en fondos saturados o bloques decorativos dominantes.
 - **Don't** presentar relaciones sin explicación ni rellenar espacios con coincidencias al azar.
