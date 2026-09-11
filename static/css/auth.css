@@ -36,7 +36,7 @@
 }
 
 .auth-frame--register {
-  grid-template-columns: minmax(280px, 0.72fr) minmax(560px, 1.28fr);
+  grid-template-columns: minmax(360px, 0.82fr) minmax(560px, 1.18fr);
 }
 
 .auth-orientation {
@@ -97,6 +97,11 @@
   line-height: 0.98;
   letter-spacing: -0.04em;
   text-wrap: balance;
+}
+
+.auth-frame--register .auth-orientation h1 {
+  max-width: 11ch;
+  font-size: clamp(2.25rem, 4vw, 3.35rem);
 }
 
 .auth-orientation p {
@@ -474,6 +479,30 @@
 .auth-orientation ::selection {
   color: var(--auth-night);
   background: #efd48f;
+}
+
+@media (max-width: 980px) {
+  .auth-frame--register {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-frame--register .auth-orientation {
+    min-height: auto;
+    padding: 1.8rem 2rem;
+  }
+
+  .auth-frame--register .auth-orientation-copy {
+    margin: 2rem 0 1.5rem;
+  }
+
+  .auth-frame--register .auth-orientation h1 {
+    max-width: 16ch;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+  }
+
+  .auth-frame--register .auth-benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 860px) {
