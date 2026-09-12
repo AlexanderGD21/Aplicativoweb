@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 from io import StringIO
 
 from django.contrib.auth.models import User
@@ -8,12 +9,14 @@ from django.core.management import call_command
 from django.db.models.deletion import ProtectedError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import (
-    Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
+    BusquedaPopularDiaria, Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
     ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
 )
 from .models import PalabraFavorita
+from apps.usuarios.models import PerfilUsuario
 from .services.clasificacion import (
     calcular_dificultad_pronunciacion,
     clasificar_textos,
@@ -53,6 +56,36 @@ class DiccionarioTests(TestCase):
         historial = HistorialBusqueda.objects.get(usuario=usuario)
         self.assertEqual(historial.termino_buscado, 'Yaku')
         self.assertEqual(historial.resultados_encontrados, 2)
+
+    def test_tendencia_se_cuenta_solo_para_entrada_exacta_y_sin_paginacion(self):
+        url = reverse('diccionario:buscar')
+        self.client.get(url, {'termino': 'Yaku'})
+        self.client.get(url, {'termino': 'agua'})
+        self.client.get(url, {'termino': 'yak'})
+        self.client.get(url, {'termino': 'Yaku', 'page': '2'})
+        conteo = BusquedaPopularDiaria.objects.get(palabra=self.palabra)
+        self.assertEqual(conteo.consultas, 2)
+        self.assertEqual(HistorialBusqueda.objects.count(), 0)
+
+        BusquedaPopularDiaria.objects.create(
+            palabra=self.misi, fecha=timezone.localdate() - timedelta(days=7), consultas=90,
+        )
+        inicio = self.client.get(reverse('diccionario:home'))
+        self.assertEqual(inicio.context['tendencias'][0]['palabra'], self.palabra)
+        self.assertEqual(inicio.context['tendencias'][0]['consultas'], 2)
+        self.assertNotIn(self.misi, [item['palabra'] for item in inicio.context['tendencias']])
+
+    def test_ranking_solo_incluye_cuentas_activas_con_participacion_voluntaria(self):
+        visible = User.objects.create_user('amaru', password='clave-segura-123')
+        privado = User.objects.create_user('killa', password='clave-segura-123')
+        inactivo = User.objects.create_user('inti', password='clave-segura-123', is_active=False)
+        PerfilUsuario.objects.filter(usuario=visible).update(puntos_totales=20, participa_ranking=True)
+        PerfilUsuario.objects.filter(usuario=privado).update(puntos_totales=90)
+        PerfilUsuario.objects.filter(usuario=inactivo).update(puntos_totales=100, participa_ranking=True)
+        respuesta = self.client.get(reverse('diccionario:home'))
+        self.assertEqual([item.usuario.username for item in respuesta.context['ranking']], ['amaru'])
+        self.assertContains(respuesta, 'amaru')
+        self.assertNotContains(respuesta, 'killa</span>')
 
     def test_detalle_incrementa_vistas(self):
         self.client.get(self.palabra.get_absolute_url())
@@ -331,6 +364,23 @@ class DiccionarioTests(TestCase):
         self.assertEqual(estadistica.respuestas_correctas, 1)
         self.assertEqual(estadistica.respuestas_totales, 1)
         self.assertEqual(SesionJuego.objects.get(id=sesion_id).estadistica, estadistica)
+
+    def test_primer_acierto_suma_puntos_una_sola_vez_por_palabra(self):
+        usuario = User.objects.create_user('urku', password='clave-segura-123')
+        self.client.force_login(usuario)
+        respuesta_url = reverse('diccionario:registrar_respuesta_juego')
+        for _ in range(2):
+            juego = self.client.get(reverse('diccionario:juego_completar'), {
+                'categoria': self.animales.slug, 'dificultad': 'medio',
+            })
+            respuesta = self.client.post(respuesta_url, data=json.dumps({
+                'sesion_id': juego.context['sesion_id'], 'tipo_juego': 'completar',
+                'palabra_id': self.misi.pk, 'respuesta': 'Misi',
+            }), content_type='application/json')
+            self.assertEqual(respuesta.status_code, 200)
+            self.assertEqual(respuesta.json()['puntos_ganados'], 10 if _ == 0 else 0)
+        perfil = PerfilUsuario.objects.get(usuario=usuario)
+        self.assertEqual(perfil.puntos_totales, 10)
 
     def test_seleccion_prioriza_palabras_nuevas_sobre_dominadas(self):
         usuario = User.objects.create_user('killa', password='contrasena-segura-123')

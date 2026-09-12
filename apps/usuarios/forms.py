@@ -233,7 +233,7 @@ class PerfilUsuarioForm(forms.ModelForm):
         fields = [
             'fecha_nacimiento', 'genero', 'ciudad', 'pais', 'telefono',
             'nivel_kichwa', 'biografia', 'avatar', 
-            'notificaciones_email', 'perfil_publico'
+            'notificaciones_email', 'perfil_publico', 'participa_ranking'
         ]
         widgets = {
             'fecha_nacimiento': forms.DateInput(attrs={
@@ -273,6 +273,17 @@ class PerfilUsuarioForm(forms.ModelForm):
             'perfil_publico': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
+            'participa_ranking': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+        labels = {
+            'participa_ranking': 'Mostrar mi usuario y puntos en el ranking público',
+        }
+
+        help_texts = {
+            'participa_ranking': 'Opcional. Puedes dejar de aparecer desmarcando esta opción cuando quieras.',
         }
 
     def clean_avatar(self):

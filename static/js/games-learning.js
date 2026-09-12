@@ -234,7 +234,10 @@
     if (result.correcta) {
       correct += 1;
       streak += 1;
-      showFeedback(true, 'Respuesta correcta.', result.progreso_guardado ? 'El avance de esta palabra quedó guardado.' : 'Puedes continuar con la siguiente.');
+      const detail = result.puntos_ganados
+        ? `¡Sumaste ${result.puntos_ganados} puntos por aprender esta palabra!`
+        : (result.progreso_guardado ? 'Tu avance quedó guardado. Esta palabra ya sumó puntos antes.' : 'Puedes continuar con la siguiente.');
+      showFeedback(true, 'Respuesta correcta.', detail);
       playSound('correct');
     } else {
       streak = 0;

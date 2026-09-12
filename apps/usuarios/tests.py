@@ -1,10 +1,11 @@
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.cache import cache
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .forms import UserForm
+from .forms import PerfilUsuarioForm, UserForm
 from .models import PerfilUsuario
 
 
@@ -54,6 +55,19 @@ class PerfilYProgresoTests(TestCase):
     def test_perfil_y_progreso_usan_la_relacion_correcta(self):
         self.assertTrue(PerfilUsuario.objects.filter(usuario=self.usuario).exists())
         self.assertEqual(self.client.get(reverse('usuarios:perfil')).status_code, 200)
+
+    def test_participacion_en_ranking_es_independiente_y_desactivada_por_defecto(self):
+        perfil = self.usuario.perfil
+        self.assertFalse(perfil.participa_ranking)
+        self.assertFalse(perfil.perfil_publico)
+        formulario = PerfilUsuarioForm({
+            'participa_ranking': 'on', 'nivel_kichwa': 'principiante',
+        }, instance=perfil)
+        self.assertTrue(formulario.is_valid(), formulario.errors)
+        formulario.save()
+        perfil.refresh_from_db()
+        self.assertTrue(perfil.participa_ranking)
+        self.assertFalse(perfil.perfil_publico)
 
     def test_cambio_de_correo_exige_la_contrasena_actual(self):
         self.usuario.email = 'sisa@example.test'
@@ -125,7 +139,7 @@ class RegistroYSesionTests(TestCase):
         usuario = User.objects.get(email='killa@example.test')
         self.assertIsNotNone(usuario.perfil.terminos_aceptados_en)
         self.assertEqual(usuario.perfil.version_terminos, '2026-09-10')
-        self.assertEqual(usuario.perfil.version_privacidad, '2026-09-10')
+        self.assertEqual(usuario.perfil.version_privacidad, settings.LEGAL_PRIVACY_VERSION)
         self.assertFalse(usuario.perfil.notificaciones_email)
 
         respuesta = self.client.post(
@@ -237,5 +251,6 @@ class CuentaYLegalTests(TestCase):
             with self.subTest(ruta=ruta):
                 respuesta = self.client.get(reverse(f'usuarios:{ruta}'))
                 self.assertEqual(respuesta.status_code, 200)
-                self.assertContains(respuesta, '2026-09-10')
+                version = settings.LEGAL_TERMS_VERSION if ruta == 'terminos' else settings.LEGAL_PRIVACY_VERSION
+                self.assertContains(respuesta, version)
                 self.assertContains(respuesta, reverse('diccionario:home'))

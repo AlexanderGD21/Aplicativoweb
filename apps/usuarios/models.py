@@ -29,6 +29,7 @@ class PerfilUsuario(models.Model):
     racha_dias = models.PositiveIntegerField(default=0)
     notificaciones_email = models.BooleanField(default=False)
     perfil_publico = models.BooleanField(default=False)
+    participa_ranking = models.BooleanField(default=False)
     terminos_aceptados_en = models.DateTimeField(null=True, blank=True)
     version_terminos = models.CharField(max_length=20, blank=True)
     version_privacidad = models.CharField(max_length=20, blank=True)

@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -242,6 +243,21 @@ class HistorialBusqueda(models.Model):
     def __str__(self):
         usuario_str = self.usuario.username if self.usuario else 'Anónimo'
         return f"{usuario_str} buscó: {self.termino_buscado}"
+
+
+class BusquedaPopularDiaria(models.Model):
+    """Conteo agregado de búsquedas exactas; no almacena la identidad de quien consulta."""
+
+    palabra = models.ForeignKey(Palabra, on_delete=models.CASCADE, related_name='busquedas_populares')
+    fecha = models.DateField(default=timezone.localdate, db_index=True)
+    consultas = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Búsqueda popular diaria'
+        verbose_name_plural = 'Búsquedas populares diarias'
+        constraints = [
+            models.UniqueConstraint(fields=['palabra', 'fecha'], name='busqueda_popular_palabra_fecha'),
+        ]
 
 class EstadisticaJuego(models.Model):
     TIPO_JUEGO_CHOICES = [

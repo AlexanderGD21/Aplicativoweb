@@ -1,6 +1,7 @@
 import json
 import logging
 import unicodedata
+from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -9,11 +10,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Case, Count, F, IntegerField, Q, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from .models import (
     Categoria,
+    BusquedaPopularDiaria,
     EstadisticaJuego,
     HistorialBusqueda,
     IntentoPalabraJuego,
@@ -32,6 +34,7 @@ from .services.juegos import (
     resumen_progreso,
     seleccionar_palabras_juego,
 )
+from apps.usuarios.models import PerfilUsuario
 
 
 logger = logging.getLogger(__name__)
@@ -149,6 +152,22 @@ def home(request):
         total_palabras = Palabra.objects.filter(activa=True).count()
         total_categorias = Categoria.objects.count()
         total_busquedas = HistorialBusqueda.objects.count()
+        ranking = PerfilUsuario.objects.select_related('usuario').filter(
+            participa_ranking=True, puntos_totales__gt=0, usuario__is_active=True,
+        ).order_by('-puntos_totales', 'usuario__username')[:5]
+        inicio_semana = timezone.localdate() - timedelta(days=6)
+        conteos_populares = list(BusquedaPopularDiaria.objects.filter(
+            fecha__gte=inicio_semana, palabra__activa=True,
+        ).values('palabra_id').annotate(total=Sum('consultas')).order_by(
+            '-total', 'palabra__palabra_kichwa', 'palabra_id',
+        )[:5])
+        palabras_populares = Palabra.objects.in_bulk(
+            item['palabra_id'] for item in conteos_populares
+        )
+        tendencias = [
+            {'palabra': palabras_populares[item['palabra_id']], 'consultas': item['total']}
+            for item in conteos_populares if item['palabra_id'] in palabras_populares
+        ]
         
         context = {
             'palabras_destacadas': palabras_destacadas,
@@ -158,6 +177,8 @@ def home(request):
             'total_categorias': total_categorias,
             'total_usuarios': User.objects.count(),
             'total_busquedas': total_busquedas,
+            'ranking': ranking,
+            'tendencias': tendencias,
         }
         
         return render(request, 'diccionario/home.html', context)
@@ -170,6 +191,8 @@ def home(request):
             'total_categorias': 0,
             'total_usuarios': 0,
             'total_busquedas': 0,
+            'ranking': [],
+            'tendencias': [],
             'error': str(e)
         }
         return render(request, 'diccionario/home.html', context)
@@ -215,12 +238,23 @@ def buscar(request):
     ).filter(total_palabras__gt=0))
     filtros_activos = bool(termino or categoria or dificultad)
 
-    if formulario_valido and termino and request.user.is_authenticated:
-        HistorialBusqueda.objects.create(
-            usuario=request.user,
-            termino_buscado=termino,
-            resultados_encontrados=paginator.count,
-        )
+    if formulario_valido and termino and 'page' not in request.GET:
+        if request.user.is_authenticated:
+            HistorialBusqueda.objects.create(
+                usuario=request.user,
+                termino_buscado=termino,
+                resultados_encontrados=paginator.count,
+            )
+        termino_exacto = normalizar_texto_busqueda(termino)
+        coincidencias_exactas = list(palabras.filter(
+            Q(busqueda_kichwa=termino_exacto) | Q(busqueda_espanol=termino_exacto)
+        ).order_by().values_list('pk', flat=True)[:2])
+        if len(coincidencias_exactas) == 1:
+            with transaction.atomic():
+                conteo, _ = BusquedaPopularDiaria.objects.get_or_create(
+                    palabra_id=coincidencias_exactas[0], fecha=timezone.localdate(),
+                )
+                BusquedaPopularDiaria.objects.filter(pk=conteo.pk).update(consultas=F('consultas') + 1)
     
     context = {
         'form': form,
@@ -727,13 +761,21 @@ def registrar_respuesta_juego(request):
         correcta = respuesta_id == palabra.id
 
     progreso = None
+    puntos_ganados = 0
     if request.user.is_authenticated:
         with transaction.atomic():
             IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabra, correcta=correcta)
             progreso, _ = ProgresoPalabraJuego.objects.select_for_update().get_or_create(
                 usuario=request.user, palabra=palabra,
             )
+            primer_acierto = correcta and progreso.respuestas_correctas == 0
             progreso.registrar_respuesta(correcta)
+            if primer_acierto:
+                PerfilUsuario.objects.get_or_create(usuario=request.user)
+                PerfilUsuario.objects.filter(usuario=request.user).update(
+                    puntos_totales=F('puntos_totales') + 10,
+                )
+                puntos_ganados = 10
 
     if tipo == 'completar' or data.get('direccion') == 'espanol_kichwa':
         respuesta_correcta = palabra.palabra_kichwa
@@ -747,6 +789,7 @@ def registrar_respuesta_juego(request):
         'progreso_guardado': progreso is not None,
         'dominio': progreso.dominio if progreso else None,
         'racha_palabra': progreso.racha_actual if progreso else 0,
+        'puntos_ganados': puntos_ganados,
     })
 
 

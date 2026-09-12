@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}">
-<link rel="stylesheet" href="{% static 'css/home-refined.css' %}">
+<link rel="stylesheet" href="{% static 'css/home-refined.css' %}?v=20260912-1">
 {% endblock %}
 
 {% block content %}
@@ -98,6 +98,51 @@
                     <i class="fas fa-arrow-right" aria-hidden="true"></i>
                 </a>
                 {% empty %}<p>No hay temas disponibles todavía.</p>{% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="home-section community-section" aria-labelledby="community-title">
+        <div class="container">
+            <div class="home-section-heading">
+                <div>
+                    <h2 id="community-title">Aprender en comunidad</h2>
+                    <p>Descubre el progreso compartido y las entradas que más curiosidad despiertan esta semana.</p>
+                </div>
+            </div>
+            <div class="community-grid">
+                <div class="community-list" aria-labelledby="ranking-title">
+                    <div class="community-list-heading">
+                        <h3 id="ranking-title">Ranking de aprendizaje</h3>
+                        <p>10 puntos por cada palabra acertada por primera vez.</p>
+                    </div>
+                    {% if ranking %}
+                    <ol class="community-rows">
+                        {% for perfil in ranking %}
+                        <li><span class="community-position">{{ forloop.counter }}</span><span class="community-name">{{ perfil.usuario.username }}</span><strong>{{ perfil.puntos_totales }} pts</strong></li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}<p class="community-empty">Aún no hay participantes en el ranking. La práctica puede comenzar hoy.</p>{% endif %}
+                    {% if user.is_authenticated %}
+                    <a class="community-action" href="{% url 'usuarios:editar_perfil' %}" data-tooltip="Activar o desactivar tu participación en el ranking">{% if user.perfil.participa_ranking %}Gestionar mi participación{% else %}Unirme al ranking{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    {% else %}
+                    <a class="community-action" href="{% url 'usuarios:registro' %}" data-tooltip="Crear una cuenta para guardar puntos de práctica">Crea una cuenta para sumar puntos <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    {% endif %}
+                </div>
+                <div class="community-list" aria-labelledby="trending-title">
+                    <div class="community-list-heading">
+                        <h3 id="trending-title">Más buscadas de la semana</h3>
+                        <p>Consultas exactas de los últimos siete días; aquí solo mostramos conteos.</p>
+                    </div>
+                    {% if tendencias %}
+                    <ol class="community-rows">
+                        {% for tendencia in tendencias %}
+                        <li><span class="community-position">{{ forloop.counter }}</span><a class="community-name" href="{{ tendencia.palabra.get_absolute_url }}" data-tooltip="Abrir la entrada de {{ tendencia.palabra.palabra_kichwa }}"><strong>{{ tendencia.palabra.palabra_kichwa }}</strong><small>{{ tendencia.palabra.traduccion_espanol|truncatechars:46 }}</small></a><span class="community-count">{{ tendencia.consultas }} {% if tendencia.consultas == 1 %}consulta{% else %}consultas{% endif %}</span></li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}<p class="community-empty">Todavía no hay búsquedas exactas esta semana. Prueba con una palabra en Kichwa o español.</p>{% endif %}
+                    <a class="community-action" href="{% url 'diccionario:buscar' %}" data-tooltip="Explorar palabras en Kichwa o español">Explorar palabras <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
             </div>
         </div>
     </section>

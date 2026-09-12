@@ -407,9 +407,10 @@
                 
                 <div class="profile-stats">
                     <div class="stat-card">
-                        <div class="stat-number">{{ perfil.palabras_aprendidas|default:0 }}</div>
-                        <div class="stat-label">Palabras Aprendidas</div>
+                        <div class="stat-number">{{ perfil.puntos_totales }}</div>
+                        <div class="stat-label">Puntos por palabras nuevas</div>
                     </div>
+                    {% if es_propio %}<small>{% if perfil.participa_ranking %}Apareces en el ranking público.{% else %}Tu puntuación es privada; puedes unirte al ranking desde Editar perfil.{% endif %}</small>{% endif %}
                 </div>
             </div>
         </div>
