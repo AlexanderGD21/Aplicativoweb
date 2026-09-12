@@ -1,4 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const cleanPersonName = (value) => [...value.normalize("NFC").replace(/\s/gu, " ")]
+    .filter((character) => /[\p{L} ]/u.test(character)).join("")
+
+  document.querySelectorAll("#id_first_name, #id_last_name").forEach((field) => {
+    const cleanCurrentValue = () => {
+      const original = field.value
+      const cleaned = cleanPersonName(original)
+      if (cleaned === original) return
+      const start = field.selectionStart ?? original.length
+      const end = field.selectionEnd ?? start
+      field.value = cleaned
+      field.setSelectionRange(cleanPersonName(original.slice(0, start)).length,
+        cleanPersonName(original.slice(0, end)).length)
+    }
+
+    field.addEventListener("beforeinput", (event) => {
+      if (event.isComposing || !event.inputType.startsWith("insert") || !event.data) return
+      const cleaned = cleanPersonName(event.data)
+      if (cleaned === event.data.normalize("NFC") || !event.cancelable) return
+      event.preventDefault()
+      if (cleaned) {
+        field.setRangeText(cleaned, field.selectionStart, field.selectionEnd, "end")
+        field.dispatchEvent(new Event("input", { bubbles: true }))
+      }
+    })
+    field.addEventListener("paste", (event) => {
+      const pasted = event.clipboardData?.getData("text")
+      if (pasted == null) return
+      const cleaned = cleanPersonName(pasted)
+      if (cleaned === pasted) return
+      event.preventDefault()
+      field.setRangeText(cleaned, field.selectionStart, field.selectionEnd, "end")
+      field.dispatchEvent(new Event("input", { bubbles: true }))
+    })
+    field.addEventListener("input", (event) => {
+      if (!event.isComposing) cleanCurrentValue()
+    })
+    field.addEventListener("compositionend", cleanCurrentValue)
+  })
+
   document.querySelectorAll("[data-password-toggle]").forEach((button) => {
     const field = document.getElementById(button.dataset.passwordToggle)
     if (!field) return
