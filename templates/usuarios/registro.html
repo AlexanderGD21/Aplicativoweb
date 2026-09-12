@@ -2,17 +2,13 @@
 {% load static %}
 
 {% block title %}Crear una cuenta | Diccionario Kichwa{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=20260911">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=20260912-2">{% endblock %}
 
 {% block content %}
 <section class="auth-page" aria-labelledby="register-page-title">
   <div class="auth-wrap">
     <div class="auth-frame auth-frame--register">
       <aside class="auth-orientation">
-        <a class="auth-brand" href="{% url 'diccionario:home' %}" data-tooltip="Volver al inicio sin crear una cuenta">
-          <i class="fas fa-book" aria-hidden="true"></i>
-          <span>Diccionario Kichwa</span>
-        </a>
         <div class="auth-orientation-copy">
           <h1 id="register-page-title">Crea tu espacio de aprendizaje.</h1>
           <p>Los datos obligatorios permiten identificar tu cuenta y recuperarla. La información del perfil puede completarse después.</p>
@@ -41,12 +37,14 @@
             <div class="auth-field{% if form.first_name.errors %} has-error{% endif %}">
               <label for="{{ form.first_name.id_for_label }}">Nombre</label>
               {{ form.first_name }}
-              {% for error in form.first_name.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
+              <span class="auth-help" id="first-name-help">Solo letras y espacios.</span>
+              {% for error in form.first_name.errors %}<span class="auth-error" id="first-name-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.last_name.errors %} has-error{% endif %}">
               <label for="{{ form.last_name.id_for_label }}">Apellido</label>
               {{ form.last_name }}
-              {% for error in form.last_name.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
+              <span class="auth-help" id="last-name-help">Solo letras y espacios.</span>
+              {% for error in form.last_name.errors %}<span class="auth-error" id="last-name-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.username.errors %} has-error{% endif %}">
               <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>

@@ -1,3 +1,5 @@
+import unicodedata
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
@@ -6,12 +8,12 @@ from .models import PerfilUsuario
 
 
 def _limpiar_nombre_persona(valor, etiqueta):
-    valor = ' '.join(valor.split())
+    valor = ' '.join(unicodedata.normalize('NFC', valor).split())
     if not valor:
         raise forms.ValidationError(f'Ingresa tu {etiqueta.lower()}.')
-    if not all(caracter.isalpha() or caracter in " '-" for caracter in valor):
+    if not all(caracter.isalpha() or caracter == ' ' for caracter in valor):
         raise forms.ValidationError(
-            f'El {etiqueta.lower()} solo puede contener letras, espacios, apóstrofes o guiones.'
+            f'El {etiqueta.lower()} solo puede contener letras y espacios.'
         )
     return valor
 
@@ -82,7 +84,9 @@ class RegistroForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Tu nombre',
             'autocomplete': 'given-name',
-            'data-tooltip': 'Escribe tu nombre como quieres que aparezca en tu perfil',
+            'pattern': r'[\p{L} ]+',
+            'title': 'Usa solo letras y espacios.',
+            'data-tooltip': 'Usa solo letras y espacios; puedes incluir tildes',
         })
     )
     last_name = forms.CharField(
@@ -92,7 +96,9 @@ class RegistroForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Tu apellido',
             'autocomplete': 'family-name',
-            'data-tooltip': 'Este dato ayuda a identificar tu cuenta',
+            'pattern': r'[\p{L} ]+',
+            'title': 'Usa solo letras y espacios.',
+            'data-tooltip': 'Usa solo letras y espacios; puedes incluir tildes',
         })
     )
 
@@ -112,6 +118,8 @@ class RegistroForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        for campo, ayuda in (('first_name', 'first-name-help'), ('last_name', 'last-name-help')):
+            self.fields[campo].widget.attrs['aria-describedby'] = ayuda
         self.fields['username'].widget.attrs['aria-describedby'] = 'username-help'
         self.fields['email'].widget.attrs['aria-describedby'] = 'email-help'
         self.fields['password1'].widget.attrs.update({
@@ -133,6 +141,9 @@ class RegistroForm(UserCreationForm):
             for nombre in self.errors:
                 if nombre in self.fields:
                     self.fields[nombre].widget.attrs['aria-invalid'] = 'true'
+                    if nombre in ('first_name', 'last_name'):
+                        descritos = self.fields[nombre].widget.attrs['aria-describedby']
+                        self.fields[nombre].widget.attrs['aria-describedby'] = f'{descritos} {nombre.replace("_", "-")}-error'
 
     def clean_username(self):
         username = self.cleaned_data['username'].strip()

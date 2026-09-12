@@ -5,7 +5,7 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .forms import PerfilUsuarioForm, UserForm
+from .forms import PerfilUsuarioForm, RegistroForm, UserForm
 from .models import PerfilUsuario
 
 
@@ -156,6 +156,30 @@ class RegistroYSesionTests(TestCase):
         registro = self.client.get(reverse('usuarios:registro'))
         self.assertContains(registro, 'data-tooltip="Elige el nombre con el que iniciarás sesión')
         self.assertContains(registro, 'data-tooltip="Validar los datos y crear tu cuenta')
+        self.assertContains(registro, 'id="first-name-help">Solo letras y espacios.')
+        self.assertContains(registro, 'id="last-name-help">Solo letras y espacios.')
+        self.assertNotContains(registro, 'class="auth-brand"')
+
+    def test_nombre_y_apellido_admiten_letras_y_espacios_sin_numeros_ni_simbolos(self):
+        formulario = RegistroForm(self._datos_registro(
+            first_name='Anthony21', last_name='Yaku@',
+        ))
+        self.assertFalse(formulario.is_valid())
+        self.assertIn('first_name', formulario.errors)
+        self.assertIn('last_name', formulario.errors)
+        self.assertIn('solo puede contener letras y espacios', formulario.errors['first_name'][0])
+        self.assertEqual(formulario.fields['first_name'].widget.attrs['aria-invalid'], 'true')
+        respuesta = self.client.post(reverse('usuarios:registro'), self._datos_registro(
+            first_name='Anthony21', last_name='Yaku@',
+        ))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, 'El nombre solo puede contener letras y espacios.')
+        self.assertFalse(User.objects.filter(username='killa').exists())
+
+        formulario = RegistroForm(self._datos_registro(
+            first_name='María José', last_name='Ñusta Chumbi',
+        ))
+        self.assertTrue(formulario.is_valid(), formulario.errors)
 
     def test_registro_exige_terminos_y_correo_unico(self):
         sin_terminos = self._datos_registro()
