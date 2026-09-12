@@ -123,7 +123,7 @@
     if (!exitPrompt) return;
     exitPrompt.hidden = true;
     pendingExit = null;
-    promptPreviousFocus?.focus();
+    promptPreviousFocus?.focus({ preventScroll: true });
   };
 
   const positionExitPrompt = () => {
