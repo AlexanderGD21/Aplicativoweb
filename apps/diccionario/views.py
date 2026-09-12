@@ -817,9 +817,9 @@ def registrar_respuesta_juego(request):
         palabra_id = _entero_no_negativo(data, 'palabra_id', 10_000_000)
     except ValueError:
         return _respuesta_error('La palabra no es válida.')
-    palabra = get_object_or_404(Palabra, pk=palabra_id, activa=True, apta_para_juegos=True)
-    if palabra.id not in sesion.palabras_ids:
+    if palabra_id not in sesion.palabras_ids:
         return _respuesta_error('La palabra no pertenece a esta sesión.', 403)
+    palabra = get_object_or_404(Palabra, pk=palabra_id, activa=True)
 
     if tipo == 'completar':
         correcta = normalizar_texto_busqueda(data.get('respuesta', '')) == normalizar_texto_busqueda(palabra.palabra_kichwa)

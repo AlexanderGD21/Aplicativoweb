@@ -39,5 +39,14 @@ entradas de confianza baja permanecen señaladas para revisión humana en
 `/admin/`. Usa `--force` solo si también deseas reemplazar categorías revisadas
 o validadas manualmente.
 
+## Vocabulario de juegos
+
+Los juegos también usan entradas generales del diccionario. La selección exige
+un par Kichwa–español breve y descarta listas de variantes o glosas extensas;
+mantiene el tema y la `dificultad` de pronunciación de cada entrada. La marca
+histórica `apta_para_juegos` ya no es una condición obligatoria y
+`dificultad_juego` no reemplaza la dificultad del diccionario en los filtros.
+Las entradas de confianza baja aún requieren revisión lingüística humana.
+
 La IA está apagada por defecto; valida su configuración con
 `python manage.py verificar_ia_kichwa`.

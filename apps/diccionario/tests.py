@@ -41,7 +41,7 @@ class DiccionarioTests(TestCase):
         cls.animales = Categoria.objects.create(nombre='Animales')
         cls.misi = Palabra.objects.create(
             palabra_kichwa='Misi', traduccion_espanol='Gato', categoria=cls.animales,
-            nivel_dificultad='intermedio', dificultad='facil', apta_para_juegos=True,
+            nivel_dificultad='intermedio', dificultad='medio', apta_para_juegos=True,
         )
 
     def test_categorias_no_falla_y_cuenta_palabras(self):
@@ -175,7 +175,7 @@ class DiccionarioTests(TestCase):
     def test_busqueda_bilingue_combina_categoria_y_dificultad_pronunciacion(self):
         respuesta = self.client.get(
             reverse('diccionario:buscar'),
-            {'termino': 'gato', 'categoria': self.animales.pk, 'dificultad': 'facil'},
+            {'termino': 'gato', 'categoria': self.animales.pk, 'dificultad': 'medio'},
         )
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual(list(respuesta.context['page_obj'].object_list), [self.misi])
@@ -259,16 +259,17 @@ class DiccionarioTests(TestCase):
                 self.assertEqual(self.client.get(reverse(f'diccionario:{ruta}')).status_code, 200)
 
     def test_juegos_usan_el_corpus_y_no_filtran_la_respuesta_como_pista(self):
-        traduccion = self.client.get(reverse('diccionario:juego_traduccion'))
+        filtros = {'categoria': self.animales.slug, 'dificultad': 'medio'}
+        traduccion = self.client.get(reverse('diccionario:juego_traduccion'), filtros)
         datos_traduccion = json.loads(traduccion.context['palabras_json'])
         self.assertEqual(datos_traduccion[0]['palabra_kichwa'], 'Misi')
         self.assertEqual(datos_traduccion[0]['descripcion_juego_espanol'], '')
 
-        conexion = self.client.get(reverse('diccionario:juego_conexion'))
+        conexion = self.client.get(reverse('diccionario:juego_conexion'), filtros)
         self.assertEqual(conexion.context['palabras'][0], self.misi)
         self.assertNotContains(conexion, 'Pukllay')
 
-        sopa = self.client.get(reverse('diccionario:juego_sopa_letras'))
+        sopa = self.client.get(reverse('diccionario:juego_sopa_letras'), filtros)
         palabra_sopa = sopa.context['palabras'][0]
         self.assertEqual(palabra_sopa.palabra_tablero, 'MISI')
         self.assertContains(sopa, 'horizontal, vertical o diagonal')
@@ -283,7 +284,7 @@ class DiccionarioTests(TestCase):
         alimentos = Categoria.objects.create(nombre='Alimentos')
         Palabra.objects.create(
             palabra_kichwa='Papa', traduccion_espanol='Papa', categoria=alimentos,
-            apta_para_juegos=True, dificultad_juego='facil',
+            apta_para_juegos=True, dificultad='facil', dificultad_juego='facil',
         )
         respuesta = self.client.get(reverse('diccionario:juego_conexion'), {
             'categoria': self.animales.slug,
@@ -295,11 +296,11 @@ class DiccionarioTests(TestCase):
     def test_tema_y_dificultad_se_aplican_en_todas_las_modalidades(self):
         Palabra.objects.create(
             palabra_kichwa='Allku', traduccion_espanol='Perro', categoria=self.animales,
-            apta_para_juegos=True, dificultad_juego='facil',
+            apta_para_juegos=True, dificultad='facil', dificultad_juego='facil',
         )
         Palabra.objects.create(
             palabra_kichwa='Tanta', traduccion_espanol='Pan', categoria=self.categoria,
-            apta_para_juegos=True, dificultad_juego='medio',
+            apta_para_juegos=True, dificultad='medio', dificultad_juego='medio',
         )
         filtros = {'categoria': self.animales.slug, 'dificultad': 'medio'}
         for ruta in ('juego_traduccion', 'juego_conexion', 'juego_memoria', 'juego_completar', 'juego_sopa_letras'):
@@ -310,10 +311,38 @@ class DiccionarioTests(TestCase):
                 self.assertEqual(respuesta.context['categoria_seleccionada'], self.animales.slug)
                 self.assertEqual(respuesta.context['dificultad'], 'medio')
 
+    def test_entradas_generales_claras_se_juegan_segun_su_dificultad(self):
+        facil = Palabra.objects.create(
+            palabra_kichwa='Allku', traduccion_espanol='Perro',
+            categoria=self.animales, dificultad='facil', apta_para_juegos=False,
+        )
+        dificil = Palabra.objects.create(
+            palabra_kichwa='Mishkichuspi', traduccion_espanol='Abeja',
+            categoria=self.animales, dificultad='dificil', apta_para_juegos=False,
+        )
+        Palabra.objects.create(
+            palabra_kichwa='Misi, allku', traduccion_espanol='Gato, perro',
+            categoria=self.animales, dificultad='dificil', apta_para_juegos=False,
+        )
+        url = reverse('diccionario:juego_traduccion')
+        faciles = self.client.get(url, {'dificultad': 'facil', 'categoria': self.animales.slug})
+        dificiles = self.client.get(url, {'dificultad': 'dificil', 'categoria': self.animales.slug})
+        self.assertEqual(faciles.context['palabras'], [facil])
+        self.assertEqual(dificiles.context['palabras'], [dificil])
+        self.assertEqual(dificiles.context['pistas_base'], 1)
+        self.assertIn(self.animales, list(dificiles.context['categorias_jugables']))
+
+        respuesta = self.client.post(reverse('diccionario:registrar_respuesta_juego'), data=json.dumps({
+            'sesion_id': dificiles.context['sesion_id'], 'tipo_juego': 'traduccion',
+            'palabra_id': dificil.pk, 'respuesta_id': dificil.pk,
+        }), content_type='application/json')
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.json()['correcta'])
+
     def test_presupuesto_de_pistas_depende_de_dificultad_y_exige_cuenta_para_extras(self):
         palabras = [Palabra.objects.create(
             palabra_kichwa=f'Rimay{i}', traduccion_espanol=f'Palabra {i}',
-            categoria=self.animales, apta_para_juegos=True, dificultad_juego='dificil',
+            categoria=self.animales, apta_para_juegos=True, dificultad='dificil', dificultad_juego='dificil',
         ) for i in range(3)]
         for dificultad, limite in (('facil', 3), ('medio', 2), ('dificil', 1)):
             with self.subTest(dificultad=dificultad):
@@ -341,7 +370,7 @@ class DiccionarioTests(TestCase):
         usuario = User.objects.create_user('pukllay', password='Clave-segura-123')
         palabras = [Palabra.objects.create(
             palabra_kichwa=f'Yachay{i}', traduccion_espanol=f'Aprender {i}',
-            categoria=self.animales, apta_para_juegos=True, dificultad_juego='dificil',
+            categoria=self.animales, apta_para_juegos=True, dificultad='dificil', dificultad_juego='dificil',
         ) for i in range(4)]
         self.client.force_login(usuario)
         url = reverse('diccionario:usar_pista_juego')
@@ -372,7 +401,9 @@ class DiccionarioTests(TestCase):
         usuario = User.objects.create_user('urku', password='Clave-segura-123')
         otra = User.objects.create_user('sisa', password='Clave-segura-123')
         self.client.force_login(usuario)
-        pagina = self.client.get(reverse('diccionario:juego_completar'), {'dificultad': 'medio'})
+        pagina = self.client.get(reverse('diccionario:juego_completar'), {
+            'dificultad': 'medio', 'categoria': self.animales.slug,
+        })
         sesion = SesionJuego.objects.get(id=pagina.context['sesion_id'])
         url = reverse('diccionario:usar_pista_juego')
         datos = {'sesion_id': str(sesion.id), 'palabra_id': self.misi.pk}
@@ -410,7 +441,7 @@ class DiccionarioTests(TestCase):
         usuario = User.objects.create_user('sisa', password='contrasena-segura-123')
         ajena = Palabra.objects.create(
             palabra_kichwa='Tanta', traduccion_espanol='Pan', categoria=self.categoria,
-            apta_para_juegos=True, dificultad_juego='facil',
+            apta_para_juegos=True, dificultad='facil', dificultad_juego='facil',
         )
         self.client.force_login(usuario)
         juego = self.client.get(reverse('diccionario:juego_traduccion'), {
@@ -485,7 +516,10 @@ class DiccionarioTests(TestCase):
     def test_auditoria_no_modifica_datos(self):
         salida = StringIO()
         call_command('auditar_diccionario', '--json', stdout=salida)
-        self.assertIn('"total": 4', salida.getvalue())
+        reporte = json.loads(salida.getvalue())
+        self.assertEqual(reporte['palabras']['total'], 4)
+        self.assertEqual(reporte['palabras']['jugables_actuales'], 4)
+        self.assertEqual(reporte['palabras']['jugables_generales_sin_marca'], 3)
         self.assertEqual(Palabra.objects.count(), 4)
 
     @override_settings(KICHWA_AI_PROVIDER='none')

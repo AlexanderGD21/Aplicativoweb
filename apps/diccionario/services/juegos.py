@@ -4,6 +4,21 @@ from ..models import Categoria, Palabra, ProgresoPalabraJuego, normalizar_texto_
 
 
 DIFICULTADES_VALIDAS = {valor for valor, _ in Palabra.DIFICULTAD_CHOICES}
+SEPARADORES_AMBIGUOS = ',;:/[]()\n\r'
+
+
+def entrada_jugable(palabra):
+    """Acepta pares bilingües breves; descarta listas de variantes y glosas extensas."""
+    kichwa = (palabra.palabra_kichwa or '').strip()
+    espanol = (palabra.traduccion_espanol or '').strip()
+    return (
+        bool(normalizar_texto_busqueda(kichwa) and normalizar_texto_busqueda(espanol))
+        and not any(separador in kichwa or separador in espanol for separador in SEPARADORES_AMBIGUOS)
+        and len(kichwa) <= 48
+        and len(espanol) <= 65
+        and len(kichwa.split()) <= 3
+        and len(espanol.split()) <= 5
+    )
 
 
 def filtros_juego(request, dificultad_predeterminada='medio'):
@@ -15,17 +30,17 @@ def filtros_juego(request, dificultad_predeterminada='medio'):
 
 
 def categorias_jugables():
-    return Categoria.objects.filter(
-        palabras__activa=True,
-        palabras__apta_para_juegos=True,
-    ).distinct().order_by('grupo', 'orden', 'nombre')
+    candidatas = Palabra.objects.filter(activa=True).only(
+        'categoria_id', 'palabra_kichwa', 'traduccion_espanol',
+    )
+    categorias_ids = {palabra.categoria_id for palabra in candidatas if entrada_jugable(palabra)}
+    return Categoria.objects.filter(pk__in=categorias_ids).order_by('grupo', 'orden', 'nombre')
 
 
 def _corpus_jugable(dificultad, categoria_slug=''):
     palabras = Palabra.objects.select_related('categoria').filter(
         activa=True,
-        apta_para_juegos=True,
-        dificultad_juego=dificultad,
+        dificultad=dificultad,
     ).exclude(
         palabra_kichwa=''
     ).exclude(
@@ -56,10 +71,10 @@ def seleccionar_palabras_juego(usuario, dificultad, categoria_slug='', limite=10
     else:
         palabras = palabras.order_by('-frecuencia_uso', 'categoria__orden', 'palabra_kichwa', 'id')
 
-    if filtro is not None:
-        palabras = [palabra for palabra in palabras if filtro(palabra)]
-    else:
-        palabras = list(palabras)
+    palabras = [
+        palabra for palabra in palabras
+        if entrada_jugable(palabra) and (filtro is None or filtro(palabra))
+    ]
 
     seleccion = []
     vistos_kichwa = set()

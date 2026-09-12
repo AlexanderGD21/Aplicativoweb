@@ -35,7 +35,8 @@ def leer_pares(ruta, invertir):
 
 
 class Command(BaseCommand):
-    help = 'Marca exactamente los pares incluidos en archivos de juegos; por defecto solo informa.'
+    help = ('Actualiza la marca editorial heredada desde archivos; la selección de juegos '
+            'también acepta entradas generales claras. Por defecto solo informa.')
 
     def add_arguments(self, parser):
         parser.add_argument('--espanol-kichwa', required=True)
