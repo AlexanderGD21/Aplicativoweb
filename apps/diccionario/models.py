@@ -302,6 +302,8 @@ class SesionJuego(models.Model):
     dificultad = models.CharField(max_length=10, choices=Palabra.DIFICULTAD_CHOICES)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
     palabras_ids = models.JSONField(default=list)
+    pistas_usadas = models.PositiveSmallIntegerField(default=0)
+    pistas_palabras_ids = models.JSONField(default=list)
     iniciada_en = models.DateTimeField(auto_now_add=True)
     finalizada_en = models.DateTimeField(null=True, blank=True)
     estadistica = models.OneToOneField(

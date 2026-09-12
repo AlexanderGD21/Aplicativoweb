@@ -54,7 +54,37 @@ class PerfilYProgresoTests(TestCase):
 
     def test_perfil_y_progreso_usan_la_relacion_correcta(self):
         self.assertTrue(PerfilUsuario.objects.filter(usuario=self.usuario).exists())
-        self.assertEqual(self.client.get(reverse('usuarios:perfil')).status_code, 200)
+        respuesta = self.client.get(reverse('usuarios:perfil'))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, '<strong>2</strong> de 2 disponibles', html=True)
+        self.assertContains(respuesta, 'Tus últimas partidas')
+
+    def test_perfil_publico_respeta_privacidad_de_progreso_y_ranking(self):
+        perfil = self.usuario.perfil
+        perfil.perfil_publico = True
+        perfil.puntos_totales = 37
+        perfil.save()
+        self.client.logout()
+        ruta = reverse('usuarios:perfil_usuario', args=[self.usuario.username])
+
+        respuesta = self.client.get(ruta)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertNotContains(respuesta, 'puntos compartidos en el ranking')
+        self.assertNotContains(respuesta, 'Pistas extra')
+        self.assertNotContains(respuesta, 'Tus últimas partidas')
+
+        perfil.participa_ranking = True
+        perfil.save(update_fields=['participa_ranking'])
+        self.assertContains(self.client.get(ruta), '<strong>37</strong> puntos compartidos en el ranking', html=True)
+
+        perfil.perfil_publico = False
+        perfil.save(update_fields=['perfil_publico'])
+        self.assertEqual(self.client.get(ruta).status_code, 404)
+
+    def test_perfil_propio_exige_sesion(self):
+        self.client.logout()
+        respuesta = self.client.get(reverse('usuarios:perfil'))
+        self.assertRedirects(respuesta, f"{reverse('usuarios:login')}?next={reverse('usuarios:perfil')}")
 
     def test_participacion_en_ranking_es_independiente_y_desactivada_por_defecto(self):
         perfil = self.usuario.perfil

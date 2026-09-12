@@ -310,6 +310,80 @@ class DiccionarioTests(TestCase):
                 self.assertEqual(respuesta.context['categoria_seleccionada'], self.animales.slug)
                 self.assertEqual(respuesta.context['dificultad'], 'medio')
 
+    def test_presupuesto_de_pistas_depende_de_dificultad_y_exige_cuenta_para_extras(self):
+        palabras = [Palabra.objects.create(
+            palabra_kichwa=f'Rimay{i}', traduccion_espanol=f'Palabra {i}',
+            categoria=self.animales, apta_para_juegos=True, dificultad_juego='dificil',
+        ) for i in range(3)]
+        for dificultad, limite in (('facil', 3), ('medio', 2), ('dificil', 1)):
+            with self.subTest(dificultad=dificultad):
+                pagina = self.client.get(reverse('diccionario:juego_traduccion'), {'dificultad': dificultad})
+                self.assertEqual(pagina.context['pistas_base'], limite)
+
+        pagina = self.client.get(reverse('diccionario:juego_traduccion'), {'dificultad': 'dificil'})
+        sesion_id = pagina.context['sesion_id']
+        url = reverse('diccionario:usar_pista_juego')
+        def usar(palabra_id):
+            return self.client.post(url, data=json.dumps({
+                'sesion_id': sesion_id, 'palabra_id': palabra_id,
+            }), content_type='application/json')
+
+        primera = usar(palabras[0].pk)
+        self.assertEqual(primera.status_code, 200)
+        self.assertEqual(primera.json()['pistas_base_restantes'], 0)
+        self.assertEqual(usar(palabras[0].pk).status_code, 409)
+        segunda = usar(palabras[1].pk)
+        self.assertEqual(segunda.status_code, 403)
+        self.assertTrue(segunda.json()['login_required'])
+        self.assertEqual(SesionJuego.objects.get(id=sesion_id).pistas_usadas, 1)
+
+    def test_dos_pistas_extra_se_gastan_una_sola_vez_por_cuenta(self):
+        usuario = User.objects.create_user('pukllay', password='Clave-segura-123')
+        palabras = [Palabra.objects.create(
+            palabra_kichwa=f'Yachay{i}', traduccion_espanol=f'Aprender {i}',
+            categoria=self.animales, apta_para_juegos=True, dificultad_juego='dificil',
+        ) for i in range(4)]
+        self.client.force_login(usuario)
+        url = reverse('diccionario:usar_pista_juego')
+        def abrir_partida():
+            return self.client.get(reverse('diccionario:juego_memoria'), {'dificultad': 'dificil'}).context['sesion_id']
+        def usar(sesion_id, palabra_id):
+            return self.client.post(url, data=json.dumps({
+                'sesion_id': sesion_id, 'palabra_id': palabra_id,
+            }), content_type='application/json')
+
+        sesion_id = abrir_partida()
+        resultados = [usar(sesion_id, palabra.pk) for palabra in palabras]
+        self.assertEqual([respuesta.status_code for respuesta in resultados], [200, 200, 200, 403])
+        self.assertEqual([respuesta.json()['origen'] for respuesta in resultados[:3]], ['partida', 'extra', 'extra'])
+        self.assertEqual(resultados[2].json()['pistas_extra_restantes'], 0)
+        usuario.perfil.refresh_from_db()
+        self.assertEqual(usuario.perfil.pistas_extra_disponibles, 0)
+
+        self.client.logout()
+        self.client.force_login(usuario)
+        nueva_sesion = abrir_partida()
+        self.assertEqual(usar(nueva_sesion, palabras[0].pk).status_code, 200)
+        self.assertEqual(usar(nueva_sesion, palabras[1].pk).status_code, 403)
+        usuario.perfil.refresh_from_db()
+        self.assertEqual(usuario.perfil.pistas_extra_disponibles, 0)
+
+    def test_pista_rechaza_sesion_ajena_palabra_ajena_y_sesion_finalizada(self):
+        usuario = User.objects.create_user('urku', password='Clave-segura-123')
+        otra = User.objects.create_user('sisa', password='Clave-segura-123')
+        self.client.force_login(usuario)
+        pagina = self.client.get(reverse('diccionario:juego_completar'), {'dificultad': 'medio'})
+        sesion = SesionJuego.objects.get(id=pagina.context['sesion_id'])
+        url = reverse('diccionario:usar_pista_juego')
+        datos = {'sesion_id': str(sesion.id), 'palabra_id': self.misi.pk}
+        self.assertEqual(self.client.post(url, data=json.dumps({**datos, 'palabra_id': self.palabra.pk}), content_type='application/json').status_code, 403)
+        self.client.force_login(otra)
+        self.assertEqual(self.client.post(url, data=json.dumps(datos), content_type='application/json').status_code, 403)
+        self.client.force_login(usuario)
+        sesion.finalizada_en = timezone.now()
+        sesion.save(update_fields=['finalizada_en'])
+        self.assertEqual(self.client.post(url, data=json.dumps(datos), content_type='application/json').status_code, 409)
+
     def test_respuesta_se_valida_en_servidor_y_actualiza_progreso(self):
         usuario = User.objects.create_user('inti', password='contrasena-segura-123')
         self.client.force_login(usuario)

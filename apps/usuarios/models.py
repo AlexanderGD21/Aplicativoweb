@@ -26,6 +26,7 @@ class PerfilUsuario(models.Model):
     nivel_kichwa = models.CharField(max_length=20, choices=NIVEL_KICHWA_CHOICES, default='principiante')
     palabras_aprendidas = models.PositiveIntegerField(default=0)
     puntos_totales = models.PositiveIntegerField(default=0)
+    pistas_extra_disponibles = models.PositiveSmallIntegerField(default=2)
     racha_dias = models.PositiveIntegerField(default=0)
     notificaciones_email = models.BooleanField(default=False)
     perfil_publico = models.BooleanField(default=False)

@@ -27,6 +27,7 @@ urlpatterns = [
     path('juegos/guardar-estadistica/', views.guardar_estadistica_juego, name='guardar_estadistica_juego'),
     path('juegos/guardar-resultado/', views.guardar_estadistica_juego, name='guardar_resultado_juego'),
     path('juegos/registrar-respuesta/', views.registrar_respuesta_juego, name='registrar_respuesta_juego'),
+    path('juegos/usar-pista/', views.usar_pista_juego, name='usar_pista_juego'),
     path('juegos/obtener-palabras/', views.obtener_palabras_juego, name='obtener_palabras_juego'),
     
     # APIs para búsqueda

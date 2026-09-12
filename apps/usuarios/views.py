@@ -208,27 +208,33 @@ def cerrar_sesion(request):
     messages.success(request, 'Sesión cerrada correctamente.')
     return redirect('diccionario:home')
 
-@login_required
 def perfil(request, username=None):
-    if username:
-        usuario = get_object_or_404(User, username=username)
-        perfil_usuario = get_object_or_404(PerfilUsuario, usuario=usuario)
-        es_propio = request.user == usuario
-    else:
-        usuario = request.user
-        perfil_usuario = get_object_or_404(PerfilUsuario, usuario=usuario)
-        es_propio = True
-    
-    # Verificar si el perfil es público o es el propio usuario
+    if not username and not request.user.is_authenticated:
+        return redirect(f"{reverse('usuarios:login')}?{urlencode({'next': request.path})}")
+
+    usuario = get_object_or_404(User, username=username) if username else request.user
+    perfil_usuario = get_object_or_404(PerfilUsuario, usuario=usuario)
+    es_propio = request.user.is_authenticated and request.user.pk == usuario.pk
     if not es_propio and not perfil_usuario.perfil_publico:
-        messages.error(request, 'Este perfil es privado.')
-        return redirect('diccionario:home')
-    
+        from django.http import Http404
+        raise Http404('Perfil no disponible')
+
     context = {
         'usuario': usuario,
         'perfil': perfil_usuario,
         'es_propio': es_propio,
+        'mostrar_puntos': es_propio or perfil_usuario.participa_ranking,
     }
+    if es_propio:
+        from apps.diccionario.models import EstadisticaJuego, PalabraFavorita
+        from apps.diccionario.services.juegos import resumen_progreso
+
+        context.update({
+            'progreso': resumen_progreso(usuario),
+            'partidas_recientes': EstadisticaJuego.objects.filter(usuario=usuario)[:4],
+            'total_partidas': EstadisticaJuego.objects.filter(usuario=usuario).count(),
+            'total_favoritas': PalabraFavorita.objects.filter(usuario=usuario).count(),
+        })
     return render(request, 'usuarios/perfil.html', context)
 
 @login_required

@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}{% block game_title %}Practicar Kichwa{% endblock %} - Diccionario Kichwa{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260912-1">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260912-2">{% endblock %}
 {% block content %}
 <div class="game-page">
   <section class="game-masthead"><div class="learning-wrap">
     <a class="game-back" data-tooltip="Volver a todas las modalidades" href="{% url 'diccionario:juegos' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Ruta de práctica</a>
     <div class="game-masthead__row"><div><h1>{% block game_heading %}{{ juego_meta.nombre }}{% endblock %}</h1><p>{% block game_lead %}{{ juego_meta.descripcion }}{% endblock %}</p></div><span class="game-stage-label">{{ juego_meta.etapa }}</span></div>
   </div></section>
-  <section class="learning-wrap game-session game-session--{{ tipo_juego }}" data-game-type="{{ tipo_juego }}" data-session-id="{{ sesion_id }}" data-answer-url="{% url 'diccionario:registrar_respuesta_juego' %}" data-stats-url="{% url 'diccionario:guardar_estadistica_juego' %}" data-difficulty="{{ dificultad }}" data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+  <section class="learning-wrap game-session game-session--{{ tipo_juego }}" data-game-type="{{ tipo_juego }}" data-session-id="{{ sesion_id }}" data-answer-url="{% url 'diccionario:registrar_respuesta_juego' %}" data-hint-url="{% url 'diccionario:usar_pista_juego' %}" data-stats-url="{% url 'diccionario:guardar_estadistica_juego' %}" data-difficulty="{{ dificultad }}" data-hint-base="{{ pistas_base }}" data-hint-bonus="{{ pistas_extra_disponibles }}" data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
     <form class="game-filters" method="get" aria-label="Configurar esta práctica">
       <div class="learning-field"><label for="game-category"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Tema</span></label><select id="game-category" name="categoria" data-tooltip="Cambia el campo de vocabulario de esta partida"><option value="">Todos los temas</option>{% for categoria in categorias_jugables %}<option value="{{ categoria.slug }}"{% if categoria.slug == categoria_seleccionada %} selected{% endif %}>{{ categoria.nombre }}</option>{% endfor %}</select></div>
       <div class="learning-field"><label for="game-difficulty"><i class="fas fa-wave-square" aria-hidden="true"></i><span>Dificultad</span></label><select id="game-difficulty" name="dificultad" data-tooltip="Selecciona la complejidad de pronunciación"><option value="facil"{% if dificultad == 'facil' %} selected{% endif %}>Fácil</option><option value="medio"{% if dificultad == 'medio' %} selected{% endif %}>Media</option><option value="dificil"{% if dificultad == 'dificil' %} selected{% endif %}>Difícil</option></select></div>
@@ -20,12 +20,14 @@
         <div class="game-progress" aria-label="Avance de la partida"><div class="game-progress__labels"><span id="game-progress-label">Pregunta 1 de {{ total_palabras }}</span><span id="game-progress-percent">0%</span></div><div class="game-progress__track"><span id="game-progress-fill"></span></div></div>
         <div id="game-stage" class="game-stage" aria-live="polite" tabindex="-1"></div>
         <div id="game-feedback" class="game-feedback" role="status" aria-live="polite" hidden></div>
-        <div class="game-actions" id="game-actions"><button class="learning-secondary" id="game-hint" type="button" data-tooltip="Muestra una ayuda breve sin resolver el reto"><i class="fas fa-lightbulb" aria-hidden="true"></i> Pista</button><button class="learning-secondary" id="game-skip" type="button" data-tooltip="Muestra la respuesta y continúa sin sumar un acierto">Omitir palabra</button><button class="learning-primary" id="game-next" type="button" data-tooltip="Avanza al siguiente reto" hidden>Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></button></div>
+        <div class="game-actions" id="game-actions"><button class="learning-secondary" id="game-hint" type="button" data-tooltip="Usa una pista disponible para este reto"><i class="fas fa-lightbulb" aria-hidden="true"></i> Usar pista</button><button class="learning-secondary" id="game-skip" type="button" data-tooltip="Muestra la respuesta y continúa sin sumar un acierto">Omitir palabra</button><button class="learning-primary" id="game-next" type="button" data-tooltip="Avanza al siguiente reto" hidden>Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></button></div>
+        <div class="game-hint-notice" id="game-hint-notice" role="status" hidden><strong>¿Necesitas dos pistas más?</strong><p>Inicia sesión o crea una cuenta. Son dos pistas extra por cuenta, disponibles una sola vez entre todos los juegos. Al acceder, esta partida anónima comenzará de nuevo.</p><div><a href="{% url 'usuarios:login' %}?next={{ request.get_full_path|urlencode }}">Iniciar sesión</a><a href="{% url 'usuarios:registro' %}?next={{ request.get_full_path|urlencode }}">Crear cuenta</a></div></div>
         <section class="game-complete" id="game-complete" hidden aria-labelledby="game-complete-title"><h2 id="game-complete-title">Sesión terminada</h2><p id="game-complete-copy"></p><div class="game-complete__actions"><button class="learning-primary" id="game-restart" type="button"><i class="fas fa-rotate-right" aria-hidden="true"></i> Practicar otra vez</button><a class="learning-secondary" href="{% url 'diccionario:juegos' %}">Elegir otra modalidad</a></div></section>
       </div>
       <aside class="game-rail" aria-label="Datos de la sesión">
         <div class="game-session-tools"><button class="game-sound-toggle" id="game-sound-toggle" type="button" aria-pressed="true" data-tooltip="Activa o silencia los sonidos de respuesta"><i class="fas fa-volume-high" aria-hidden="true"></i><span>Sonido activado</span></button></div>
         <dl class="game-stats"><div><dt>Aciertos</dt><dd id="game-correct">0</dd></div><div><dt>Racha</dt><dd id="game-streak">0</dd></div><div><dt>Tiempo</dt><dd id="game-time">0:00</dd></div></dl>
+        <div class="game-hint-budget" aria-live="polite"><i class="fas fa-lightbulb" aria-hidden="true"></i><div><strong>Pistas disponibles</strong><span id="game-hint-status">{{ pistas_base }} de partida{% if user.is_authenticated %} · {{ pistas_extra_disponibles }} extra de cuenta{% endif %}</span></div></div>
         <div class="game-instructions"><h2>Cómo se practica</h2><p>{% block game_instruction %}Responde y revisa la explicación antes de continuar.{% endblock %}</p></div>
         {% if not user.is_authenticated %}<div class="game-account-note"><i class="fas fa-bookmark" aria-hidden="true"></i><p>Esta partida funciona sin cuenta. <a href="{% url 'usuarios:login' %}?next={{ request.get_full_path|urlencode }}">Inicia sesión</a> para conservar el progreso de cada palabra.</p></div>{% endif %}
       </aside>
@@ -42,4 +44,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}{% if palabras %}<script src="{% static 'js/games-learning.js' %}?v=20260912-5" defer></script>{% endif %}{% endblock %}
+{% block extra_js %}{% if palabras %}<script src="{% static 'js/games-learning.js' %}?v=20260912-6" defer></script>{% endif %}{% endblock %}

@@ -39,6 +39,7 @@ from apps.usuarios.models import PerfilUsuario
 
 logger = logging.getLogger(__name__)
 LIMITE_SUGERENCIAS = 8
+PISTAS_BASE_DIFICULTAD = {'facil': 3, 'medio': 2, 'dificil': 1}
 
 
 def _normalizar_palabra_tablero(texto):
@@ -603,6 +604,11 @@ def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=Non
         'categorias_jugables': categorias_jugables(),
         'total_palabras': len(palabras),
         'sesion_id': str(sesion.id) if sesion else '',
+        'pistas_base': PISTAS_BASE_DIFICULTAD[dificultad],
+        'pistas_extra_disponibles': (
+            PerfilUsuario.objects.filter(usuario=request.user).values_list('pistas_extra_disponibles', flat=True).first() or 0
+            if request.user.is_authenticated else 0
+        ),
     }
 
 def juego_traduccion(request):
@@ -669,6 +675,70 @@ def _entero_no_negativo(datos, campo, maximo, default=None):
     if entero < 0 or entero > maximo:
         raise ValueError
     return entero
+
+
+@require_http_methods(['POST'])
+def usar_pista_juego(request):
+    """Concede una pista por palabra y descuenta extras una sola vez por cuenta."""
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return _respuesta_error('El cuerpo de la solicitud debe ser JSON válido.')
+    if not isinstance(data, dict):
+        return _respuesta_error('El cuerpo de la solicitud debe ser un objeto JSON.')
+    try:
+        palabra_id = _entero_no_negativo(data, 'palabra_id', 10_000_000)
+    except ValueError:
+        return _respuesta_error('La palabra no es válida.')
+
+    with transaction.atomic():
+        try:
+            sesion = SesionJuego.objects.select_for_update().get(id=data.get('sesion_id'))
+        except (SesionJuego.DoesNotExist, ValidationError, ValueError, TypeError):
+            return _respuesta_error('La sesión de juego no es válida.', 404)
+        if request.user.is_authenticated:
+            autorizada = sesion.usuario_id == request.user.id
+        else:
+            autorizada = sesion.usuario_id is None and sesion.clave_anonima == request.session.session_key
+        if not autorizada:
+            return _respuesta_error('Esta sesión pertenece a otra persona.', 403)
+        if sesion.finalizada_en:
+            return _respuesta_error('La sesión ya terminó.', 409)
+        if palabra_id not in sesion.palabras_ids:
+            return _respuesta_error('La palabra no pertenece a esta sesión.', 403)
+        if palabra_id in sesion.pistas_palabras_ids:
+            return _respuesta_error('Ya usaste una pista para esta palabra.', 409)
+        if sesion.intentos.filter(palabra_id=palabra_id, correcta=True).exists():
+            return _respuesta_error('Esta palabra ya fue resuelta.', 409)
+
+        base = PISTAS_BASE_DIFICULTAD[sesion.dificultad]
+        usa_extra = sesion.pistas_usadas >= base
+        extras_restantes = 0
+        if usa_extra:
+            if not request.user.is_authenticated:
+                return JsonResponse({
+                    'success': False,
+                    'login_required': True,
+                    'message': 'Agotaste las pistas de esta partida. Inicia sesión o crea una cuenta para disponer de dos pistas extra una sola vez.',
+                }, status=403)
+            PerfilUsuario.objects.get_or_create(usuario=request.user)
+            descontadas = PerfilUsuario.objects.filter(
+                usuario=request.user, pistas_extra_disponibles__gt=0,
+            ).update(pistas_extra_disponibles=F('pistas_extra_disponibles') - 1)
+            if not descontadas:
+                return _respuesta_error('Ya usaste las dos pistas extra de tu cuenta.', 403)
+        if request.user.is_authenticated:
+            extras_restantes = PerfilUsuario.objects.get(usuario=request.user).pistas_extra_disponibles
+        sesion.pistas_usadas += 1
+        sesion.pistas_palabras_ids = [*sesion.pistas_palabras_ids, palabra_id]
+        sesion.save(update_fields=['pistas_usadas', 'pistas_palabras_ids'])
+
+    return JsonResponse({
+        'success': True,
+        'origen': 'extra' if usa_extra else 'partida',
+        'pistas_base_restantes': max(base - sesion.pistas_usadas, 0),
+        'pistas_extra_restantes': extras_restantes,
+    })
 
 
 @require_http_methods(['POST'])

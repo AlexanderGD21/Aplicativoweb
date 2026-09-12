@@ -202,6 +202,7 @@ body:has(.game-page) footer .text-muted {
 .game-option.is-correct,
 .match-option.is-matched { background: var(--game-success); border-color: #77ac95; }
 .game-option.is-wrong { background: var(--game-error); border-color: #c88b84; }
+.game-option.is-hint-eliminated { color: var(--game-muted); background: #f0f3f1; text-decoration: line-through; opacity: .65; }
 .game-input-row { display: grid; gap: .65rem; max-width: 560px; margin: 1.2rem auto 0; }
 .game-answer-input { min-height: 50px; border: 1px solid #aebdb7; border-radius: 10px; padding: .75rem .9rem; font: inherit; color: var(--game-ink); background: #fff; }
 .game-mask { margin: .8rem 0 0; color: var(--game-forest); font-size: clamp(1.3rem, 5vw, 2rem); font-weight: 760; letter-spacing: .12em; overflow-wrap: anywhere; }
@@ -212,6 +213,12 @@ body:has(.game-page) footer .text-muted {
 .game-feedback strong { display: block; }
 .game-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; margin-top: 1rem; border-top: 1px solid var(--game-line); padding-top: 1rem; }
 .game-actions .learning-primary { margin-left: auto; }
+.game-hint-notice { margin-top: 1rem; padding: 1rem; color: var(--game-ink); background: #f8f0da; border: 1px solid #e0d0a5; border-radius: 12px; }
+.game-hint-notice[hidden] { display: none; }
+.game-hint-notice strong { display: block; margin-bottom: .3rem; }
+.game-hint-notice p { margin: 0 0 .75rem; max-width: 65ch; }
+.game-hint-notice div { display: flex; flex-wrap: wrap; gap: .75rem; }
+.game-hint-notice a { display: inline-flex; min-height: 44px; align-items: center; color: var(--game-forest); font-weight: 760; text-underline-offset: .2em; }
 
 .game-rail { display: grid; align-content: start; gap: 1rem; }
 .game-session-tools { display: flex; justify-content: flex-end; }
@@ -225,6 +232,11 @@ body:has(.game-page) footer .text-muted {
 .game-stats div { padding: .8rem .5rem; text-align: center; }
 .game-stats dt { color: var(--game-muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
 .game-stats dd { margin: .1rem 0 0; color: var(--game-ink); font-size: 1.35rem; font-weight: 780; font-variant-numeric: tabular-nums; }
+.game-hint-budget { display: grid; grid-template-columns: 1.3rem minmax(0,1fr); gap: .55rem; padding: .75rem 0; border-bottom: 1px solid #c9d2ce; }
+.game-hint-budget i { margin-top: .2rem; color: var(--game-ochre); }
+.game-hint-budget strong,.game-hint-budget span { display: block; }
+.game-hint-budget strong { font-size: .88rem; }
+.game-hint-budget span { color: var(--game-muted); font-size: .82rem; font-variant-numeric: tabular-nums; }
 .game-instructions,
 .game-account-note { padding: 1rem 0; border-bottom: 1px solid #c9d2ce; }
 .game-instructions h2 { margin: 0 0 .35rem; font-size: 1rem; font-weight: 780; }
@@ -239,16 +251,20 @@ body:has(.game-page) footer .text-muted {
 .memory-card span { display: none; overflow-wrap: anywhere; }
 .memory-card::before { content: "Abrir"; color: var(--game-forest); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
 .memory-card.is-open span,
-.memory-card.is-matched span { display: block; }
+.memory-card.is-matched span,
+.memory-card.is-hint-preview span { display: block; }
 .memory-card.is-open::before,
-.memory-card.is-matched::before { display: none; }
+.memory-card.is-matched::before,
+.memory-card.is-hint-preview::before { display: none; }
 .memory-card.is-open { animation: memory-reveal 260ms cubic-bezier(.16,1,.3,1); }
+.memory-card.is-hint-preview { background: #f8f0da; border-color: #c7ac68; }
 .memory-card.is-matched { background: var(--game-success); border-color: #77ac95; animation: matched-settle 360ms cubic-bezier(.16,1,.3,1); }
 
 .match-board { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
 .match-column { display: grid; gap: .55rem; align-content: start; }
 .match-column h2 { margin: 0 0 .2rem; font-size: .78rem; color: var(--game-muted); text-transform: uppercase; letter-spacing: .04em; }
 .match-option { text-align: left; overflow-wrap: anywhere; }
+.match-option.is-hint-preview { background: #f8f0da; border-color: #c7ac68; }
 
 .word-search-layout { display: grid; gap: 1rem; }
 .word-grid { --grid-size: 10; display: grid; grid-template-columns: repeat(var(--grid-size),minmax(0,1fr)); width: 100%; max-width: 560px; margin-inline: auto; border: 1px solid #aebdb7; touch-action: none; user-select: none; -webkit-user-select: none; }

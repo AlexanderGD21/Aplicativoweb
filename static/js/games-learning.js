@@ -27,6 +27,8 @@
   const feedback = document.getElementById('game-feedback');
   const nextButton = document.getElementById('game-next');
   const hintButton = document.getElementById('game-hint');
+  const hintNotice = document.getElementById('game-hint-notice');
+  const hintStatus = document.getElementById('game-hint-status');
   const skipButton = document.getElementById('game-skip');
   const completePanel = document.getElementById('game-complete');
   const actions = document.getElementById('game-actions');
@@ -47,6 +49,11 @@
   let audioContext = null;
   let soundEnabled = true;
   let promptPreviousFocus = null;
+  let hintsBaseLeft = Number(root.dataset.hintBase) || 0;
+  let hintsBonusLeft = Number(root.dataset.hintBonus) || 0;
+  let hintRequestPending = false;
+  let getHintOffer = () => null;
+  const hintedWords = new Set();
 
   // El contenido principal tiene su propio contexto de apilamiento, debajo de la navegación.
   // El aviso debe vivir en el body para poder mostrarse completo por encima de ambos.
@@ -127,6 +134,12 @@
     stage.focus({ preventScroll: true });
     promptPreviousFocus = null;
   };
+
+  const updateHintStatus = () => {
+    if (!hintStatus) return;
+    hintStatus.textContent = `${hintsBaseLeft} de partida${root.dataset.authenticated === 'true' ? ` · ${hintsBonusLeft} extra de cuenta` : ''}`;
+  };
+  updateHintStatus();
 
   const positionExitPrompt = () => {
     if (!exitPrompt || exitPrompt.hidden) return;
@@ -341,6 +354,19 @@
     pool.forEach((item) => options.append(makeOption(reverse ? item.kichwa : item.espanol, item.id, word.id, answerDirection)));
     question.append(direction, prompt, support, options);
     stage.replaceChildren(question);
+    getHintOffer = () => ({
+      wordId: word.id,
+      apply: () => {
+        const wrong = [...options.querySelectorAll('.game-option')].find((item) => item.dataset.answerId !== String(word.id));
+        if (wrong) {
+          wrong.classList.add('is-hint-eliminated');
+          wrong.disabled = true;
+          showFeedback(true, 'Pista', 'Se descartó una opción que no corresponde a esta palabra.');
+        } else {
+          showFeedback(true, 'Pista', word.pronunciacion ? `Pronunciación: ${word.pronunciacion}` : `Tema: ${word.categoria}.`);
+        }
+      },
+    });
   };
 
   const maskWord = (word) => [...word].map((character, index) => {
@@ -392,6 +418,19 @@
     });
     question.append(direction, prompt, mask, row);
     stage.replaceChildren(question);
+    getHintOffer = () => {
+      const letters = [...word.kichwa];
+      const index = letters.findIndex((character, position) => /[\p{L}]/u.test(character) && position !== 0 && position !== letters.length - 1 && position % 3 !== 0 && !revealedLetters.has(position));
+      if (index < 0) return null;
+      return {
+        wordId: word.id,
+        apply: () => {
+          revealedLetters.add(index);
+          mask.textContent = maskWord(word.kichwa);
+          showFeedback(true, 'Pista', 'Se reveló una letra de la palabra en Kichwa.');
+        },
+      };
+    };
     input.focus();
   };
 
@@ -409,7 +448,7 @@
   };
 
   const renderMemory = () => {
-    hintButton.hidden = true;
+    hintButton.hidden = false;
     skipButton.hidden = true;
     const cards = shuffle(words.flatMap((word) => [
       { id: word.id, side: 'kichwa', label: word.kichwa },
@@ -466,6 +505,20 @@
     });
     stage.replaceChildren(board);
     setProgress(0);
+    getHintOffer = () => {
+      if (openCards.length) return null;
+      const pending = words.find((word) => !hintedWords.has(word.id) && board.querySelector(`[data-word-id="${word.id}"]:not(.is-matched)`));
+      if (!pending) return null;
+      return {
+        wordId: pending.id,
+        apply: () => {
+          const pair = [...board.querySelectorAll(`[data-word-id="${pending.id}"]`)];
+          pair.forEach((card) => card.classList.add('is-hint-preview'));
+          showFeedback(true, 'Pista', `Observa esta pareja: ${pending.kichwa} y ${pending.espanol}.`);
+          window.setTimeout(() => pair.forEach((card) => card.classList.remove('is-hint-preview')), 1500);
+        },
+      };
+    };
   };
 
   const renderConnect = () => {
@@ -514,13 +567,18 @@
       right.append(button);
     });
     board.append(left, right); stage.replaceChildren(board); setProgress(0);
-    hintButton.onclick = () => {
-      markSessionActive();
-      const first = left.querySelector('.match-option:not(.is-matched)');
-      if (!first) return;
-      const match = right.querySelector(`[data-word-id="${first.dataset.wordId}"]`);
-      first.classList.add('is-selected'); match?.classList.add('is-selected');
-      window.setTimeout(() => { first.classList.remove('is-selected'); match?.classList.remove('is-selected'); }, 900);
+    getHintOffer = () => {
+      const first = [...left.querySelectorAll('.match-option:not(.is-matched)')].find((item) => !hintedWords.has(Number(item.dataset.wordId)));
+      if (!first) return null;
+      return {
+        wordId: Number(first.dataset.wordId),
+        apply: () => {
+          const match = right.querySelector(`[data-word-id="${first.dataset.wordId}"]`);
+          first.classList.add('is-hint-preview'); match?.classList.add('is-hint-preview');
+          showFeedback(true, 'Pista', 'Se señaló una pareja Kichwa–español pendiente.');
+          window.setTimeout(() => { first.classList.remove('is-hint-preview'); match?.classList.remove('is-hint-preview'); }, 1500);
+        },
+      };
     };
   };
 
@@ -666,21 +724,61 @@
     gridNode.addEventListener('pointerup', finishDrag);
     gridNode.addEventListener('pointercancel', () => { dragStart = null; dragEnd = null; dragMoved = false; clearPreview(); gridNode.classList.remove('is-dragging'); });
     layout.append(gridNode, list); stage.replaceChildren(layout); setProgress(0, placements.length);
-    hintButton.onclick = () => {
-      markSessionActive();
-      const pending = placements.find((item) => !item.found); if (!pending) return;
-      const [row,col] = pending.cells[0]; const cell = cellNodes.get(`${row}:${col}`); cell?.classList.add('is-start');
-      window.setTimeout(() => cell?.classList.remove('is-start'), 900);
+    getHintOffer = () => {
+      const pending = placements.find((item) => !item.found && !hintedWords.has(item.word.id));
+      if (!pending) return null;
+      return {
+        wordId: pending.word.id,
+        apply: () => {
+          const [row,col] = pending.cells[0];
+          const cell = cellNodes.get(`${row}:${col}`);
+          cell?.classList.add('is-start');
+          showFeedback(true, 'Pista', `${pending.word.kichwa} empieza en la fila ${row + 1}, columna ${col + 1}; dirección ${pending.direction}.`);
+          window.setTimeout(() => cell?.classList.remove('is-start'), 1500);
+        },
+      };
     };
   };
 
-  hintButton.addEventListener('click', () => {
-    markSessionActive();
-    if (type === 'completar' && !questionLocked) {
-      const candidates = [...words[current].kichwa].map((character, index) => /[\p{L}]/u.test(character) && index !== 0 && index !== words[current].kichwa.length - 1 ? index : -1).filter((index) => index >= 0 && !revealedLetters.has(index));
-      if (candidates.length) { revealedLetters.add(candidates[0]); document.getElementById('game-mask').textContent = maskWord(words[current].kichwa); }
-    } else if (type === 'traduccion' && !questionLocked) {
-      const word = words[current]; showFeedback(true, 'Pista', word.pronunciacion ? `Pronunciación: ${word.pronunciacion}` : `Tema: ${word.categoria}.`);
+  hintButton.addEventListener('click', async () => {
+    if (hintRequestPending || questionLocked || finished) return;
+    const offer = getHintOffer();
+    if (!offer) {
+      showFeedback(false, 'No hay una pista aplicable ahora.', 'Termina o cierra la selección actual y prueba con otra palabra.');
+      return;
+    }
+    if (hintedWords.has(offer.wordId)) {
+      showFeedback(false, 'Ya utilizaste la pista de esta palabra.', 'Continúa con otra palabra para usar una nueva pista.');
+      return;
+    }
+    hintRequestPending = true;
+    hintButton.disabled = true;
+    try {
+      const response = await fetch(root.dataset.hintUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ sesion_id: root.dataset.sessionId, palabra_id: offer.wordId }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        if (result.login_required) {
+          hintNotice.hidden = false;
+          showFeedback(false, 'Pistas de partida agotadas.', 'Puedes iniciar sesión o registrarte para usar dos pistas extra una sola vez por cuenta.');
+        } else showFeedback(false, 'No hay más pistas disponibles.', result.message || 'Continúa sin pista o inicia otra partida.');
+        return;
+      }
+      hintedWords.add(offer.wordId);
+      hintsBaseLeft = result.pistas_base_restantes;
+      hintsBonusLeft = result.pistas_extra_restantes;
+      updateHintStatus();
+      markSessionActive();
+      offer.apply();
+      playSound('select');
+    } catch (_) {
+      showFeedback(false, 'No se pudo cargar la pista.', 'Revisa la conexión e inténtalo nuevamente.');
+    } finally {
+      hintRequestPending = false;
+      hintButton.disabled = false;
     }
   });
   skipButton.addEventListener('click', async () => {
