@@ -48,6 +48,10 @@
   let soundEnabled = true;
   let promptPreviousFocus = null;
 
+  // El contenido principal tiene su propio contexto de apilamiento, debajo de la navegación.
+  // El aviso debe vivir en el body para poder mostrarse completo por encima de ambos.
+  if (exitPrompt) document.body.append(exitPrompt);
+
   try { soundEnabled = window.localStorage.getItem('kichwa-game-sound') !== 'off'; } catch (_) { /* La preferencia es opcional. */ }
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -122,13 +126,24 @@
     promptPreviousFocus?.focus();
   };
 
+  const positionExitPrompt = () => {
+    if (!exitPrompt || exitPrompt.hidden) return;
+    const navigationBottom = document.querySelector('.navbar')?.getBoundingClientRect().bottom ?? 0;
+    const preferredTop = Math.max(12, navigationBottom + 12);
+    const lastVisibleTop = window.innerHeight - exitPrompt.offsetHeight - 12;
+    exitPrompt.style.top = `${Math.max(12, Math.min(preferredTop, lastVisibleTop))}px`;
+  };
+
   const requestExit = (action) => {
     if (!sessionDirty || finished || !exitPrompt) { action(); return; }
     pendingExit = action;
     promptPreviousFocus = document.activeElement;
     exitPrompt.hidden = false;
+    positionExitPrompt();
     stayButton?.focus();
   };
+
+  window.addEventListener('resize', positionExitPrompt);
 
   stayButton?.addEventListener('click', hideExitPrompt);
   confirmExitButton?.addEventListener('click', () => {
