@@ -238,6 +238,13 @@ class DiccionarioTests(TestCase):
         sopa = self.client.get(reverse('diccionario:juego_sopa_letras'))
         palabra_sopa = sopa.context['palabras'][0]
         self.assertEqual(palabra_sopa.palabra_tablero, 'MISI')
+        self.assertContains(sopa, 'Arrastra desde la primera hasta la última letra')
+        self.assertContains(sopa, 'id="game-exit-prompt"')
+        self.assertContains(sopa, 'id="game-sound-toggle"')
+
+        portada = self.client.get(reverse('diccionario:juegos'))
+        for tipo in ('traduccion', 'conectar', 'memoria', 'completar', 'sopa_letras'):
+            self.assertContains(portada, f'learning-path__item--{tipo}')
 
     def test_filtros_de_juego_no_se_rellenan_con_otro_tema_o_dificultad(self):
         alimentos = Categoria.objects.create(nombre='Alimentos')

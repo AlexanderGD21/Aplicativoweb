@@ -380,7 +380,7 @@ JUEGOS_DISPONIBLES = [
     },
     {
         'tipo': 'conectar', 'etapa': 'Asociar', 'nombre': 'Conectar significados',
-        'descripcion': 'Une cada palabra Kichwa con su significado en español sin depender de arrastrar.',
+        'descripcion': 'Une cada palabra Kichwa con su significado en español mediante selecciones claras.',
         'url': 'diccionario:juego_conexion', 'icono': 'fa-link', 'duracion': '3–4 min',
     },
     {
@@ -395,7 +395,7 @@ JUEGOS_DISPONIBLES = [
     },
     {
         'tipo': 'sopa_letras', 'etapa': 'Explorar', 'nombre': 'Sopa de palabras',
-        'descripcion': 'Localiza vocabulario de un mismo tema en una cuadrícula accesible por toques.',
+        'descripcion': 'Localiza vocabulario de un mismo tema arrastrando o marcando el inicio y el final.',
         'url': 'diccionario:juego_sopa_letras', 'icono': 'fa-border-all', 'duracion': '5–7 min',
     },
 ]

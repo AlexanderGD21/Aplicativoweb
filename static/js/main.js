@@ -4,13 +4,35 @@ document.addEventListener("DOMContentLoaded", () => {
   // Importar Bootstrap
   const bootstrap = window.bootstrap
 
-  // Inicializar tooltips de Bootstrap
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-  var tooltipList = tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
+  // Los tooltips del sitio se declaran con data-tooltip para mantener el texto
+  // accesible incluso cuando Bootstrap no está disponible.
+  document.querySelectorAll("[data-tooltip]").forEach((element) => {
+    element.setAttribute("title", element.dataset.tooltip)
+    if (element.dataset.bsToggle !== "dropdown") element.dataset.bsToggle = "tooltip"
+  })
+
+  if (bootstrap?.Tooltip) {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((element) => {
+      bootstrap.Tooltip.getOrCreateInstance(element, {
+        boundary: document.body,
+        container: document.body,
+        delay: { show: 280, hide: 80 },
+        trigger: "hover focus",
+      })
+    })
+  }
+
+  // Respuesta táctil y de foco coherente para controles de todo el sitio.
+  document.querySelectorAll("button, .btn, .nav-link, [role='button']").forEach((control) => {
+    control.classList.add("ui-control")
+  })
 
   // Inicializar popovers de Bootstrap
-  var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-  var popoverList = popoverTriggerList.map((popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl))
+  if (bootstrap?.Popover) {
+    document.querySelectorAll('[data-bs-toggle="popover"]').forEach((element) => {
+      bootstrap.Popover.getOrCreateInstance(element)
+    })
+  }
 
   // Smooth scrolling para enlaces internos
   document.querySelectorAll('a[href^="#"]').forEach((anchor) => {

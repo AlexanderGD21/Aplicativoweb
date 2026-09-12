@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Practicar Kichwa - Diccionario Kichwa{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260911-1">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260911-2">{% endblock %}
 {% block content %}
 <div class="learning-hub">
   <section class="learning-hero" aria-labelledby="learning-title">
@@ -28,18 +28,18 @@
       <p>Empieza por reconocer y continúa cuando quieras. No necesitas completar una modalidad para abrir la siguiente.</p>
     </div>
     <div class="learning-filter" aria-label="Preferencias para empezar">
-      <div class="learning-field"><label for="hub-category">Tema</label><select id="hub-category"><option value="">Todos los temas</option>{% for categoria in categorias_jugables %}<option value="{{ categoria.slug }}">{{ categoria.nombre }}</option>{% endfor %}</select></div>
-      <div class="learning-field"><label for="hub-difficulty">Dificultad de pronunciación</label><select id="hub-difficulty"><option value="facil">Fácil</option><option value="medio" selected>Media</option><option value="dificil">Difícil</option></select></div>
-      <a class="learning-primary" id="start-learning" href="{% url 'diccionario:juego_traduccion' %}">Empezar a reconocer <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      <div class="learning-field"><label for="hub-category"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Tema</span></label><select id="hub-category" data-tooltip="Limita la partida a palabras de un mismo tema"><option value="">Todos los temas</option>{% for categoria in categorias_jugables %}<option value="{{ categoria.slug }}">{{ categoria.nombre }}</option>{% endfor %}</select></div>
+      <div class="learning-field"><label for="hub-difficulty"><i class="fas fa-wave-square" aria-hidden="true"></i><span>Dificultad de pronunciación</span></label><select id="hub-difficulty" data-tooltip="Ajusta la complejidad de las palabras que practicarás"><option value="facil">Fácil</option><option value="medio" selected>Media</option><option value="dificil">Difícil</option></select></div>
+      <a class="learning-primary" id="start-learning" data-tooltip="Comienza con equivalencias Kichwa y español" href="{% url 'diccionario:juego_traduccion' %}">Empezar a reconocer <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
     </div>
     <ol class="learning-path">
       {% for juego in juegos_disponibles %}
-      <li class="learning-path__item">
+      <li class="learning-path__item learning-path__item--{{ juego.tipo }}">
         <div class="learning-path__marker" aria-hidden="true"><i class="fas {{ juego.icono }}"></i></div>
         <div class="learning-path__body">
           <div class="learning-path__meta"><span>{{ juego.etapa }}</span><span>{{ juego.duracion }}</span></div>
           <h3>{{ juego.nombre }}</h3><p>{{ juego.descripcion }}</p>
-          <a class="learning-game-link" data-game-url="{% url juego.url %}" href="{% url juego.url %}">Abrir modalidad <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          <a class="learning-game-link" data-game-url="{% url juego.url %}" data-tooltip="Practicar {{ juego.etapa|lower }} con {{ juego.nombre|lower }}" href="{% url juego.url %}">Abrir modalidad <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
       </li>
       {% endfor %}
@@ -47,4 +47,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'js/games-learning.js' %}?v=20260911-1" defer></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'js/games-learning.js' %}?v=20260911-2" defer></script>{% endblock %}

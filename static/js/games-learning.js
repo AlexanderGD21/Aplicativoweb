@@ -30,6 +30,10 @@
   const skipButton = document.getElementById('game-skip');
   const completePanel = document.getElementById('game-complete');
   const actions = document.getElementById('game-actions');
+  const soundButton = document.getElementById('game-sound-toggle');
+  const exitPrompt = document.getElementById('game-exit-prompt');
+  const stayButton = document.getElementById('game-stay');
+  const confirmExitButton = document.getElementById('game-confirm-exit');
   const startedAt = Date.now();
   let current = 0;
   let correct = 0;
@@ -38,6 +42,13 @@
   let finished = false;
   let questionLocked = false;
   let revealedLetters = new Set();
+  let sessionDirty = false;
+  let pendingExit = null;
+  let audioContext = null;
+  let soundEnabled = true;
+  let promptPreviousFocus = null;
+
+  try { soundEnabled = window.localStorage.getItem('kichwa-game-sound') !== 'off'; } catch (_) { /* La preferencia es opcional. */ }
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
   const shuffle = (items) => {
@@ -51,6 +62,113 @@
   const normalize = (value) => (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').replace(/[^a-z0-9ñ]+/g, ' ').trim();
   const elapsedSeconds = () => Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
   const formatTime = (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+
+  const ensureAudio = () => {
+    if (!soundEnabled) return null;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return null;
+    if (!audioContext) audioContext = new AudioContext();
+    if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+    return audioContext;
+  };
+
+  const playTone = (frequency, delay, duration, volume = .035) => {
+    const context = ensureAudio();
+    if (!context) return;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const begins = context.currentTime + delay;
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, begins);
+    gain.gain.setValueAtTime(.0001, begins);
+    gain.gain.exponentialRampToValueAtTime(volume, begins + .012);
+    gain.gain.exponentialRampToValueAtTime(.0001, begins + duration);
+    oscillator.connect(gain); gain.connect(context.destination);
+    oscillator.start(begins); oscillator.stop(begins + duration + .02);
+  };
+
+  const playSound = (kind) => {
+    if (!soundEnabled) return;
+    if (kind === 'correct') { playTone(659, 0, .13); playTone(880, .105, .18); }
+    else if (kind === 'error') { playTone(247, 0, .16, .026); playTone(196, .11, .2, .024); }
+    else if (kind === 'complete') { playTone(523, 0, .12); playTone(659, .1, .14); playTone(988, .22, .25); }
+    else playTone(440, 0, .08, .018);
+  };
+
+  const markSessionActive = () => {
+    if (!finished) sessionDirty = true;
+    ensureAudio();
+  };
+
+  const updateSoundButton = () => {
+    if (!soundButton) return;
+    soundButton.setAttribute('aria-pressed', String(soundEnabled));
+    soundButton.querySelector('i').className = `fas ${soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark'}`;
+    soundButton.querySelector('span').textContent = soundEnabled ? 'Sonido activado' : 'Sonido silenciado';
+  };
+
+  updateSoundButton();
+  soundButton?.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    try { window.localStorage.setItem('kichwa-game-sound', soundEnabled ? 'on' : 'off'); } catch (_) { /* La partida sigue funcionando sin almacenamiento local. */ }
+    updateSoundButton();
+    if (soundEnabled) playSound('select');
+  });
+
+  const hideExitPrompt = () => {
+    if (!exitPrompt) return;
+    exitPrompt.hidden = true;
+    pendingExit = null;
+    promptPreviousFocus?.focus();
+  };
+
+  const requestExit = (action) => {
+    if (!sessionDirty || finished || !exitPrompt) { action(); return; }
+    pendingExit = action;
+    promptPreviousFocus = document.activeElement;
+    exitPrompt.hidden = false;
+    stayButton?.focus();
+  };
+
+  stayButton?.addEventListener('click', hideExitPrompt);
+  confirmExitButton?.addEventListener('click', () => {
+    const action = pendingExit;
+    sessionDirty = false;
+    exitPrompt.hidden = true;
+    pendingExit = null;
+    action?.();
+  });
+
+  exitPrompt?.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') { event.preventDefault(); hideExitPrompt(); return; }
+    if (event.key !== 'Tab') return;
+    const controls = [stayButton, confirmExitButton].filter(Boolean);
+    const currentIndex = controls.indexOf(document.activeElement);
+    const nextIndex = event.shiftKey ? (currentIndex <= 0 ? controls.length - 1 : currentIndex - 1) : (currentIndex + 1) % controls.length;
+    event.preventDefault(); controls[nextIndex].focus();
+  });
+
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link || link.closest('#game-exit-prompt') || link.target === '_blank' || !sessionDirty || finished) return;
+    const destination = new URL(link.href, window.location.href);
+    if (destination.href === window.location.href || destination.hash && destination.pathname === window.location.pathname && destination.search === window.location.search) return;
+    event.preventDefault();
+    requestExit(() => { window.location.href = destination.href; });
+  }, true);
+
+  document.addEventListener('submit', (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || form.closest('#game-stage') || form.closest('#game-exit-prompt') || !sessionDirty || finished) return;
+    event.preventDefault();
+    requestExit(() => form.submit());
+  }, true);
+
+  window.addEventListener('beforeunload', (event) => {
+    if (!sessionDirty || finished) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
 
   const timer = window.setInterval(() => {
     const time = document.getElementById('game-time');
@@ -84,6 +202,7 @@
   };
 
   const registerAnswer = async (word, payload) => {
+    markSessionActive();
     const response = await fetch(root.dataset.answerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
@@ -98,9 +217,11 @@
       correct += 1;
       streak += 1;
       showFeedback(true, 'Respuesta correcta.', result.progreso_guardado ? 'El avance de esta palabra quedó guardado.' : 'Puedes continuar con la siguiente.');
+      playSound('correct');
     } else {
       streak = 0;
       showFeedback(false, 'Todavía no.', `La respuesta esperada era “${result.respuesta_correcta}”.`);
+      playSound('error');
     }
     updateStats();
   };
@@ -113,6 +234,7 @@
 
   const finishGame = async () => {
     finished = true;
+    sessionDirty = false;
     window.clearInterval(timer);
     stage.hidden = true;
     feedback.hidden = true;
@@ -121,6 +243,7 @@
     const accuracy = Math.round((correct / Math.max(sessionTotal, 1)) * 100);
     document.getElementById('game-complete-copy').textContent = `Acertaste ${correct} de ${sessionTotal} palabras (${accuracy}%) en ${formatTime(elapsedSeconds())}.`;
     setProgress(sessionTotal, sessionTotal);
+    playSound('complete');
     if (root.dataset.authenticated !== 'true') return;
     try {
       await fetch(root.dataset.statsUrl, {
@@ -143,7 +266,13 @@
     nextButton.hidden = true;
     skipButton.hidden = false;
     if (current >= words.length) finishGame();
-    else renderSequential();
+    else {
+      renderSequential();
+      stage.animate?.([
+        { opacity: .55, clipPath: 'inset(0 0 18% 0 round 12px)' },
+        { opacity: 1, clipPath: 'inset(0 0 0 0 round 12px)' },
+      ], { duration: 260, easing: 'cubic-bezier(.16,1,.3,1)' });
+    }
   };
 
   const makeOption = (label, wordId, correctId, direction) => {
@@ -282,6 +411,7 @@
       button.append(label);
       button.addEventListener('click', async () => {
         if (button.classList.contains('is-open') || button.classList.contains('is-matched') || openCards.length === 2) return;
+        markSessionActive();
         button.classList.add('is-open');
         button.setAttribute('aria-label', `${card.side === 'kichwa' ? 'Kichwa' : 'Español'}: ${card.label}`);
         openCards.push(button);
@@ -334,6 +464,7 @@
       button.type = 'button'; button.className = 'match-option'; button.textContent = word.kichwa; button.dataset.wordId = String(word.id);
       button.addEventListener('click', () => {
         if (button.classList.contains('is-matched')) return;
+        markSessionActive();
         left.querySelectorAll('.is-selected').forEach((item) => item.classList.remove('is-selected'));
         selected = button; button.classList.add('is-selected'); clearFeedback();
       });
@@ -363,6 +494,7 @@
     });
     board.append(left, right); stage.replaceChildren(board); setProgress(0);
     hintButton.onclick = () => {
+      markSessionActive();
       const first = left.querySelector('.match-option:not(.is-matched)');
       if (!first) return;
       const match = right.querySelector(`[data-word-id="${first.dataset.wordId}"]`);
@@ -400,31 +532,79 @@
       item.append(kichwa, espanol); list.append(item);
     });
     sessionTotal = placements.length;
-    let start = null; let found = 0;
+    let start = null; let found = 0; let dragStart = null; let dragEnd = null; let dragMoved = false; let suppressClick = false;
     const cellNodes = new Map();
+    const clearPreview = () => gridNode.querySelectorAll('.is-preview').forEach((item) => item.classList.remove('is-preview'));
+    const previewLine = (from, to) => {
+      clearPreview();
+      if (!from || !to || from[0] !== to[0]) return;
+      const firstColumn = Math.min(from[1], to[1]);
+      const lastColumn = Math.max(from[1], to[1]);
+      for (let column = firstColumn; column <= lastColumn; column += 1) cellNodes.get(`${from[0]}:${column}`)?.classList.add('is-preview');
+    };
+    const findMatch = (from, to) => placements.find((placement) => {
+      if (placement.found) return false;
+      const first = placement.cells[0]; const last = placement.cells[placement.cells.length - 1];
+      return (first[0] === from[0] && first[1] === from[1] && last[0] === to[0] && last[1] === to[1]) || (last[0] === from[0] && last[1] === from[1] && first[0] === to[0] && first[1] === to[1]);
+    });
+    const submitLine = async (from, to) => {
+      clearPreview();
+      gridNode.querySelectorAll('.is-start').forEach((item) => item.classList.remove('is-start'));
+      if (!from || !to || from[0] !== to[0]) {
+        showFeedback(false, 'Traza una línea horizontal.', 'Las palabras pueden leerse de izquierda a derecha o al revés.');
+        playSound('error'); streak = 0; updateStats(); return;
+      }
+      const match = findMatch(from, to);
+      if (!match) {
+        showFeedback(false, 'Esa línea no corresponde a una palabra pendiente.', 'Prueba con otro inicio y final.');
+        playSound('error'); streak = 0; updateStats(); return;
+      }
+      try {
+        const accepted = await registerPair(match.word, match.word.id);
+        if (!accepted) return;
+        match.found = true; found += 1;
+        match.cells.forEach(([row, column]) => cellNodes.get(`${row}:${column}`)?.classList.add('is-found'));
+        list.querySelector(`[data-word-id="${match.word.id}"]`)?.classList.add('is-found'); setProgress(found, placements.length);
+        if (found === placements.length) window.setTimeout(finishGame, 450);
+      } catch (_) { handleRequestError(); }
+    };
     for (let row = 0; row < size; row += 1) for (let col = 0; col < size; col += 1) {
       const cell = document.createElement('button'); cell.type = 'button'; cell.className = 'word-cell'; cell.textContent = grid[row][col]; cell.dataset.row = row; cell.dataset.col = col;
+      cell.setAttribute('aria-label', `Fila ${row + 1}, columna ${col + 1}: ${grid[row][col]}`);
       cellNodes.set(`${row}:${col}`, cell); gridNode.append(cell);
-      cell.addEventListener('click', async () => {
-        if (!start) { start = [row,col]; cell.classList.add('is-start'); return; }
-        const selectedStart = start; start = null; gridNode.querySelectorAll('.is-start').forEach((item) => item.classList.remove('is-start'));
-        const match = placements.find((placement) => {
-          if (placement.found) return false;
-          const first = placement.cells[0]; const last = placement.cells[placement.cells.length - 1];
-          return (first[0] === selectedStart[0] && first[1] === selectedStart[1] && last[0] === row && last[1] === col) || (last[0] === selectedStart[0] && last[1] === selectedStart[1] && first[0] === row && first[1] === col);
-        });
-        if (!match) { showFeedback(false, 'Esa línea no corresponde a una palabra pendiente.', 'Prueba con otro inicio y final.'); streak = 0; updateStats(); return; }
-        try {
-          const accepted = await registerPair(match.word, match.word.id);
-          if (!accepted) return;
-          match.found = true; found += 1; match.cells.forEach(([r,c]) => cellNodes.get(`${r}:${c}`)?.classList.add('is-found'));
-          list.querySelector(`[data-word-id="${match.word.id}"]`)?.classList.add('is-found'); setProgress(found, placements.length);
-          if (found === placements.length) window.setTimeout(finishGame, 450);
-        } catch (_) { handleRequestError(); }
+      cell.addEventListener('click', () => {
+        if (suppressClick) { suppressClick = false; return; }
+        markSessionActive();
+        if (!start) { start = [row,col]; cell.classList.add('is-start'); playSound('select'); return; }
+        const selectedStart = start; start = null; submitLine(selectedStart, [row,col]);
       });
     }
+    gridNode.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      const cell = event.target.closest('.word-cell'); if (!cell) return;
+      markSessionActive(); start = null; gridNode.querySelectorAll('.is-start').forEach((item) => item.classList.remove('is-start'));
+      dragStart = [Number(cell.dataset.row), Number(cell.dataset.col)]; dragEnd = dragStart; dragMoved = false;
+      gridNode.classList.add('is-dragging'); previewLine(dragStart, dragEnd);
+    });
+    gridNode.addEventListener('pointermove', (event) => {
+      if (!dragStart) return;
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.word-cell'); if (!target || !gridNode.contains(target)) return;
+      const next = [Number(target.dataset.row), Number(target.dataset.col)];
+      if (next[0] !== dragEnd[0] || next[1] !== dragEnd[1]) dragMoved = true;
+      dragEnd = next; previewLine(dragStart, dragEnd);
+    });
+    const finishDrag = (event) => {
+      if (!dragStart) return;
+      const from = dragStart; const to = dragEnd;
+      dragStart = null; dragEnd = null; gridNode.classList.remove('is-dragging');
+      if (!dragMoved) { clearPreview(); return; }
+      event.preventDefault(); suppressClick = true; submitLine(from, to);
+    };
+    gridNode.addEventListener('pointerup', finishDrag);
+    gridNode.addEventListener('pointercancel', () => { dragStart = null; dragEnd = null; dragMoved = false; clearPreview(); gridNode.classList.remove('is-dragging'); });
     layout.append(gridNode, list); stage.replaceChildren(layout); setProgress(0, placements.length);
     hintButton.onclick = () => {
+      markSessionActive();
       const pending = placements.find((item) => !item.found); if (!pending) return;
       const [row,col] = pending.cells[0]; const cell = cellNodes.get(`${row}:${col}`); cell?.classList.add('is-start');
       window.setTimeout(() => cell?.classList.remove('is-start'), 900);
@@ -432,6 +612,7 @@
   };
 
   hintButton.addEventListener('click', () => {
+    markSessionActive();
     if (type === 'completar' && !questionLocked) {
       const candidates = [...words[current].kichwa].map((character, index) => /[\p{L}]/u.test(character) && index !== 0 && index !== words[current].kichwa.length - 1 ? index : -1).filter((index) => index >= 0 && !revealedLetters.has(index));
       if (candidates.length) { revealedLetters.add(candidates[0]); document.getElementById('game-mask').textContent = maskWord(words[current].kichwa); }

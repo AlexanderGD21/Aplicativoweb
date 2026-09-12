@@ -1311,3 +1311,30 @@ body.surface-ready main > :first-child {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Microinteracciones globales: cada control responde sin alterar el layout. */
+.ui-control {
+  transition-property: color, background-color, border-color, box-shadow, filter;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ui-control:active:not(:disabled) { filter: brightness(.92); }
+
+.tooltip {
+  --bs-tooltip-bg: #151f38;
+  --bs-tooltip-color: #fff;
+  --bs-tooltip-opacity: 1;
+  --bs-tooltip-border-radius: 8px;
+  --bs-tooltip-padding-x: .65rem;
+  --bs-tooltip-padding-y: .45rem;
+  font-family: 'Inter', sans-serif;
+  font-size: .76rem;
+  font-weight: 650;
+  letter-spacing: .01em;
+}
+
+.tooltip-inner {
+  max-width: 250px;
+  box-shadow: 0 8px 22px rgba(8, 19, 34, .22);
+}
