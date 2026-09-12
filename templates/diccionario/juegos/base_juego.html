@@ -18,7 +18,7 @@
     <div class="game-layout">
       <div class="game-workbench">
         <div class="game-progress" aria-label="Avance de la partida"><div class="game-progress__labels"><span id="game-progress-label">Pregunta 1 de {{ total_palabras }}</span><span id="game-progress-percent">0%</span></div><div class="game-progress__track"><span id="game-progress-fill"></span></div></div>
-        <div id="game-stage" class="game-stage" aria-live="polite"></div>
+        <div id="game-stage" class="game-stage" aria-live="polite" tabindex="-1"></div>
         <div id="game-feedback" class="game-feedback" role="status" aria-live="polite" hidden></div>
         <div class="game-actions" id="game-actions"><button class="learning-secondary" id="game-hint" type="button" data-tooltip="Muestra una ayuda breve sin resolver el reto"><i class="fas fa-lightbulb" aria-hidden="true"></i> Pista</button><button class="learning-secondary" id="game-skip" type="button" data-tooltip="Muestra la respuesta y continúa sin sumar un acierto">Omitir palabra</button><button class="learning-primary" id="game-next" type="button" data-tooltip="Avanza al siguiente reto" hidden>Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></button></div>
         <section class="game-complete" id="game-complete" hidden aria-labelledby="game-complete-title"><h2 id="game-complete-title">Sesión terminada</h2><p id="game-complete-copy"></p><div class="game-complete__actions"><button class="learning-primary" id="game-restart" type="button"><i class="fas fa-rotate-right" aria-hidden="true"></i> Practicar otra vez</button><a class="learning-secondary" href="{% url 'diccionario:juegos' %}">Elegir otra modalidad</a></div></section>
@@ -42,4 +42,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}{% if palabras %}<script src="{% static 'js/games-learning.js' %}?v=20260912-2" defer></script>{% endif %}{% endblock %}
+{% block extra_js %}{% if palabras %}<script src="{% static 'js/games-learning.js' %}?v=20260912-4" defer></script>{% endif %}{% endblock %}

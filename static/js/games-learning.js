@@ -123,7 +123,9 @@
     if (!exitPrompt) return;
     exitPrompt.hidden = true;
     pendingExit = null;
-    promptPreviousFocus?.focus({ preventScroll: true });
+    window.bootstrap?.Tooltip?.getInstance(promptPreviousFocus)?.hide();
+    stage.focus({ preventScroll: true });
+    promptPreviousFocus = null;
   };
 
   const positionExitPrompt = () => {
@@ -138,6 +140,7 @@
     if (!sessionDirty || finished || !exitPrompt) { action(); return; }
     pendingExit = action;
     promptPreviousFocus = document.activeElement;
+    window.bootstrap?.Tooltip?.getInstance(promptPreviousFocus)?.hide();
     exitPrompt.hidden = false;
     positionExitPrompt();
     stayButton?.focus();

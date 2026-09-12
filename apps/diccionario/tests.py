@@ -259,6 +259,24 @@ class DiccionarioTests(TestCase):
         self.assertEqual(respuesta.context['palabras'], [])
         self.assertContains(respuesta, 'No hay palabras disponibles con estos filtros')
 
+    def test_tema_y_dificultad_se_aplican_en_todas_las_modalidades(self):
+        Palabra.objects.create(
+            palabra_kichwa='Allku', traduccion_espanol='Perro', categoria=self.animales,
+            apta_para_juegos=True, dificultad_juego='facil',
+        )
+        Palabra.objects.create(
+            palabra_kichwa='Tanta', traduccion_espanol='Pan', categoria=self.categoria,
+            apta_para_juegos=True, dificultad_juego='medio',
+        )
+        filtros = {'categoria': self.animales.slug, 'dificultad': 'medio'}
+        for ruta in ('juego_traduccion', 'juego_conexion', 'juego_memoria', 'juego_completar', 'juego_sopa_letras'):
+            with self.subTest(ruta=ruta):
+                respuesta = self.client.get(reverse(f'diccionario:{ruta}'), filtros)
+                self.assertEqual(respuesta.status_code, 200)
+                self.assertEqual(respuesta.context['palabras'], [self.misi])
+                self.assertEqual(respuesta.context['categoria_seleccionada'], self.animales.slug)
+                self.assertEqual(respuesta.context['dificultad'], 'medio')
+
     def test_respuesta_se_valida_en_servidor_y_actualiza_progreso(self):
         usuario = User.objects.create_user('inti', password='contrasena-segura-123')
         self.client.force_login(usuario)

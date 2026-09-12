@@ -6,19 +6,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Los tooltips del sitio se declaran con data-tooltip para mantener el texto
   // accesible incluso cuando Bootstrap no está disponible.
-  document.querySelectorAll("[data-tooltip]").forEach((element) => {
+  const tooltipTargets = document.querySelectorAll("[data-tooltip]")
+  tooltipTargets.forEach((element) => {
     element.setAttribute("title", element.dataset.tooltip)
     if (element.dataset.bsToggle !== "dropdown") element.dataset.bsToggle = "tooltip"
   })
 
   if (bootstrap?.Tooltip) {
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((element) => {
-      bootstrap.Tooltip.getOrCreateInstance(element, {
+    tooltipTargets.forEach((element) => {
+      const tooltip = bootstrap.Tooltip.getOrCreateInstance(element, {
         boundary: document.body,
         container: document.body,
-        delay: { show: 280, hide: 80 },
-        trigger: "hover focus",
+        trigger: "manual",
       })
+      let hoverTimer = null
+      const hideTooltip = () => {
+        window.clearTimeout(hoverTimer)
+        hoverTimer = null
+        tooltip.hide()
+      }
+      element.addEventListener("pointerenter", (event) => {
+        if (event.pointerType !== "mouse") return
+        hoverTimer = window.setTimeout(() => tooltip.show(), 280)
+      })
+      element.addEventListener("pointerleave", hideTooltip)
+      element.addEventListener("click", hideTooltip)
     })
   }
 
