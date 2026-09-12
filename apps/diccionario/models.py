@@ -1,5 +1,6 @@
 import re
 import unicodedata
+import uuid
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -273,3 +274,102 @@ class EstadisticaJuego(models.Model):
         if self.respuestas_totales > 0:
             return round((self.respuestas_correctas / self.respuestas_totales) * 100, 2)
         return 0
+
+
+class SesionJuego(models.Model):
+    """Conjunto cerrado de palabras que el servidor autoriza para una partida."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='sesiones_juego')
+    clave_anonima = models.CharField(max_length=40, blank=True)
+    tipo_juego = models.CharField(max_length=20, choices=EstadisticaJuego.TIPO_JUEGO_CHOICES)
+    dificultad = models.CharField(max_length=10, choices=Palabra.DIFICULTAD_CHOICES)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
+    palabras_ids = models.JSONField(default=list)
+    iniciada_en = models.DateTimeField(auto_now_add=True)
+    finalizada_en = models.DateTimeField(null=True, blank=True)
+    estadistica = models.OneToOneField(
+        EstadisticaJuego, on_delete=models.SET_NULL, null=True, blank=True, related_name='sesion_validada',
+    )
+
+    class Meta:
+        verbose_name = 'Sesión de juego'
+        verbose_name_plural = 'Sesiones de juego'
+        ordering = ['-iniciada_en']
+
+
+class IntentoPalabraJuego(models.Model):
+    sesion = models.ForeignKey(SesionJuego, on_delete=models.CASCADE, related_name='intentos')
+    palabra = models.ForeignKey(Palabra, on_delete=models.CASCADE, related_name='intentos_juego')
+    correcta = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Intento de palabra'
+        verbose_name_plural = 'Intentos de palabras'
+        ordering = ['fecha']
+        indexes = [
+            models.Index(fields=['sesion', 'palabra', 'correcta'], name='intento_sesion_palabra_idx'),
+        ]
+
+
+class ProgresoPalabraJuego(models.Model):
+    """Memoria de aprendizaje por usuario y palabra, compartida por los juegos."""
+
+    DOMINIO_CHOICES = [
+        ('nueva', 'Nueva'),
+        ('aprendiendo', 'Aprendiendo'),
+        ('practicando', 'En práctica'),
+        ('dominada', 'Dominada'),
+    ]
+
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='progreso_juegos')
+    palabra = models.ForeignKey(Palabra, on_delete=models.CASCADE, related_name='progreso_juegos')
+    intentos = models.PositiveIntegerField(default=0)
+    respuestas_correctas = models.PositiveIntegerField(default=0)
+    racha_actual = models.PositiveIntegerField(default=0)
+    mejor_racha = models.PositiveIntegerField(default=0)
+    dominio = models.CharField(max_length=12, choices=DOMINIO_CHOICES, default='nueva', db_index=True)
+    ultima_practica = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Progreso de palabra en juegos'
+        verbose_name_plural = 'Progreso de palabras en juegos'
+        ordering = ['dominio', 'ultima_practica']
+        constraints = [
+            models.UniqueConstraint(fields=['usuario', 'palabra'], name='progreso_juego_usuario_palabra'),
+        ]
+        indexes = [
+            models.Index(fields=['usuario', 'dominio', 'ultima_practica'], name='progreso_juego_prioridad_idx'),
+        ]
+
+    @property
+    def porcentaje_aciertos(self):
+        if not self.intentos:
+            return 0
+        return round((self.respuestas_correctas / self.intentos) * 100)
+
+    def registrar_respuesta(self, correcta):
+        self.intentos += 1
+        if correcta:
+            self.respuestas_correctas += 1
+            self.racha_actual += 1
+            self.mejor_racha = max(self.mejor_racha, self.racha_actual)
+        else:
+            self.racha_actual = 0
+
+        precision = self.respuestas_correctas / self.intentos
+        if self.intentos >= 6 and precision >= 0.85 and self.racha_actual >= 3:
+            self.dominio = 'dominada'
+        elif self.intentos >= 3 and precision >= 0.6:
+            self.dominio = 'practicando'
+        else:
+            self.dominio = 'aprendiendo'
+
+        self.save(update_fields=[
+            'intentos', 'respuestas_correctas', 'racha_actual', 'mejor_racha',
+            'dominio', 'ultima_practica',
+        ])
+
+    def __str__(self):
+        return f'{self.usuario.username}: {self.palabra.palabra_kichwa} ({self.dominio})'

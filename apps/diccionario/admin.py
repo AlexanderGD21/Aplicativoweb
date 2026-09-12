@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.db.models import F
-from .models import Categoria, Palabra, PalabraFavorita, HistorialBusqueda, EstadisticaJuego
+from .models import (
+    Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
+    PalabraFavorita, ProgresoPalabraJuego, SesionJuego,
+)
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
@@ -99,3 +102,26 @@ class EstadisticaJuegoAdmin(admin.ModelAdmin):
     def porcentaje_aciertos(self, obj):
         return f"{obj.porcentaje_aciertos}%"
     porcentaje_aciertos.short_description = 'Porcentaje de Aciertos'
+
+
+@admin.register(ProgresoPalabraJuego)
+class ProgresoPalabraJuegoAdmin(admin.ModelAdmin):
+    list_display = ['usuario', 'palabra', 'dominio', 'intentos', 'respuestas_correctas', 'mejor_racha', 'ultima_practica']
+    list_filter = ['dominio', 'ultima_practica']
+    search_fields = ['usuario__username', 'palabra__palabra_kichwa', 'palabra__traduccion_espanol']
+    readonly_fields = ['ultima_practica']
+
+
+@admin.register(SesionJuego)
+class SesionJuegoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'usuario', 'tipo_juego', 'dificultad', 'categoria', 'iniciada_en', 'finalizada_en']
+    list_filter = ['tipo_juego', 'dificultad', 'iniciada_en', 'finalizada_en']
+    readonly_fields = ['id', 'palabras_ids', 'iniciada_en', 'finalizada_en', 'estadistica']
+
+
+@admin.register(IntentoPalabraJuego)
+class IntentoPalabraJuegoAdmin(admin.ModelAdmin):
+    list_display = ['sesion', 'palabra', 'correcta', 'fecha']
+    list_filter = ['correcta', 'fecha', 'sesion__tipo_juego']
+    search_fields = ['palabra__palabra_kichwa', 'palabra__traduccion_espanol', 'sesion__usuario__username']
+    readonly_fields = ['sesion', 'palabra', 'correcta', 'fecha']

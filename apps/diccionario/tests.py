@@ -9,7 +9,10 @@ from django.db.models.deletion import ProtectedError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from .models import Categoria, EstadisticaJuego, HistorialBusqueda, Palabra, RelacionPalabra
+from .models import (
+    Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
+    ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
+)
 from .models import PalabraFavorita
 from .services.clasificacion import (
     calcular_dificultad_pronunciacion,
@@ -229,12 +232,96 @@ class DiccionarioTests(TestCase):
         self.assertEqual(datos_traduccion[0]['descripcion_juego_espanol'], '')
 
         conexion = self.client.get(reverse('diccionario:juego_conexion'))
-        self.assertContains(conexion, f'id: {self.misi.pk}')
-        self.assertNotContains(conexion, 'id: 35, kichwa: "Pukllay"')
+        self.assertEqual(conexion.context['palabras'][0], self.misi)
+        self.assertNotContains(conexion, 'Pukllay')
 
         sopa = self.client.get(reverse('diccionario:juego_sopa_letras'))
         palabra_sopa = sopa.context['palabras'][0]
         self.assertEqual(palabra_sopa.palabra_tablero, 'MISI')
+
+    def test_filtros_de_juego_no_se_rellenan_con_otro_tema_o_dificultad(self):
+        alimentos = Categoria.objects.create(nombre='Alimentos')
+        Palabra.objects.create(
+            palabra_kichwa='Papa', traduccion_espanol='Papa', categoria=alimentos,
+            apta_para_juegos=True, dificultad_juego='facil',
+        )
+        respuesta = self.client.get(reverse('diccionario:juego_conexion'), {
+            'categoria': self.animales.slug,
+            'dificultad': 'facil',
+        })
+        self.assertEqual(respuesta.context['palabras'], [])
+        self.assertContains(respuesta, 'No hay palabras disponibles con estos filtros')
+
+    def test_respuesta_se_valida_en_servidor_y_actualiza_progreso(self):
+        usuario = User.objects.create_user('inti', password='contrasena-segura-123')
+        self.client.force_login(usuario)
+        url = reverse('diccionario:registrar_respuesta_juego')
+        juego = self.client.get(reverse('diccionario:juego_completar'), {'dificultad': 'medio'})
+        sesion_id = juego.context['sesion_id']
+
+        incorrecta = self.client.post(url, data=json.dumps({
+            'sesion_id': sesion_id, 'tipo_juego': 'completar', 'palabra_id': self.misi.pk, 'respuesta': 'allku',
+        }), content_type='application/json')
+        correcta = self.client.post(url, data=json.dumps({
+            'sesion_id': sesion_id, 'tipo_juego': 'completar', 'palabra_id': self.misi.pk, 'respuesta': 'mísí',
+        }), content_type='application/json')
+
+        self.assertFalse(incorrecta.json()['correcta'])
+        self.assertTrue(correcta.json()['correcta'])
+        progreso = ProgresoPalabraJuego.objects.get(usuario=usuario, palabra=self.misi)
+        self.assertEqual(progreso.intentos, 2)
+        self.assertEqual(progreso.respuestas_correctas, 1)
+        self.assertEqual(progreso.dominio, 'aprendiendo')
+        self.assertEqual(IntentoPalabraJuego.objects.filter(sesion_id=sesion_id).count(), 2)
+
+    def test_sesion_rechaza_palabra_ajena_y_resultado_inventado(self):
+        usuario = User.objects.create_user('sisa', password='contrasena-segura-123')
+        ajena = Palabra.objects.create(
+            palabra_kichwa='Tanta', traduccion_espanol='Pan', categoria=self.categoria,
+            apta_para_juegos=True, dificultad_juego='facil',
+        )
+        self.client.force_login(usuario)
+        juego = self.client.get(reverse('diccionario:juego_traduccion'), {
+            'categoria': self.animales.slug, 'dificultad': 'medio',
+        })
+        sesion_id = juego.context['sesion_id']
+        respuesta_url = reverse('diccionario:registrar_respuesta_juego')
+        rechazada = self.client.post(respuesta_url, data=json.dumps({
+            'sesion_id': sesion_id, 'tipo_juego': 'traduccion',
+            'palabra_id': ajena.pk, 'respuesta_id': ajena.pk,
+        }), content_type='application/json')
+        self.assertEqual(rechazada.status_code, 403)
+
+        validada = self.client.post(respuesta_url, data=json.dumps({
+            'sesion_id': sesion_id, 'tipo_juego': 'traduccion',
+            'palabra_id': self.misi.pk, 'respuesta_id': self.misi.pk,
+        }), content_type='application/json')
+        self.assertTrue(validada.json()['correcta'])
+        cierre = self.client.post(reverse('diccionario:guardar_estadistica_juego'), data=json.dumps({
+            'sesion_id': sesion_id, 'puntuacion': 999999, 'respuestas_correctas': 999,
+        }), content_type='application/json')
+        self.assertEqual(cierre.status_code, 201)
+        estadistica = EstadisticaJuego.objects.get(usuario=usuario)
+        self.assertEqual(estadistica.puntuacion, 10)
+        self.assertEqual(estadistica.respuestas_correctas, 1)
+        self.assertEqual(estadistica.respuestas_totales, 1)
+        self.assertEqual(SesionJuego.objects.get(id=sesion_id).estadistica, estadistica)
+
+    def test_seleccion_prioriza_palabras_nuevas_sobre_dominadas(self):
+        usuario = User.objects.create_user('killa', password='contrasena-segura-123')
+        nueva = Palabra.objects.create(
+            palabra_kichwa='Allku', traduccion_espanol='Perro', categoria=self.animales,
+            apta_para_juegos=True, dificultad_juego='medio',
+        )
+        ProgresoPalabraJuego.objects.create(
+            usuario=usuario, palabra=self.misi, intentos=8, respuestas_correctas=8,
+            racha_actual=8, mejor_racha=8, dominio='dominada',
+        )
+        self.client.force_login(usuario)
+        respuesta = self.client.get(reverse('diccionario:juego_traduccion'), {
+            'categoria': self.animales.slug, 'dificultad': 'medio',
+        })
+        self.assertEqual(respuesta.context['palabras'][0], nueva)
 
     def test_inicio_usa_palabras_destacadas_reales_y_api_de_sugerencias(self):
         respuesta = self.client.get(reverse('diccionario:home'))

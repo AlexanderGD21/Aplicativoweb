@@ -1,53 +1,41 @@
 import json
 import logging
 import unicodedata
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from .models import (
     Categoria,
     EstadisticaJuego,
     HistorialBusqueda,
+    IntentoPalabraJuego,
     Palabra,
     PalabraFavorita,
+    ProgresoPalabraJuego,
     RelacionPalabra,
+    SesionJuego,
     normalizar_texto_busqueda,
 )
 from .forms import BusquedaForm, ContactoForm
 from .services.relaciones import obtener_palabras_relacionadas
+from .services.juegos import (
+    categorias_jugables,
+    filtros_juego,
+    resumen_progreso,
+    seleccionar_palabras_juego,
+)
 
 
 logger = logging.getLogger(__name__)
 LIMITE_SUGERENCIAS = 8
-
-
-def _consulta_palabras_para_juego(dificultad):
-    """Devuelve el corpus jugable, sin registros incompletos ni inactivos."""
-    palabras = Palabra.objects.filter(
-        activa=True,
-        apta_para_juegos=True,
-    ).exclude(
-        palabra_kichwa=''
-    ).exclude(
-        traduccion_espanol=''
-    )
-
-    if dificultad:
-        por_dificultad = palabras.filter(dificultad_juego=dificultad)
-        if por_dificultad.exists():
-            palabras = por_dificultad
-
-    return palabras
-
-
-def _muestra_palabras_para_juego(dificultad, limite):
-    """Selecciona una muestra aleatoria pequeña del corpus apto para juegos."""
-    return list(_consulta_palabras_para_juego(dificultad).order_by('?')[:limite])
 
 
 def _normalizar_palabra_tablero(texto):
@@ -384,41 +372,41 @@ def contacto(request):
     context = {'form': form}
     return render(request, 'diccionario/contacto.html', context)
 
+JUEGOS_DISPONIBLES = [
+    {
+        'tipo': 'traduccion', 'etapa': 'Reconocer', 'nombre': 'Traducción guiada',
+        'descripcion': 'Reconoce equivalencias en ambos sentidos y aprende a distinguir significados cercanos.',
+        'url': 'diccionario:juego_traduccion', 'icono': 'fa-language', 'duracion': '3–5 min',
+    },
+    {
+        'tipo': 'conectar', 'etapa': 'Asociar', 'nombre': 'Conectar significados',
+        'descripcion': 'Une cada palabra Kichwa con su significado en español sin depender de arrastrar.',
+        'url': 'diccionario:juego_conexion', 'icono': 'fa-link', 'duracion': '3–4 min',
+    },
+    {
+        'tipo': 'memoria', 'etapa': 'Recordar', 'nombre': 'Memoria bilingüe',
+        'descripcion': 'Recupera parejas del mismo tema y fortalece el recuerdo visual del vocabulario.',
+        'url': 'diccionario:juego_memoria', 'icono': 'fa-clone', 'duracion': '4–6 min',
+    },
+    {
+        'tipo': 'completar', 'etapa': 'Producir', 'nombre': 'Completar en Kichwa',
+        'descripcion': 'Escribe la palabra completa a partir de su significado y una pista gradual.',
+        'url': 'diccionario:juego_completar', 'icono': 'fa-pen', 'duracion': '4–6 min',
+    },
+    {
+        'tipo': 'sopa_letras', 'etapa': 'Explorar', 'nombre': 'Sopa de palabras',
+        'descripcion': 'Localiza vocabulario de un mismo tema en una cuadrícula accesible por toques.',
+        'url': 'diccionario:juego_sopa_letras', 'icono': 'fa-border-all', 'duracion': '5–7 min',
+    },
+]
+
+
 def juegos(request):
-    """Vista principal de juegos"""
+    """Ruta de práctica y resumen personal de aprendizaje."""
     context = {
-        'juegos_disponibles': [
-            {
-                'nombre': 'Traducción',
-                'descripcion': 'Traduce palabras del kichwa al español y viceversa',
-                'url': 'diccionario:juego_traduccion',
-                'icono': '🔄'
-            },
-            {
-                'nombre': 'Completar',
-                'descripcion': 'Completa las palabras con las letras faltantes',
-                'url': 'diccionario:juego_completar',
-                'icono': '✏️'
-            },
-            {
-                'nombre': 'Memoria',
-                'descripcion': 'Encuentra las parejas de palabras en kichwa y español',
-                'url': 'diccionario:juego_memoria',
-                'icono': '🧠'
-            },
-            {
-                'nombre': 'Conexión',
-                'descripcion': 'Conecta las palabras en kichwa con su traducción',
-                'url': 'diccionario:juego_conexion',
-                'icono': '🔗'
-            },
-            {
-                'nombre': 'Sopa de Letras',
-                'descripcion': 'Encuentra las palabras ocultas en la sopa de letras',
-                'url': 'diccionario:juego_sopa_letras',
-                'icono': '🔍'
-            }
-        ]
+        'juegos_disponibles': JUEGOS_DISPONIBLES,
+        'categorias_jugables': categorias_jugables(),
+        'progreso': resumen_progreso(request.user),
     }
     return render(request, 'diccionario/juegos.html', context)
 
@@ -526,121 +514,105 @@ def quitar_favorita(request, palabra_id):
 
 # ==================== VISTAS DE JUEGOS ====================
 
-def juego_traduccion(request):
-    """Juego de traducción"""
-    try:
-        dificultad = request.GET.get('dificultad', 'medio')
-        palabras = _muestra_palabras_para_juego(dificultad, 15)
-        
-        palabras_data = []
-        for palabra in palabras:
-            palabras_data.append({
-                'id': palabra.id,
-                'palabra_kichwa': palabra.palabra_kichwa,
-                'traduccion_espanol': palabra.traduccion_espanol,
-                'pronunciacion': getattr(palabra, 'pronunciacion', '') or '',
-                # Una pista opcional no debe revelar la traducción correcta.
-                'descripcion_juego_espanol': _pista_de_traduccion(palabra),
-                'descripcion_juego_kichwa': palabra.descripcion_juego_kichwa or '',
-            })
-        
-        context = {
-            'palabras': palabras,
-            'palabras_json': json.dumps(palabras_data),
-            'dificultad': dificultad,
-            'total_palabras': len(palabras),
+def _datos_palabras_juego(palabras):
+    return [
+        {
+            'id': palabra.id,
+            'kichwa': palabra.palabra_kichwa,
+            'espanol': palabra.traduccion_espanol,
+            'pronunciacion': palabra.pronunciacion or '',
+            'pista': _pista_de_traduccion(palabra),
+            'tablero': getattr(palabra, 'palabra_tablero', ''),
+            'categoria': palabra.categoria.nombre,
         }
-        return render(request, 'diccionario/juegos/traduccion.html', context)
-        
+        for palabra in palabras
+    ]
+
+
+def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=None):
+    dificultad, categoria = filtros_juego(request, dificultad_predeterminada)
+    palabras = seleccionar_palabras_juego(
+        request.user, dificultad, categoria, limite=limite, filtro=filtro,
+    )
+    datos = _datos_palabras_juego(palabras)
+    meta = next(juego for juego in JUEGOS_DISPONIBLES if juego['tipo'] == tipo)
+    sesion = None
+    if palabras:
+        if not request.session.session_key:
+            request.session.create()
+        sesion = SesionJuego.objects.create(
+            usuario=request.user if request.user.is_authenticated else None,
+            clave_anonima='' if request.user.is_authenticated else request.session.session_key,
+            tipo_juego=tipo,
+            dificultad=dificultad,
+            categoria=Categoria.objects.filter(slug=categoria).first() if categoria else None,
+            palabras_ids=[palabra.id for palabra in palabras],
+        )
+    return {
+        'juego_meta': meta,
+        'tipo_juego': tipo,
+        'palabras': palabras,
+        'palabras_data': datos,
+        'palabras_json': json.dumps([
+            {
+                'id': dato['id'],
+                'palabra_kichwa': dato['kichwa'],
+                'traduccion_espanol': dato['espanol'],
+                'pronunciacion': dato['pronunciacion'],
+                'descripcion_juego_espanol': dato['pista'],
+                'descripcion_juego_kichwa': '',
+            }
+            for dato in datos
+        ]),
+        'dificultad': dificultad,
+        'categoria_seleccionada': categoria,
+        'categorias_jugables': categorias_jugables(),
+        'total_palabras': len(palabras),
+        'sesion_id': str(sesion.id) if sesion else '',
+    }
+
+def juego_traduccion(request):
+    """Reconocimiento bilingüe con distractores del corpus filtrado."""
+    try:
+        return render(request, 'diccionario/juegos/traduccion.html', _contexto_juego(request, 'traduccion', 'medio', 12))
     except Exception as e:
         messages.error(request, f'Error al cargar el juego: {str(e)}')
         return redirect('diccionario:juegos')
 
 def juego_completar(request):
-    """Juego de completar palabras"""
+    """Producción escrita de vocabulario Kichwa."""
     try:
-        dificultad = request.GET.get('dificultad', 'facil')
-        
-        palabras = _muestra_palabras_para_juego(dificultad, 15)
-        
-        context = {
-            'palabras': palabras,
-            'dificultad': dificultad,
-        }
-        return render(request, 'diccionario/juegos/completar.html', context)
-        
+        return render(request, 'diccionario/juegos/completar.html', _contexto_juego(request, 'completar', 'facil', 10))
     except Exception as e:
         messages.error(request, f'Error al cargar el juego: {str(e)}')
         return redirect('diccionario:juegos')
 
 def juego_memoria(request):
-    """Juego de memoria"""
+    """Memoria bilingüe con parejas del mismo filtro."""
     try:
-        dificultad = request.GET.get('dificultad', 'medio')
-        
-        palabras = _muestra_palabras_para_juego(dificultad, 15)
-        
-        # Preparar datos para el juego de memoria
-        cartas_data = []
-        for palabra in palabras:
-            cartas_data.append({
-                'texto': palabra.palabra_kichwa,
-                'traduccion': palabra.traduccion_espanol,
-                'id': palabra.id,
-                'pareja': palabra.id
-            })
-        
-        context = {
-            'palabras': palabras,
-            'cartas_json': json.dumps(cartas_data),
-            'dificultad': dificultad,
-        }
-        return render(request, 'diccionario/juegos/memoria.html', context)
-        
+        return render(request, 'diccionario/juegos/memoria.html', _contexto_juego(request, 'memoria', 'medio', 6))
     except Exception as e:
         messages.error(request, f'Error al cargar el juego: {str(e)}')
         return redirect('diccionario:juegos')
 
 def juego_conectar(request):
-    """Juego de conectar palabras"""
+    """Asociación accesible por selección, también en pantallas táctiles."""
     try:
-        dificultad = request.GET.get('dificultad', 'medio')
-        
-        palabras = _muestra_palabras_para_juego(dificultad, 6)
-        
-        context = {
-            'palabras': palabras,
-            'dificultad': dificultad,
-        }
-        return render(request, 'diccionario/juegos/conectar.html', context)
-        
+        return render(request, 'diccionario/juegos/conectar.html', _contexto_juego(request, 'conectar', 'medio', 6))
     except Exception as e:
         messages.error(request, f'Error al cargar el juego: {str(e)}')
         return redirect('diccionario:juegos')
 
 def juego_sopa_letras(request):
-    """Juego de sopa de letras"""
+    """Exploración visual con palabras que caben en el tablero."""
     try:
-        dificultad = request.GET.get('dificultad', 'medio')
-        
-        # Se toma un grupo mayor y solo se conservan palabras que caben en la
-        # grilla de 15 celdas. La puntuación editorial no forma parte del reto.
-        candidatas = _muestra_palabras_para_juego(dificultad, 80)
-        palabras = []
-        for palabra in candidatas:
-            palabra_tablero = _normalizar_palabra_tablero(palabra.palabra_kichwa)
-            if 2 <= len(palabra_tablero) <= 15:
-                palabra.palabra_tablero = palabra_tablero
-                palabras.append(palabra)
-            if len(palabras) == 8:
-                break
-        
-        context = {
-            'palabras': palabras,
-            'dificultad': dificultad,
-        }
-        return render(request, 'diccionario/juegos/sopa_letras.html', context)
-        
+        def cabe_en_tablero(palabra):
+            palabra.palabra_tablero = _normalizar_palabra_tablero(palabra.palabra_kichwa)
+            return 2 <= len(palabra.palabra_tablero) <= 12
+
+        return render(request, 'diccionario/juegos/sopa_letras.html', _contexto_juego(
+            request, 'sopa_letras', 'medio', 6, filtro=cabe_en_tablero,
+        ))
     except Exception as e:
         messages.error(request, f'Error al cargar el juego: {str(e)}')
         return redirect('diccionario:juegos')
@@ -667,7 +639,7 @@ def _entero_no_negativo(datos, campo, maximo, default=None):
 
 @require_http_methods(['POST'])
 def guardar_estadistica_juego(request):
-    """Guarda una partida autenticada con valores de rango controlado."""
+    """Cierra una sesión y deriva el resultado desde intentos validados."""
     if not request.user.is_authenticated:
         return _respuesta_error('Debes iniciar sesión para guardar estadísticas.', 401)
     try:
@@ -677,39 +649,105 @@ def guardar_estadistica_juego(request):
     if not isinstance(data, dict):
         return _respuesta_error('El cuerpo de la solicitud debe ser un objeto JSON.')
 
-    tipos_validos = {valor for valor, _ in EstadisticaJuego.TIPO_JUEGO_CHOICES}
-    dificultades_validas = {valor for valor, _ in Palabra.DIFICULTAD_CHOICES}
-    tipo_juego = data.get('tipo_juego')
-    dificultad = data.get('dificultad', 'medio')
-    if tipo_juego not in tipos_validos or dificultad not in dificultades_validas:
-        return _respuesta_error('El tipo de juego o la dificultad no son válidos.')
-    try:
-        puntuacion = _entero_no_negativo(data, 'puntuacion', 1_000_000)
-        tiempo_jugado = _entero_no_negativo(data, 'tiempo_jugado', 86_400)
-        correctas = _entero_no_negativo(
-            data,
-            'respuestas_correctas' if 'respuestas_correctas' in data else 'palabras_correctas',
-            1_000,
-        )
-        if 'respuestas_totales' in data:
-            totales = _entero_no_negativo(data, 'respuestas_totales', 1_000)
-        else:
-            totales = correctas + _entero_no_negativo(data, 'palabras_incorrectas', 1_000)
-    except ValueError:
-        return _respuesta_error('Las puntuaciones, respuestas y tiempo deben ser enteros válidos.')
-    if correctas > totales:
-        return _respuesta_error('Las respuestas correctas no pueden superar el total.')
+    sesion_id = data.get('sesion_id')
+    with transaction.atomic():
+        try:
+            sesion = SesionJuego.objects.select_for_update().get(id=sesion_id, usuario=request.user)
+        except (SesionJuego.DoesNotExist, ValidationError, ValueError, TypeError):
+            return _respuesta_error('La sesión de juego no es válida.', 404)
+        if sesion.estadistica_id:
+            return JsonResponse({'success': True, 'message': 'La sesión ya estaba guardada.'})
 
-    EstadisticaJuego.objects.create(
-        usuario=request.user,
-        tipo_juego=tipo_juego,
-        puntuacion=puntuacion,
-        respuestas_correctas=correctas,
-        respuestas_totales=totales,
-        dificultad=dificultad,
-        tiempo_jugado=tiempo_jugado,
-    )
-    return JsonResponse({'success': True, 'message': 'Estadísticas guardadas correctamente'}, status=201)
+        ids_correctos = set(sesion.intentos.filter(correcta=True).values_list('palabra_id', flat=True))
+        correctas = len(ids_correctos.intersection(set(sesion.palabras_ids)))
+        totales = len(sesion.palabras_ids)
+        tiempo_jugado = min(max(int((timezone.now() - sesion.iniciada_en).total_seconds()), 0), 86_400)
+        estadistica = EstadisticaJuego.objects.create(
+            usuario=request.user,
+            tipo_juego=sesion.tipo_juego,
+            puntuacion=correctas * 10,
+            respuestas_correctas=correctas,
+            respuestas_totales=totales,
+            dificultad=sesion.dificultad,
+            tiempo_jugado=tiempo_jugado,
+        )
+        sesion.estadistica = estadistica
+        sesion.finalizada_en = timezone.now()
+        sesion.save(update_fields=['estadistica', 'finalizada_en'])
+    return JsonResponse({
+        'success': True,
+        'message': 'Estadísticas guardadas correctamente',
+        'puntuacion': estadistica.puntuacion,
+        'respuestas_correctas': correctas,
+        'respuestas_totales': totales,
+    }, status=201)
+
+
+@require_http_methods(['POST'])
+def registrar_respuesta_juego(request):
+    """Valida una respuesta en el servidor y conserva progreso por palabra."""
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return _respuesta_error('El cuerpo de la solicitud debe ser JSON válido.')
+    if not isinstance(data, dict):
+        return _respuesta_error('El cuerpo de la solicitud debe ser un objeto JSON.')
+
+    try:
+        sesion = SesionJuego.objects.get(id=data.get('sesion_id'))
+    except (SesionJuego.DoesNotExist, ValidationError, ValueError, TypeError):
+        return _respuesta_error('La sesión de juego no es válida.', 404)
+    if request.user.is_authenticated:
+        sesion_autorizada = sesion.usuario_id == request.user.id
+    else:
+        sesion_autorizada = sesion.usuario_id is None and sesion.clave_anonima == request.session.session_key
+    if not sesion_autorizada:
+        return _respuesta_error('Esta sesión pertenece a otra persona.', 403)
+    if sesion.finalizada_en:
+        return _respuesta_error('La sesión ya terminó.', 409)
+
+    tipo = data.get('tipo_juego')
+    if tipo != sesion.tipo_juego:
+        return _respuesta_error('El tipo de juego no coincide con la sesión.')
+    try:
+        palabra_id = _entero_no_negativo(data, 'palabra_id', 10_000_000)
+    except ValueError:
+        return _respuesta_error('La palabra no es válida.')
+    palabra = get_object_or_404(Palabra, pk=palabra_id, activa=True, apta_para_juegos=True)
+    if palabra.id not in sesion.palabras_ids:
+        return _respuesta_error('La palabra no pertenece a esta sesión.', 403)
+
+    if tipo == 'completar':
+        correcta = normalizar_texto_busqueda(data.get('respuesta', '')) == normalizar_texto_busqueda(palabra.palabra_kichwa)
+    else:
+        try:
+            respuesta_id = _entero_no_negativo(data, 'respuesta_id', 10_000_000)
+        except ValueError:
+            return _respuesta_error('La respuesta no es válida.')
+        correcta = respuesta_id == palabra.id
+
+    progreso = None
+    if request.user.is_authenticated:
+        with transaction.atomic():
+            IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabra, correcta=correcta)
+            progreso, _ = ProgresoPalabraJuego.objects.select_for_update().get_or_create(
+                usuario=request.user, palabra=palabra,
+            )
+            progreso.registrar_respuesta(correcta)
+
+    if tipo == 'completar' or data.get('direccion') == 'espanol_kichwa':
+        respuesta_correcta = palabra.palabra_kichwa
+    else:
+        respuesta_correcta = palabra.traduccion_espanol
+
+    return JsonResponse({
+        'success': True,
+        'correcta': correcta,
+        'respuesta_correcta': respuesta_correcta,
+        'progreso_guardado': progreso is not None,
+        'dominio': progreso.dominio if progreso else None,
+        'racha_palabra': progreso.racha_actual if progreso else 0,
+    })
 
 
 @require_http_methods(['GET'])
@@ -726,19 +764,16 @@ def obtener_palabras_juego(request):
     except ValueError:
         return _respuesta_error(f'cantidad debe ser un entero entre 0 y {API_MAX_CANTIDAD_JUEGO}.')
 
-    palabras_query = Palabra.objects.filter(activa=True, apta_para_juegos=True)
-    por_dificultad = palabras_query.filter(dificultad_juego=dificultad)
-    if por_dificultad.exists():
-        palabras_query = por_dificultad
-    palabras = palabras_query.order_by('?')[:cantidad]
+    categoria = request.GET.get('categoria', '').strip()
+    palabras = seleccionar_palabras_juego(request.user, dificultad, categoria, cantidad)
     return JsonResponse({'palabras': [
         {
             'id': palabra.id,
             'palabra_kichwa': palabra.palabra_kichwa,
             'traduccion_espanol': palabra.traduccion_espanol,
             'pronunciacion': palabra.pronunciacion or '',
-            'descripcion_juego_espanol': palabra.descripcion_juego_espanol or palabra.traduccion_espanol,
-            'descripcion_juego_kichwa': palabra.descripcion_juego_kichwa or palabra.palabra_kichwa,
+            'descripcion_juego_espanol': _pista_de_traduccion(palabra),
+            'descripcion_juego_kichwa': palabra.descripcion_juego_kichwa or '',
         }
         for palabra in palabras
     ]})
