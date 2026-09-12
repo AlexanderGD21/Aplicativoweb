@@ -395,7 +395,7 @@ JUEGOS_DISPONIBLES = [
     },
     {
         'tipo': 'sopa_letras', 'etapa': 'Explorar', 'nombre': 'Sopa de palabras',
-        'descripcion': 'Localiza vocabulario de un mismo tema arrastrando o marcando el inicio y el final.',
+        'descripcion': 'Localiza vocabulario en horizontal, vertical y diagonal, también en sentido inverso.',
         'url': 'diccionario:juego_sopa_letras', 'icono': 'fa-border-all', 'duracion': '5–7 min',
     },
 ]

@@ -104,6 +104,15 @@ class RegistroYSesionTests(TestCase):
         datos.update(cambios)
         return datos
 
+    def test_acceso_y_registro_ofrecen_ayuda_contextual(self):
+        acceso = self.client.get(reverse('usuarios:login'))
+        self.assertContains(acceso, 'data-tooltip="Mostrar u ocultar la contraseña escrita')
+        self.assertContains(acceso, 'data-tooltip="Puedes usar tu nombre de usuario')
+
+        registro = self.client.get(reverse('usuarios:registro'))
+        self.assertContains(registro, 'data-tooltip="Elige el nombre con el que iniciarás sesión')
+        self.assertContains(registro, 'data-tooltip="Validar los datos y crear tu cuenta')
+
     def test_registro_exige_terminos_y_correo_unico(self):
         sin_terminos = self._datos_registro()
         sin_terminos.pop('acepto_terminos')

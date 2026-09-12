@@ -27,6 +27,7 @@ class LoginForm(AuthenticationForm):
             'autocapitalize': 'none',
             'spellcheck': 'false',
             'placeholder': 'Tu usuario o correo',
+            'data-tooltip': 'Puedes usar tu nombre de usuario o el correo asociado',
         }),
     )
     password = forms.CharField(
@@ -36,6 +37,7 @@ class LoginForm(AuthenticationForm):
             'class': 'form-control',
             'autocomplete': 'current-password',
             'placeholder': 'Tu contraseña',
+            'data-tooltip': 'La contraseña distingue mayúsculas y minúsculas',
         }),
     )
     error_messages = {
@@ -70,6 +72,7 @@ class RegistroForm(UserCreationForm):
             'autocomplete': 'email',
             'autocapitalize': 'none',
             'spellcheck': 'false',
+            'data-tooltip': 'Usaremos este correo para recuperar el acceso a tu cuenta',
         })
     )
     first_name = forms.CharField(
@@ -79,6 +82,7 @@ class RegistroForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Tu nombre',
             'autocomplete': 'given-name',
+            'data-tooltip': 'Escribe tu nombre como quieres que aparezca en tu perfil',
         })
     )
     last_name = forms.CharField(
@@ -88,6 +92,7 @@ class RegistroForm(UserCreationForm):
             'class': 'form-control',
             'placeholder': 'Tu apellido',
             'autocomplete': 'family-name',
+            'data-tooltip': 'Este dato ayuda a identificar tu cuenta',
         })
     )
 
@@ -101,6 +106,7 @@ class RegistroForm(UserCreationForm):
                 'autocomplete': 'username',
                 'autocapitalize': 'none',
                 'spellcheck': 'false',
+                'data-tooltip': 'Elige el nombre con el que iniciarás sesión',
             }),
         }
 
@@ -113,12 +119,14 @@ class RegistroForm(UserCreationForm):
             'placeholder': 'Crea una contraseña',
             'autocomplete': 'new-password',
             'aria-describedby': 'password-strength-help',
+            'data-tooltip': 'Combina al menos 8 caracteres y evita claves comunes',
         })
         self.fields['password2'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Repite la contraseña',
             'autocomplete': 'new-password',
             'aria-describedby': 'password-match-help',
+            'data-tooltip': 'Repite exactamente la contraseña anterior',
         })
         self.fields['acepto_terminos'].widget.attrs['aria-describedby'] = 'terms-consent-help'
         if self.is_bound:

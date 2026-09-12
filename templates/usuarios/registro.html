@@ -9,7 +9,7 @@
   <div class="auth-wrap">
     <div class="auth-frame auth-frame--register">
       <aside class="auth-orientation">
-        <a class="auth-brand" href="{% url 'diccionario:home' %}">
+        <a class="auth-brand" href="{% url 'diccionario:home' %}" data-tooltip="Volver al inicio sin crear una cuenta">
           <i class="fas fa-book" aria-hidden="true"></i>
           <span>Diccionario Kichwa</span>
         </a>
@@ -64,7 +64,7 @@
               <label for="{{ form.password1.id_for_label }}">Contraseña</label>
               <div class="password-wrap">
                 {{ form.password1 }}
-                <button class="password-toggle" type="button" data-password-toggle="id_password1" aria-label="Mostrar contraseña" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                <button class="password-toggle" type="button" data-password-toggle="id_password1" aria-label="Mostrar contraseña" aria-pressed="false" data-tooltip="Mostrar u ocultar la contraseña"><i class="fas fa-eye" aria-hidden="true"></i></button>
               </div>
               <div class="password-meter" data-password-meter data-score="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
               <span class="password-feedback" id="password-strength-help" data-password-feedback>Usa al menos 8 caracteres y evita contraseñas comunes.</span>
@@ -74,7 +74,7 @@
               <label for="{{ form.password2.id_for_label }}">Confirmar contraseña</label>
               <div class="password-wrap">
                 {{ form.password2 }}
-                <button class="password-toggle" type="button" data-password-toggle="id_password2" aria-label="Mostrar contraseña" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                <button class="password-toggle" type="button" data-password-toggle="id_password2" aria-label="Mostrar contraseña" aria-pressed="false" data-tooltip="Mostrar u ocultar la confirmación"><i class="fas fa-eye" aria-hidden="true"></i></button>
               </div>
               <span id="password-match-help" data-password-match aria-live="polite"></span>
               {% for error in form.password2.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
@@ -85,7 +85,7 @@
             <div class="auth-choice{% if form.acepto_terminos.errors %} has-error{% endif %}">
               {{ form.acepto_terminos }}
               <label for="{{ form.acepto_terminos.id_for_label }}">
-                He leído y acepto los <a href="{% url 'usuarios:terminos' %}" target="_blank" rel="noopener">Términos de uso<span class="visually-hidden"> (se abre en otra pestaña)</span></a> y la <a href="{% url 'usuarios:privacidad' %}" target="_blank" rel="noopener">Política de privacidad<span class="visually-hidden"> (se abre en otra pestaña)</span></a>.
+                He leído y acepto los <a href="{% url 'usuarios:terminos' %}" target="_blank" rel="noopener" data-tooltip="Leer los términos en una pestaña nueva">Términos de uso<span class="visually-hidden"> (se abre en otra pestaña)</span></a> y la <a href="{% url 'usuarios:privacidad' %}" target="_blank" rel="noopener" data-tooltip="Leer la política en una pestaña nueva">Política de privacidad<span class="visually-hidden"> (se abre en otra pestaña)</span></a>.
               </label>
             </div>
             <span id="terms-consent-help">La aceptación es necesaria para crear la cuenta.</span>
@@ -98,7 +98,7 @@
           </div>
 
           <div class="auth-actions">
-            <button class="auth-button" type="submit" data-loading-text="Creando cuenta…">
+            <button class="auth-button" type="submit" data-loading-text="Creando cuenta…" data-tooltip="Validar los datos y crear tu cuenta">
               <i class="fas fa-user-plus" aria-hidden="true"></i>
               Crear mi cuenta
             </button>
@@ -107,7 +107,7 @@
 
         <div class="auth-meta">
           <span>¿Ya tienes una cuenta?</span>
-          <a href="{% url 'usuarios:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Iniciar sesión</a>
+          <a href="{% url 'usuarios:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}" data-tooltip="Ya tengo una cuenta y quiero acceder">Iniciar sesión</a>
         </div>
       </div>
     </div>

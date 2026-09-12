@@ -28,22 +28,22 @@
                     <label for="id_termino">¿Qué palabra quieres comprender?</label>
                     <div class="search-control" data-suggestions-url="{% url 'diccionario:obtener_sugerencias_ajax' %}">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input id="id_termino" name="termino" type="search" placeholder="Prueba con wasi, casa, yaku o agua" autocomplete="off" aria-autocomplete="list" aria-controls="search-suggestions" aria-expanded="false">
-                        <button type="submit">Buscar</button>
+                        <input id="id_termino" name="termino" type="search" placeholder="Prueba con wasi, casa, yaku o agua" autocomplete="off" aria-autocomplete="list" aria-controls="search-suggestions" aria-expanded="false" data-tooltip="Escribe una palabra completa o una parte, en Kichwa o español">
+                        <button type="submit" data-tooltip="Buscar esta palabra en todo el diccionario">Buscar</button>
                         <div id="search-suggestions" class="search-suggestions" role="listbox" hidden></div>
                     </div>
                     <p id="search-suggestions-status" class="visually-hidden" role="status" aria-live="polite"></p>
                     <div class="home-filter-row">
                         <label>
                             <span>Tema</span>
-                            <select name="categoria">
+                            <select name="categoria" data-tooltip="Muestra sólo palabras del tema seleccionado">
                                 <option value="">Todos los temas</option>
                                 {% for categoria in categorias %}<option value="{{ categoria.pk }}">{{ categoria.nombre }}</option>{% endfor %}
                             </select>
                         </label>
                         <label>
                             <span>Pronunciación</span>
-                            <select name="dificultad">
+                            <select name="dificultad" data-tooltip="Filtra según la complejidad de pronunciación">
                                 <option value="">Cualquier dificultad</option>
                                 <option value="facil">Fácil</option>
                                 <option value="medio">Media</option>
@@ -65,7 +65,7 @@
                     <p>{{ palabras_destacadas.0.traduccion_espanol }}</p>
                 </div>
                 {% if palabras_destacadas.0.pronunciacion %}<p class="open-entry-pronunciation"><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabras_destacadas.0.pronunciacion }}</p>{% endif %}
-                <a href="{{ palabras_destacadas.0.get_absolute_url }}">Abrir esta entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <a href="{{ palabras_destacadas.0.get_absolute_url }}" data-tooltip="Consultar significado, pronunciación y palabras relacionadas">Abrir esta entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </aside>
             {% endif %}
         </div>
@@ -76,7 +76,7 @@
             <p><strong>{{ total_palabras }}</strong><span>equivalencias bilingües</span></p>
             <p><strong>{{ total_categorias }}</strong><span>temas para explorar</span></p>
             <p><strong>5</strong><span>juegos de práctica</span></p>
-            <a href="{% url 'diccionario:buscar' %}">Explorar el corpus <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            <a href="{% url 'diccionario:buscar' %}" data-tooltip="Abrir las {{ total_palabras }} entradas del diccionario">Explorar el corpus <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
     </section>
 
@@ -87,11 +87,11 @@
                     <h2 id="topics-title">Explora por tema</h2>
                     <p>Empieza por un campo cotidiano y continúa descubriendo vocabulario relacionado.</p>
                 </div>
-                <a href="{% url 'diccionario:categorias' %}">Ver los {{ total_categorias }} temas</a>
+                <a href="{% url 'diccionario:categorias' %}" data-tooltip="Consultar la organización temática completa">Ver los {{ total_categorias }} temas</a>
             </div>
             <div class="topic-list">
                 {% for categoria in categorias_destacadas %}
-                <a class="topic-row" style="--topic-color: {{ categoria.color|default:'#61736c' }}" href="{% url 'diccionario:palabras_por_categoria' categoria.pk %}">
+                <a class="topic-row" style="--topic-color: {{ categoria.color|default:'#61736c' }}" href="{% url 'diccionario:palabras_por_categoria' categoria.pk %}" data-tooltip="Explorar {{ categoria.total_palabras }} palabras de {{ categoria.nombre }}">
                     <span class="topic-marker" aria-hidden="true"></span>
                     <span><strong>{{ categoria.nombre }}</strong>{% if categoria.descripcion %}<small>{{ categoria.descripcion|truncatechars:88 }}</small>{% endif %}</span>
                     <span class="topic-count">{{ categoria.total_palabras }} palabras</span>
@@ -120,7 +120,7 @@
                     <h3>{{ palabra.palabra_kichwa }}</h3>
                     <p><span>Español</span>{{ palabra.traduccion_espanol }}</p>
                     {% if palabra.pronunciacion %}<small><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabra.pronunciacion }}</small>{% endif %}
-                    <a class="featured-entry-link" href="{{ palabra.get_absolute_url }}" aria-label="Ver entrada de {{ palabra.palabra_kichwa }}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <a class="featured-entry-link" href="{{ palabra.get_absolute_url }}" aria-label="Ver entrada de {{ palabra.palabra_kichwa }}" data-tooltip="Consultar la entrada de {{ palabra.palabra_kichwa }}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </article>
                 {% empty %}<p>Aún no hay palabras destacadas disponibles.</p>{% endfor %}
             </div>
@@ -134,8 +134,8 @@
                 <p>Busca su significado, escucha la pronunciación y llévala a uno de los juegos.</p>
             </div>
             <div class="home-close-actions">
-                <a class="home-primary-action" href="{% url 'diccionario:buscar' %}">Buscar palabras</a>
-                <a href="{% url 'diccionario:juegos' %}">Ir a los juegos</a>
+                <a class="home-primary-action" href="{% url 'diccionario:buscar' %}" data-tooltip="Buscar por texto, tema o pronunciación">Buscar palabras</a>
+                <a href="{% url 'diccionario:juegos' %}" data-tooltip="Practicar vocabulario en cinco modalidades">Ir a los juegos</a>
             </div>
         </div>
     </section>

@@ -25,7 +25,7 @@ STORY
 7. Una salida accidental se detiene con una franja superior que permite continuar o abandonar la partida.
 
 FIRST VIEWPORT
-En escritorio, la ruta y el selector ocupan una franja compacta y dejan ver las cinco modalidades como tarjetas diferenciadas. Dentro de una partida, el tablero es protagonista y los datos forman un rail breve. En móvil, filtros, tablero y acciones se apilan; el arrastre de la sopa es opcional porque se conserva la selección por dos toques y teclado, y los objetivos táctiles miden al menos 44 px.
+En escritorio, la ruta y el selector ocupan una franja compacta y dejan ver las cinco modalidades como tarjetas diferenciadas. Dentro de una partida, el tablero es protagonista y los datos forman un rail breve. En móvil, filtros, tablero y acciones se apilan; la sopa permite arrastre horizontal, vertical y diagonal en ambos sentidos, pero conserva la selección por dos toques y teclado, y los objetivos táctiles miden al menos 44 px.
 
 FORM
 Extensión code-led del sistema existente, confirmada por el usuario como continuación directa de la ruta acordada. No aplica concept roll ni seed porque no se crea ni reemplaza el mundo visual. La interacción distintiva es el cambio de estado del mismo panel de papel: pregunta, validación y siguiente paso ocurren sin modales ni saltos decorativos.
@@ -40,6 +40,8 @@ DECISION
 Confirmación textual del usuario, 2026-09-11: “claro entonces vayamos por ese orden, te doy los permisos para que hagas los cambios de los juegos con las palabras”. Esta aprobación cierra la dirección ya conversada y autoriza su ejecución directa; no abre una ronda de conceptos nueva.
 
 Ampliación textual del usuario, 2026-09-11: solicita confirmación al salir a mitad de una partida, animaciones, sonidos de acierto y error, arrastre en la sopa, tooltips, tarjetas diferenciadas por color y mejores etiquetas. Esta ampliación mantiene el mismo mundo visual y suma respuesta y orientación interactiva.
+
+Corrección textual del usuario, 2026-09-11: la sopa debe comportarse como el juego tradicional y aceptar direcciones horizontales, verticales y diagonales; los tooltips también deben cubrir Inicio, Buscar, Iniciar sesión y Registro.
 
 FINISH
 This should feel authored, coherent, and clearly derived from the approved brief—not like a generic template, not like a component-library assembly, and not like the cheapest acceptable version of the idea.

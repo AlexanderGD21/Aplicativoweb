@@ -9,7 +9,7 @@
   <div class="auth-wrap">
     <div class="auth-frame">
       <aside class="auth-orientation">
-        <a class="auth-brand" href="{% url 'diccionario:home' %}">
+        <a class="auth-brand" href="{% url 'diccionario:home' %}" data-tooltip="Volver al inicio sin acceder a una cuenta">
           <i class="fas fa-book" aria-hidden="true"></i>
           <span>Diccionario Kichwa</span>
         </a>
@@ -47,11 +47,11 @@
           <div class="auth-field{% if form.password.errors %} has-error{% endif %}">
             <div class="d-flex align-items-center justify-content-between gap-3">
               <label for="{{ form.password.id_for_label }}">Contraseña</label>
-              <a class="auth-inline-link small" href="{% url 'usuarios:password_reset' %}{% if next %}?next={{ next|urlencode }}{% endif %}">¿La olvidaste?</a>
+              <a class="auth-inline-link small" href="{% url 'usuarios:password_reset' %}{% if next %}?next={{ next|urlencode }}{% endif %}" data-tooltip="Recibir instrucciones para recuperar el acceso">¿La olvidaste?</a>
             </div>
             <div class="password-wrap">
               {{ form.password }}
-              <button class="password-toggle" type="button" data-password-toggle="id_password" aria-label="Mostrar contraseña" aria-pressed="false">
+              <button class="password-toggle" type="button" data-password-toggle="id_password" aria-label="Mostrar contraseña" aria-pressed="false" data-tooltip="Mostrar u ocultar la contraseña escrita">
                 <i class="fas fa-eye" aria-hidden="true"></i>
               </button>
             </div>
@@ -59,7 +59,7 @@
           </div>
 
           <div class="auth-actions">
-            <button class="auth-button" type="submit" data-loading-text="Comprobando…">
+            <button class="auth-button" type="submit" data-loading-text="Comprobando…" data-tooltip="Comprobar tus datos y abrir la cuenta">
               <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
               Entrar a mi cuenta
             </button>
@@ -73,7 +73,7 @@
 
         <div class="auth-meta">
           <span>¿Aún no tienes una cuenta?</span>
-          <a href="{% url 'usuarios:registro' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Crear una cuenta</a>
+          <a href="{% url 'usuarios:registro' %}{% if next %}?next={{ next|urlencode }}{% endif %}" data-tooltip="Abrir el formulario de registro">Crear una cuenta</a>
         </div>
       </div>
     </div>

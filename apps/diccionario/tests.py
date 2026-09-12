@@ -238,7 +238,7 @@ class DiccionarioTests(TestCase):
         sopa = self.client.get(reverse('diccionario:juego_sopa_letras'))
         palabra_sopa = sopa.context['palabras'][0]
         self.assertEqual(palabra_sopa.palabra_tablero, 'MISI')
-        self.assertContains(sopa, 'Arrastra desde la primera hasta la última letra')
+        self.assertContains(sopa, 'horizontal, vertical o diagonal')
         self.assertContains(sopa, 'id="game-exit-prompt"')
         self.assertContains(sopa, 'id="game-sound-toggle"')
 
@@ -335,6 +335,10 @@ class DiccionarioTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertContains(respuesta, self.palabra.get_absolute_url())
         self.assertContains(respuesta, reverse('diccionario:obtener_sugerencias_ajax'))
+        self.assertContains(respuesta, 'data-tooltip="Escribe una palabra completa')
+
+        busqueda = self.client.get(reverse('diccionario:buscar'))
+        self.assertContains(busqueda, 'data-tooltip="Limita los resultados a un tema')
 
     def test_auditoria_no_modifica_datos(self):
         salida = StringIO()

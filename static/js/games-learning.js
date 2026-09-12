@@ -509,15 +509,47 @@
     const size = 12;
     const grid = Array.from({ length: size }, () => Array(size).fill(''));
     const placements = [];
-    const availableRows = shuffle(Array.from({ length: size }, (_, index) => index));
+    const directions = [
+      { row: 0, col: 1, name: 'horizontal' },
+      { row: 1, col: 0, name: 'vertical' },
+      { row: 1, col: 1, name: 'diagonal' },
+      { row: 1, col: -1, name: 'diagonal' },
+      { row: 0, col: -1, name: 'horizontal inversa' },
+      { row: -1, col: 0, name: 'vertical inversa' },
+      { row: -1, col: -1, name: 'diagonal inversa' },
+      { row: -1, col: 1, name: 'diagonal inversa' },
+    ];
+    const placementCandidates = (letters, direction) => {
+      const length = letters.length;
+      const rowMinimum = direction.row < 0 ? length - 1 : 0;
+      const rowMaximum = direction.row > 0 ? size - length : size - 1;
+      const colMinimum = direction.col < 0 ? length - 1 : 0;
+      const colMaximum = direction.col > 0 ? size - length : size - 1;
+      if (rowMinimum > rowMaximum || colMinimum > colMaximum) return [];
+      const candidates = [];
+      for (let row = rowMinimum; row <= rowMaximum; row += 1) {
+        for (let col = colMinimum; col <= colMaximum; col += 1) candidates.push([row, col]);
+      }
+      return shuffle(candidates);
+    };
+    const placeWord = (word, wordIndex) => {
+      const letters = [...boardWord(word)];
+      const preferred = directions[wordIndex % directions.length];
+      const orderedDirections = [preferred, ...shuffle(directions.filter((direction) => direction !== preferred))];
+      for (const direction of orderedDirections) {
+        for (const [startRow, startCol] of placementCandidates(letters, direction)) {
+          const cells = letters.map((_, index) => [startRow + (direction.row * index), startCol + (direction.col * index)]);
+          const available = cells.every(([row, col], index) => !grid[row][col] || grid[row][col] === letters[index]);
+          if (!available) continue;
+          cells.forEach(([row, col], index) => { grid[row][col] = letters[index]; });
+          return { word, letters: letters.join(''), cells, direction: direction.name };
+        }
+      }
+      return null;
+    };
     words.forEach((word, wordIndex) => {
-      const original = boardWord(word);
-      const letters = wordIndex % 2 ? [...original].reverse().join('') : original;
-      const row = availableRows[wordIndex];
-      const startColumn = Math.floor(Math.random() * (size - letters.length + 1));
-      const cells = [...letters].map((_, index) => [row, startColumn + index]);
-      cells.forEach(([r,c], index) => { grid[r][c] = letters[index]; });
-      placements.push({ word, letters: original, cells });
+      const placement = placeWord(word, wordIndex);
+      if (placement) placements.push(placement);
     });
     const alphabet = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
     for (let row = 0; row < size; row += 1) for (let col = 0; col < size; col += 1) if (!grid[row][col]) grid[row][col] = alphabet[Math.floor(Math.random() * alphabet.length)];
@@ -535,12 +567,22 @@
     let start = null; let found = 0; let dragStart = null; let dragEnd = null; let dragMoved = false; let suppressClick = false;
     const cellNodes = new Map();
     const clearPreview = () => gridNode.querySelectorAll('.is-preview').forEach((item) => item.classList.remove('is-preview'));
+    const cellsInLine = (from, to) => {
+      if (!from || !to) return null;
+      const rowDistance = to[0] - from[0];
+      const colDistance = to[1] - from[1];
+      const isHorizontal = rowDistance === 0 && colDistance !== 0;
+      const isVertical = colDistance === 0 && rowDistance !== 0;
+      const isDiagonal = Math.abs(rowDistance) === Math.abs(colDistance) && rowDistance !== 0;
+      if (!isHorizontal && !isVertical && !isDiagonal) return null;
+      const length = Math.max(Math.abs(rowDistance), Math.abs(colDistance));
+      const rowStep = Math.sign(rowDistance); const colStep = Math.sign(colDistance);
+      return Array.from({ length: length + 1 }, (_, index) => [from[0] + (rowStep * index), from[1] + (colStep * index)]);
+    };
     const previewLine = (from, to) => {
       clearPreview();
-      if (!from || !to || from[0] !== to[0]) return;
-      const firstColumn = Math.min(from[1], to[1]);
-      const lastColumn = Math.max(from[1], to[1]);
-      for (let column = firstColumn; column <= lastColumn; column += 1) cellNodes.get(`${from[0]}:${column}`)?.classList.add('is-preview');
+      const cells = cellsInLine(from, to);
+      cells?.forEach(([row, col]) => cellNodes.get(`${row}:${col}`)?.classList.add('is-preview'));
     };
     const findMatch = (from, to) => placements.find((placement) => {
       if (placement.found) return false;
@@ -550,8 +592,8 @@
     const submitLine = async (from, to) => {
       clearPreview();
       gridNode.querySelectorAll('.is-start').forEach((item) => item.classList.remove('is-start'));
-      if (!from || !to || from[0] !== to[0]) {
-        showFeedback(false, 'Traza una línea horizontal.', 'Las palabras pueden leerse de izquierda a derecha o al revés.');
+      if (!cellsInLine(from, to)) {
+        showFeedback(false, 'Traza una línea recta.', 'Puedes buscar en horizontal, vertical o diagonal, en ambos sentidos.');
         playSound('error'); streak = 0; updateStats(); return;
       }
       const match = findMatch(from, to);

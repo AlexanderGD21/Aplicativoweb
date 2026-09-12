@@ -15,7 +15,7 @@
                 <h1>Busca en Kichwa o español</h1>
                 <p>Escribe una palabra en cualquiera de los dos idiomas. Puedes combinar la búsqueda con un tema y la dificultad de pronunciación.</p>
             </div>
-            <a class="text-link" href="{% url 'diccionario:categorias' %}">
+            <a class="text-link" href="{% url 'diccionario:categorias' %}" data-tooltip="Ver todos los temas y cuántas palabras contienen">
                 Explorar los 20 temas <i class="fas fa-arrow-right" aria-hidden="true"></i>
             </a>
         </div>
@@ -31,8 +31,8 @@
                 <div class="search-control" data-suggestions-url="{% url 'diccionario:obtener_sugerencias_ajax' %}">
                     <label class="visually-hidden" for="id_termino">Palabra en Kichwa o español</label>
                     <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-                    <input id="id_termino" name="termino" type="search" value="{{ query }}" maxlength="200" placeholder="Ejemplo: wasi, casa, yaku o agua" autocomplete="off" aria-autocomplete="list" aria-controls="search-suggestions" aria-expanded="false" aria-describedby="search-suggestions-status">
-                    <button type="submit">Buscar</button>
+                    <input id="id_termino" name="termino" type="search" value="{{ query }}" maxlength="200" placeholder="Ejemplo: wasi, casa, yaku o agua" autocomplete="off" aria-autocomplete="list" aria-controls="search-suggestions" aria-expanded="false" aria-describedby="search-suggestions-status" data-tooltip="Busca coincidencias en Kichwa y español, incluso sin tildes">
+                    <button type="submit" data-tooltip="Buscar con el texto y los filtros actuales">Buscar</button>
                     <div id="search-suggestions" class="search-suggestions" role="listbox" hidden></div>
                     <span id="search-suggestions-status" class="visually-hidden" aria-live="polite"></span>
                 </div>
@@ -43,12 +43,12 @@
             <aside class="filter-panel" aria-labelledby="filtros-title">
                 <div class="panel-heading">
                     <h2 id="filtros-title">Afinar resultados</h2>
-                    {% if filtros_activos %}<a href="{% url 'diccionario:buscar' %}">Limpiar</a>{% endif %}
+                    {% if filtros_activos %}<a href="{% url 'diccionario:buscar' %}" data-tooltip="Quitar el texto y todos los filtros">Limpiar</a>{% endif %}
                 </div>
                 <div class="filter-grid">
                     <div class="filter-field">
                         <label for="id_categoria">Tema</label>
-                        <select id="id_categoria" name="categoria">
+                        <select id="id_categoria" name="categoria" data-tooltip="Limita los resultados a un tema del diccionario">
                             <option value="">Todos los temas</option>
                             {% for grupo in categorias_agrupadas %}
                                 <optgroup label="{{ grupo.nombre }}">
@@ -61,7 +61,7 @@
                     </div>
                     <div class="filter-field">
                         <label for="id_dificultad">Dificultad de pronunciación</label>
-                        <select id="id_dificultad" name="dificultad">
+                        <select id="id_dificultad" name="dificultad" data-tooltip="Filtra por complejidad de pronunciación">
                             <option value="">Cualquier dificultad</option>
                             <option value="facil" {% if dificultad_activa == 'facil' %}selected{% endif %}>Fácil</option>
                             <option value="medio" {% if dificultad_activa == 'medio' %}selected{% endif %}>Media</option>
@@ -69,7 +69,7 @@
                         </select>
                     </div>
                 </div>
-                <button class="filter-submit" type="submit"><i class="fas fa-sliders" aria-hidden="true"></i> Aplicar filtros</button>
+                <button class="filter-submit" type="submit" data-tooltip="Actualizar los resultados con estas opciones"><i class="fas fa-sliders" aria-hidden="true"></i> Aplicar filtros</button>
                 {% if form.categoria.errors or form.dificultad.errors %}<p class="field-error">Uno de los filtros no es válido. Elige una opción de la lista.</p>{% endif %}
             </aside>
         </form>
@@ -101,8 +101,8 @@
                                 {% if palabra.pronunciacion %}<p class="word-pronunciation"><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabra.pronunciacion }}</p>{% endif %}
                             </div>
                             <div class="word-meta">
-                                <a class="category-tag" style="--tag-color: {{ palabra.categoria.color }}" href="{% url 'diccionario:buscar' %}?categoria={{ palabra.categoria.pk }}">{{ palabra.categoria.nombre }}</a>
-                                <a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}" aria-label="Ver detalles de {{ palabra.palabra_kichwa }}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                                <a class="category-tag" style="--tag-color: {{ palabra.categoria.color }}" href="{% url 'diccionario:buscar' %}?categoria={{ palabra.categoria.pk }}" data-tooltip="Ver más palabras de {{ palabra.categoria.nombre }}">{{ palabra.categoria.nombre }}</a>
+                                <a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}" aria-label="Ver detalles de {{ palabra.palabra_kichwa }}" data-tooltip="Abrir significado, pronunciación y relaciones">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                             </div>
                         </article>
                     {% endfor %}
@@ -110,9 +110,9 @@
 
                 {% if page_obj.has_other_pages %}
                     <nav class="dictionary-pagination" aria-label="Páginas de resultados">
-                        {% if page_obj.has_previous %}<a href="?{% if parametros_pagina %}{{ parametros_pagina }}&{% endif %}page={{ page_obj.previous_page_number }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</a>{% else %}<span aria-disabled="true"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</span>{% endif %}
+                        {% if page_obj.has_previous %}<a href="?{% if parametros_pagina %}{{ parametros_pagina }}&{% endif %}page={{ page_obj.previous_page_number }}" data-tooltip="Ir a la página anterior de resultados"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</a>{% else %}<span aria-disabled="true"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</span>{% endif %}
                         <p>Página <strong>{{ page_obj.number }}</strong> de {{ page_obj.paginator.num_pages }}</p>
-                        {% if page_obj.has_next %}<a href="?{% if parametros_pagina %}{{ parametros_pagina }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% else %}<span aria-disabled="true">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></span>{% endif %}
+                        {% if page_obj.has_next %}<a href="?{% if parametros_pagina %}{{ parametros_pagina }}&{% endif %}page={{ page_obj.next_page_number }}" data-tooltip="Ir a la página siguiente de resultados">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% else %}<span aria-disabled="true">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></span>{% endif %}
                     </nav>
                 {% endif %}
             {% else %}
@@ -120,7 +120,7 @@
                     <i class="fas fa-book-open" aria-hidden="true"></i>
                     <h3>No encontramos una coincidencia</h3>
                     <p>Prueba con la palabra en el otro idioma, revisa la escritura o elimina alguno de los filtros.</p>
-                    <a href="{% url 'diccionario:buscar' %}">Ver todo el diccionario</a>
+                    <a href="{% url 'diccionario:buscar' %}" data-tooltip="Quitar la búsqueda actual y mostrar todas las palabras">Ver todo el diccionario</a>
                 </div>
             {% endif %}
         </section>
