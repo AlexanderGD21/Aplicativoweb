@@ -74,7 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'diccionario_kichwa.wsgi.application'
 
-DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', 'sqlite3').strip().lower()
+DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', 'postgresql').strip().lower()
 if DATABASE_ENGINE in {'sqlite', 'sqlite3', 'django.db.backends.sqlite3'}:
     DATABASES = {
         'default': {

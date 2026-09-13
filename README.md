@@ -9,11 +9,11 @@ python manage.py runserver
 ```
 
 Las credenciales se configuran en `.env`, ignorado por Git. Copia
-`.env.example` y reemplaza sus valores de ejemplo. SQLite es local por defecto;
-PostgreSQL se habilita con `DATABASE_ENGINE=postgresql` y `DATABASE_*`.
+`.env.example` y reemplaza sus valores de ejemplo. PostgreSQL es el motor
+predeterminado; configura `DATABASE_ENGINE=postgresql` y `DATABASE_*`.
 
-Para trasladar una copia validada de SQLite a PostgreSQL, completa primero las
-variables `DATABASE_*` en `.env` y ejecuta:
+Si aún necesitas trasladar una copia antigua de SQLite a PostgreSQL, completa
+primero las variables `DATABASE_*` en `.env` y ejecuta:
 
 ```powershell
 .\scripts\migrar_sqlite_a_postgres.ps1 -Confirmar
