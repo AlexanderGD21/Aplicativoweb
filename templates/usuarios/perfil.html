@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}{% if es_propio %}Mi espacio de aprendizaje{% else %}Perfil de {{ usuario.username }}{% endif %} · Diccionario Kichwa{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/profile.css' %}?v=20260913-3">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/profile.css' %}?v=20260913-4">{% endblock %}
 
 {% block content %}
 <div class="learning-profile">
@@ -40,10 +40,37 @@
                     <div class="profile-metric"><span class="profile-metric-number">{{ progreso.dominadas }}</span><span class="profile-metric-label">Palabras dominadas</span></div>
                     <div class="profile-metric"><span class="profile-metric-number">{{ progreso.precision }}%</span><span class="profile-metric-label">Aciertos al practicar</span></div>
                 </div>
+                <div class="profile-level" aria-labelledby="profile-level-title">
+                    <div class="profile-level-copy">
+                        <h3 id="profile-level-title">Nivel {{ nivel_practica.numero }} de práctica</h3>
+                        <p>Se calcula con tus puntos en juegos; no mide tu nivel de Kichwa.</p>
+                    </div>
+                    <div class="profile-level-track">
+                        <strong>{{ nivel_practica.puntos_en_nivel }} de {{ nivel_practica.meta }} puntos</strong>
+                        <progress value="{{ nivel_practica.puntos_en_nivel }}" max="{{ nivel_practica.meta }}" aria-label="Avance hacia el nivel {{ nivel_practica.proximo_numero }}"></progress>
+                        <span>Faltan {{ nivel_practica.faltantes }} puntos para el nivel {{ nivel_practica.proximo_numero }}</span>
+                    </div>
+                </div>
             </section>
 
             <div class="profile-columns">
                 <div class="profile-primary">
+                    <section class="profile-missions" aria-labelledby="profile-missions-title">
+                        <div class="profile-section-heading profile-section-heading--compact">
+                            <h2 id="profile-missions-title">Misiones de práctica</h2>
+                            <span>{{ misiones_completadas }} de {{ misiones|length }} completas</span>
+                        </div>
+                        <p class="profile-missions-intro">Sigue objetivos concretos mientras practicas. Los puntos se ganan al acertar una palabra por primera vez.</p>
+                        <ol class="profile-mission-list">
+                            {% for mision in misiones %}
+                                <li>
+                                    <div class="profile-mission-heading"><strong>{{ mision.nombre }}</strong><span>{% if mision.completada %}Completada{% else %}{{ mision.avance }} de {{ mision.meta }}{% endif %}</span></div>
+                                    <p>{{ mision.descripcion }}</p>
+                                    <progress value="{{ mision.avance }}" max="{{ mision.meta }}" aria-label="{{ mision.nombre }}: {{ mision.avance }} de {{ mision.meta }}"></progress>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    </section>
                     <section class="profile-panel" aria-labelledby="profile-next-title">
                         <p class="profile-kicker">Siguiente paso</p>
                         <h2 id="profile-next-title">Sigue explorando el Kichwa</h2>

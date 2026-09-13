@@ -1,6 +1,11 @@
 # Diccionario Kichwa V1
 
-Aplicación Django para el corpus Kichwa Unificado–español. Para iniciar:
+Aplicación Django para el corpus Kichwa Unificado–español.
+
+La secuencia de funciones de aprendizaje y su estado están en
+[`docs/HOJA_DE_RUTA_APRENDIZAJE.md`](docs/HOJA_DE_RUTA_APRENDIZAJE.md).
+
+Para iniciar:
 
 ```powershell
 .\venv\Scripts\Activate.ps1

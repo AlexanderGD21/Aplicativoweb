@@ -7,7 +7,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.diccionario.models import ActividadUsuario, Categoria, EstadisticaJuego, Palabra, PalabraFavorita
+from apps.diccionario.models import ActividadUsuario, Categoria, EstadisticaJuego, Palabra, PalabraFavorita, ProgresoPalabraJuego
+from apps.diccionario.services.aprendizaje import nivel_practica
 
 from .forms import PerfilUsuarioForm, RegistroForm, UserForm
 from .models import PerfilUsuario
@@ -62,6 +63,44 @@ class PerfilYProgresoTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertContains(respuesta, '<strong>2</strong> de 2 disponibles', html=True)
         self.assertContains(respuesta, 'Actividad reciente')
+        self.assertContains(respuesta, 'Nivel 1 de práctica')
+        self.assertContains(respuesta, 'Misiones de práctica')
+
+    def test_nivel_de_practica_avanza_cada_cien_puntos(self):
+        for puntos, numero, avance, faltantes in (
+            (0, 1, 0, 100), (99, 1, 99, 1), (100, 2, 0, 100), (250, 3, 50, 50),
+        ):
+            with self.subTest(puntos=puntos):
+                nivel = nivel_practica(puntos)
+                self.assertEqual((nivel['numero'], nivel['puntos_en_nivel'], nivel['faltantes']),
+                                 (numero, avance, faltantes))
+
+    def test_misiones_reflejan_progreso_y_partidas_guardadas(self):
+        categoria = Categoria.objects.create(nombre='Naturaleza')
+        palabra = Palabra.objects.create(
+            palabra_kichwa='Yaku', traduccion_espanol='Agua', categoria=categoria,
+        )
+        ProgresoPalabraJuego.objects.create(
+            usuario=self.usuario, palabra=palabra, intentos=6,
+            respuestas_correctas=6, racha_actual=0, mejor_racha=3,
+            dominio='dominada',
+        )
+        EstadisticaJuego.objects.create(
+            usuario=self.usuario, tipo_juego='traduccion', respuestas_correctas=1,
+            respuestas_totales=1, puntuacion=10,
+        )
+        perfil = self.usuario.perfil
+        perfil.puntos_totales = 100
+        perfil.save(update_fields=['puntos_totales'])
+
+        respuesta = self.client.get(reverse('usuarios:perfil'))
+        self.assertContains(respuesta, 'Nivel 2 de práctica')
+        self.assertContains(respuesta, 'Tres seguidas')
+        self.assertEqual(respuesta.context['misiones_completadas'], 2)
+        self.assertEqual(
+            [(mision['avance'], mision['meta'], mision['completada']) for mision in respuesta.context['misiones']],
+            [(1, 1, True), (1, 5, False), (1, 3, False), (1, 1, True)],
+        )
 
     def test_perfil_publico_respeta_privacidad_de_progreso_y_ranking(self):
         perfil = self.usuario.perfil
@@ -76,6 +115,8 @@ class PerfilYProgresoTests(TestCase):
         self.assertNotContains(respuesta, 'puntos compartidos en el ranking')
         self.assertNotContains(respuesta, 'Pistas extra')
         self.assertNotContains(respuesta, 'Actividad reciente')
+        self.assertNotContains(respuesta, 'Misiones de práctica')
+        self.assertNotContains(respuesta, 'Nivel 1 de práctica')
 
         perfil.participa_ranking = True
         perfil.save(update_fields=['participa_ranking'])

@@ -231,10 +231,16 @@ def perfil(request, username=None):
     }
     if es_propio:
         from apps.diccionario.models import ActividadUsuario, PalabraFavorita
+        from apps.diccionario.services.aprendizaje import misiones_aprendizaje, nivel_practica
         from apps.diccionario.services.juegos import resumen_progreso
 
+        progreso = resumen_progreso(usuario)
+        misiones = misiones_aprendizaje(usuario)
         context.update({
-            'progreso': resumen_progreso(usuario),
+            'progreso': progreso,
+            'nivel_practica': nivel_practica(perfil_usuario.puntos_totales),
+            'misiones': misiones,
+            'misiones_completadas': sum(mision['completada'] for mision in misiones),
             'total_favoritas': PalabraFavorita.objects.filter(usuario=usuario).count(),
             'actividad_reciente': ActividadUsuario.objects.filter(usuario=usuario).select_related(
                 'palabra', 'busqueda', 'estadistica',

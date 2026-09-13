@@ -23,7 +23,15 @@ $listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, 0)
 $listener.Start()
 $port = $listener.LocalEndpoint.Port
 $listener.Stop()
-$password = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+$passwordBytes = New-Object byte[] 32
+$randomGenerator = [Security.Cryptography.RandomNumberGenerator]::Create()
+try {
+    $randomGenerator.GetBytes($passwordBytes)
+}
+finally {
+    $randomGenerator.Dispose()
+}
+$password = [Convert]::ToBase64String($passwordBytes)
 $serverStarted = $false
 $databaseVariables = @('DATABASE_ENGINE', 'DATABASE_NAME', 'DATABASE_USER', 'DATABASE_PASSWORD', 'DATABASE_HOST', 'DATABASE_PORT')
 $previousEnvironment = @{}
