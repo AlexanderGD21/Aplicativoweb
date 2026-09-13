@@ -1,8 +1,10 @@
 import unicodedata
+import re
 
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserCreationForm
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from .models import PerfilUsuario
 
@@ -247,9 +249,10 @@ class PerfilUsuarioForm(forms.ModelForm):
             'notificaciones_email', 'perfil_publico', 'participa_ranking'
         ]
         widgets = {
-            'fecha_nacimiento': forms.DateInput(attrs={
+            'fecha_nacimiento': forms.DateInput(format='%Y-%m-%d', attrs={
                 'class': 'form-control',
-                'type': 'date'
+                'type': 'date',
+                'aria-describedby': 'profile-age-preview',
             }),
             'genero': forms.Select(attrs={
                 'class': 'form-control'
@@ -264,8 +267,12 @@ class PerfilUsuarioForm(forms.ModelForm):
             }),
             'telefono': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Teléfono (privado)',
+                'placeholder': '10 dígitos',
                 'autocomplete': 'tel',
+                'inputmode': 'numeric',
+                'pattern': '[0-9]{10}',
+                'maxlength': '10',
+                'aria-describedby': 'phone-help',
             }),
             'nivel_kichwa': forms.Select(attrs={
                 'class': 'form-control'
@@ -295,7 +302,25 @@ class PerfilUsuarioForm(forms.ModelForm):
 
         help_texts = {
             'participa_ranking': 'Opcional. Puedes dejar de aparecer desmarcando esta opción cuando quieras.',
+            'telefono': 'Opcional y privado. Escribe exactamente 10 dígitos, sin espacios ni símbolos.',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['fecha_nacimiento'].widget.attrs['max'] = timezone.localdate().isoformat()
+        self.fields['telefono'].strip = False
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono', '')
+        if telefono and not re.fullmatch(r'[0-9]{10}', telefono):
+            raise forms.ValidationError('El teléfono debe tener exactamente 10 dígitos numéricos.')
+        return telefono
+
+    def clean_fecha_nacimiento(self):
+        fecha = self.cleaned_data.get('fecha_nacimiento')
+        if fecha and fecha > timezone.localdate():
+            raise forms.ValidationError('La fecha de nacimiento no puede ser futura.')
+        return fecha
 
     def clean_avatar(self):
         avatar = self.cleaned_data.get('avatar')
@@ -304,3 +329,23 @@ class PerfilUsuarioForm(forms.ModelForm):
         if avatar and (avatar.image.width > 4096 or avatar.image.height > 4096):
             raise forms.ValidationError('La imagen no puede superar 4096 × 4096 píxeles.')
         return avatar
+
+
+class CambioContrasenaForm(PasswordChangeForm):
+    """Conserva todas las validaciones de contraseña configuradas en Django."""
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        configuracion = {
+            'old_password': ('Contraseña actual', 'current-password', 'Confirma tu contraseña actual'),
+            'new_password1': ('Contraseña nueva', 'new-password', 'Crea una contraseña nueva'),
+            'new_password2': ('Confirmar contraseña nueva', 'new-password', 'Repite la contraseña nueva'),
+        }
+        for nombre, (etiqueta, autocompletar, marcador) in configuracion.items():
+            campo = self.fields[nombre]
+            campo.label = etiqueta
+            campo.widget.attrs.update({
+                'class': 'form-control',
+                'autocomplete': autocompletar,
+                'placeholder': marcador,
+            })

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi actividad · Diccionario Kichwa{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/account-library.css' %}?v=20260912-1">{% endblock %}
+
+{% block content %}
+<div class="account-library">
+  <header class="library-masthead">
+    <div class="library-shell">
+      <a class="library-back" href="{% url 'usuarios:perfil' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Mi perfil</a>
+      <div class="library-heading"><div><h1>Mi actividad</h1><p>Revisa qué consultaste y cómo practicaste. Solo tú puedes ver este registro.</p></div><span class="library-private"><i class="fas fa-lock" aria-hidden="true"></i> Registro privado</span></div>
+    </div>
+  </header>
+
+  <main class="library-shell library-content">
+    <section class="activity-overview" aria-labelledby="activity-overview-title">
+      <div class="activity-overview-heading"><h2 id="activity-overview-title">Últimos 30 días</h2><p>Resumen de tu uso, no de otras personas.</p></div>
+      <div class="activity-metrics">
+        <div><strong>{{ conteos.busquedas }}</strong><span>Búsquedas</span></div>
+        <div><strong>{{ conteos.palabras }}</strong><span>Entradas vistas</span></div>
+        <div><strong>{{ conteos.partidas }}</strong><span>Partidas terminadas</span></div>
+        <div><strong>{{ minutos_jugados }}</strong><span>Minutos de juego</span></div>
+        <div><strong>{{ precision }}%</strong><span>Aciertos en juegos</span></div>
+      </div>
+    </section>
+
+    <section class="activity-history" aria-labelledby="activity-history-title">
+      <div class="library-toolbar"><div><h2 id="activity-history-title">Historial</h2><p>De más reciente a más antiguo</p></div></div>
+      <nav class="activity-filters" aria-label="Filtrar historial">
+        <a href="{% url 'usuarios:mi_actividad' %}"{% if not tipo %} aria-current="page"{% endif %}>Todo</a>
+        <a href="?tipo=busqueda"{% if tipo == 'busqueda' %} aria-current="page"{% endif %}>Búsquedas</a>
+        <a href="?tipo=palabra"{% if tipo == 'palabra' %} aria-current="page"{% endif %}>Palabras</a>
+        <a href="?tipo=juego"{% if tipo == 'juego' %} aria-current="page"{% endif %}>Juegos</a>
+      </nav>
+      {% if pagina.object_list %}
+        <ol class="activity-list">
+          {% for evento in pagina %}
+            <li>
+              <span class="activity-icon activity-icon--{{ evento.tipo }}" aria-hidden="true"><i class="fas {% if evento.tipo == 'busqueda' %}fa-search{% elif evento.tipo == 'palabra' %}fa-book-open{% else %}fa-gamepad{% endif %}"></i></span>
+              <div class="activity-copy">
+                <span class="activity-type">{{ evento.get_tipo_display }}</span>
+                {% if evento.tipo == 'busqueda' %}
+                  <strong>“{{ evento.busqueda.termino_buscado }}”</strong>
+                  <small>{{ evento.busqueda.resultados_encontrados }} resultado{{ evento.busqueda.resultados_encontrados|pluralize }} encontrado{{ evento.busqueda.resultados_encontrados|pluralize }}</small>
+                {% elif evento.tipo == 'palabra' %}
+                  {% if evento.palabra %}<strong>{{ evento.palabra.palabra_kichwa }} <span>· {{ evento.palabra.traduccion_espanol }}</span></strong>{% if evento.palabra.activa %}<a href="{% url 'diccionario:detalle_palabra' evento.palabra.pk %}">Volver a la entrada</a>{% endif %}{% else %}<strong>Entrada ya no disponible</strong>{% endif %}
+                {% else %}
+                  <strong>{{ evento.estadistica.get_tipo_juego_display }}</strong>
+                  <small>{{ evento.estadistica.respuestas_correctas }} de {{ evento.estadistica.respuestas_totales }} aciertos · {{ evento.estadistica.puntuacion }} puntos</small>
+                {% endif %}
+              </div>
+              <time datetime="{{ evento.fecha|date:'c' }}">{{ evento.fecha|date:'l d/m/Y' }}<span>{{ evento.fecha|date:'H:i' }}</span></time>
+            </li>
+          {% endfor %}
+        </ol>
+        {% if pagina.has_other_pages %}
+          <nav class="library-pagination" aria-label="Páginas del historial">
+            {% if pagina.has_previous %}<a href="?{% if tipo %}tipo={{ tipo }}&amp;{% endif %}page={{ pagina.previous_page_number }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</a>{% endif %}
+            <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+            {% if pagina.has_next %}<a href="?{% if tipo %}tipo={{ tipo }}&amp;{% endif %}page={{ pagina.next_page_number }}">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% endif %}
+          </nav>
+        {% endif %}
+      {% else %}
+        <div class="activity-empty"><p>Aún no hay actividad de este tipo. Las consultas y partidas que hagas con tu sesión iniciada aparecerán aquí.</p><a href="{% url 'diccionario:buscar' %}">Buscar una palabra <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}

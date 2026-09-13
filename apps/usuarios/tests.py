@@ -1,9 +1,13 @@
 from django.contrib.auth.models import User
+from datetime import timedelta
 from django.conf import settings
 from django.core.cache import cache
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
+
+from apps.diccionario.models import ActividadUsuario, Categoria, EstadisticaJuego, Palabra, PalabraFavorita
 
 from .forms import PerfilUsuarioForm, RegistroForm, UserForm
 from .models import PerfilUsuario
@@ -57,7 +61,7 @@ class PerfilYProgresoTests(TestCase):
         respuesta = self.client.get(reverse('usuarios:perfil'))
         self.assertEqual(respuesta.status_code, 200)
         self.assertContains(respuesta, '<strong>2</strong> de 2 disponibles', html=True)
-        self.assertContains(respuesta, 'Tus últimas partidas')
+        self.assertContains(respuesta, 'Actividad reciente')
 
     def test_perfil_publico_respeta_privacidad_de_progreso_y_ranking(self):
         perfil = self.usuario.perfil
@@ -71,7 +75,7 @@ class PerfilYProgresoTests(TestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertNotContains(respuesta, 'puntos compartidos en el ranking')
         self.assertNotContains(respuesta, 'Pistas extra')
-        self.assertNotContains(respuesta, 'Tus últimas partidas')
+        self.assertNotContains(respuesta, 'Actividad reciente')
 
         perfil.participa_ranking = True
         perfil.save(update_fields=['participa_ranking'])
@@ -129,6 +133,69 @@ class PerfilYProgresoTests(TestCase):
         }, instance=self.usuario)
         self.assertFalse(form.is_valid())
         self.assertIn('email', form.errors)
+
+    def test_telefono_exige_diez_digitos_y_fecha_no_futura(self):
+        for telefono in ('2323jjmmm', '123456789', '12345678901', '+593987654321', '123 456 7890', ' 0987654321 '):
+            with self.subTest(telefono=telefono):
+                form = PerfilUsuarioForm({'telefono': telefono, 'nivel_kichwa': 'principiante'}, instance=self.usuario.perfil)
+                self.assertFalse(form.is_valid())
+                self.assertIn('telefono', form.errors)
+        form = PerfilUsuarioForm({'telefono': '0987654321', 'nivel_kichwa': 'principiante'}, instance=self.usuario.perfil)
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data['telefono'], '0987654321')
+        manana = timezone.localdate() + timedelta(days=1)
+        form = PerfilUsuarioForm({'fecha_nacimiento': manana.isoformat(), 'nivel_kichwa': 'principiante'}, instance=self.usuario.perfil)
+        self.assertFalse(form.is_valid())
+        self.assertIn('fecha_nacimiento', form.errors)
+
+    def test_edad_y_calendario_se_muestran_en_edicion(self):
+        hoy = timezone.localdate()
+        self.usuario.perfil.fecha_nacimiento = hoy.replace(year=hoy.year - 20)
+        self.usuario.perfil.save(update_fields=['fecha_nacimiento'])
+        respuesta = self.client.get(reverse('usuarios:editar_perfil'))
+        self.assertContains(respuesta, 'Edad actual: 20 años')
+        self.assertContains(respuesta, 'type="date"')
+        self.assertContains(respuesta, 'inputmode="numeric"')
+
+    def test_cambiar_contrasena_exige_actual_y_confirmacion_y_mantiene_sesion(self):
+        url = reverse('usuarios:cambiar_contrasena')
+        self.assertContains(self.client.get(url), 'Contraseña actual')
+        datos = {'old_password': 'incorrecta', 'new_password1': 'Otra-clave-segura-123', 'new_password2': 'Otra-clave-segura-123'}
+        self.assertContains(self.client.post(url, datos), 'contraseña actual')
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.check_password('clave-segura-123'))
+        datos['old_password'] = 'clave-segura-123'
+        datos['new_password2'] = 'Clave-distinta-123'
+        self.assertContains(self.client.post(url, datos), 'no coinciden')
+        datos['new_password2'] = datos['new_password1']
+        self.assertRedirects(self.client.post(url, datos), reverse('usuarios:perfil'))
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.check_password('Otra-clave-segura-123'))
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.usuario.pk)
+
+    def test_historial_y_estadisticas_son_privados_y_tienen_fecha_hora(self):
+        categoria = Categoria.objects.create(nombre='Naturaleza')
+        palabra = Palabra.objects.create(palabra_kichwa='Yaku', traduccion_espanol='Agua', categoria=categoria)
+        self.client.get(reverse('diccionario:buscar'), {'termino': 'Yaku'})
+        self.client.get(palabra.get_absolute_url())
+        estadistica = EstadisticaJuego.objects.create(
+            usuario=self.usuario, tipo_juego='traduccion', puntuacion=10,
+            respuestas_correctas=1, respuestas_totales=1, tiempo_jugado=120,
+        )
+        ActividadUsuario.objects.create(usuario=self.usuario, tipo='juego', estadistica=estadistica)
+        respuesta = self.client.get(reverse('usuarios:mi_actividad'))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.context['total_actividad'], 3)
+        self.assertContains(respuesta, 'Yaku')
+        self.assertContains(respuesta, '2</strong><span>Minutos de juego', html=False)
+        self.assertContains(respuesta, 'datetime="')
+        self.assertEqual(self.client.get(reverse('usuarios:mi_actividad'), {'tipo': 'juego'}).context['pagina'].paginator.count, 1)
+
+        otro = User.objects.create_user('ajeno', password='clave-segura-123')
+        self.client.force_login(otro)
+        self.assertNotContains(self.client.get(reverse('usuarios:mi_actividad')), 'Yaku')
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse('usuarios:mi_actividad')).status_code, 302)
 
 
 class RegistroYSesionTests(TestCase):

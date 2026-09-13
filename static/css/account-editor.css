@@ -1,0 +1,22 @@
+.account-editor .auth-frame{min-height:0}
+.account-editor .auth-orientation{justify-content:center;gap:2rem}
+.account-editor .auth-orientation-copy{margin:0}
+.account-editor .auth-orientation h1{max-width:13ch}
+.account-editor .auth-panel{justify-content:flex-start}
+.account-editor .auth-frame--register{grid-template-columns:1fr}
+.account-editor .auth-frame--register .auth-orientation{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.7fr);align-items:end;gap:2rem;padding:clamp(1.5rem,3vw,2.5rem)}
+.account-editor .auth-frame--register .auth-orientation h1{max-width:none;font-size:clamp(2rem,3.5vw,2.8rem)}
+.account-editor .auth-frame--register .auth-orientation p{max-width:65ch}
+.account-editor .auth-frame--register .auth-benefits{gap:.45rem}
+.account-editor .auth-frame--register .auth-panel{padding:clamp(1.5rem,3vw,2.5rem)}
+.account-editor .auth-field input[type="date"]{min-height:58px;font-size:1rem;padding:.8rem 1rem;color-scheme:light}
+.account-editor .auth-field input[type="date"]::-webkit-calendar-picker-indicator{width:22px;height:22px;cursor:pointer}
+.account-age{display:block;margin-top:.4rem;color:#17684d;font-weight:750;font-size:.82rem;line-height:1.4}
+.account-security{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:2rem;padding-top:1.2rem;border-top:1px solid #d9ded8}
+.account-security h3{font-size:1.1rem;color:#142923;font-weight:780;margin:0 0 .35rem}
+.account-security p{margin:0;color:#52645f;font-size:.86rem;line-height:1.45}
+.account-security a{flex:0 0 auto;display:inline-flex;align-items:center;gap:.5rem;min-height:44px;padding:.55rem .8rem;border-radius:10px;color:#17684d;background:#e7f1e8;font-size:.86rem;font-weight:760;text-decoration:none}
+.account-security a:hover{background:#d5e8dc;color:#0f533c}
+.account-editor :is(a,button,input,select,textarea):focus-visible{outline:3px solid #d59b2b;outline-offset:3px}
+@media(max-width:760px){.account-editor .auth-frame--register .auth-orientation{grid-template-columns:1fr;gap:.8rem}.account-editor .auth-frame--register .auth-benefits{display:none}}
+@media(max-width:620px){.account-security{align-items:start;flex-direction:column}.account-security a{width:100%;justify-content:center}}

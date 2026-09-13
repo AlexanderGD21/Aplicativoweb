@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import (
-    BusquedaPopularDiaria, Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
+    ActividadUsuario, BusquedaPopularDiaria, Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
     ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
 )
 from .models import PalabraFavorita
@@ -56,6 +56,7 @@ class DiccionarioTests(TestCase):
         historial = HistorialBusqueda.objects.get(usuario=usuario)
         self.assertEqual(historial.termino_buscado, 'Yaku')
         self.assertEqual(historial.resultados_encontrados, 2)
+        self.assertTrue(ActividadUsuario.objects.filter(usuario=usuario, tipo='busqueda', busqueda=historial).exists())
 
     def test_tendencia_se_cuenta_solo_para_entrada_exacta_y_sin_paginacion(self):
         url = reverse('diccionario:buscar')
@@ -98,6 +99,20 @@ class DiccionarioTests(TestCase):
         self.client.force_login(usuario)
         respuesta = self.client.get(self.palabra.get_absolute_url())
         self.assertTrue(respuesta.context['es_favorita'])
+        self.assertTrue(ActividadUsuario.objects.filter(usuario=usuario, tipo='palabra', palabra=self.palabra).exists())
+
+    def test_favoritas_tienen_diseno_actual_y_quitar_exige_post(self):
+        usuario = User.objects.create_user('inti', password='contrasena-segura-123')
+        PalabraFavorita.objects.create(usuario=usuario, palabra=self.palabra)
+        self.client.force_login(usuario)
+        pagina = self.client.get(reverse('diccionario:mis_favoritas'))
+        self.assertContains(pagina, 'Palabras que guardaste')
+        self.assertContains(pagina, self.palabra.palabra_kichwa)
+        self.assertContains(pagina, 'style="--favorite-accent: #007bff"')
+        quitar = reverse('diccionario:quitar_favorita', args=[self.palabra.pk])
+        self.assertEqual(self.client.get(quitar).status_code, 405)
+        self.assertRedirects(self.client.post(quitar), reverse('diccionario:mis_favoritas'))
+        self.assertFalse(PalabraFavorita.objects.filter(usuario=usuario, palabra=self.palabra).exists())
 
     def test_relaciones_semanticas_no_rellenan_solo_por_categoria(self):
         tiempo = Categoria.objects.create(nombre='Tiempo')
@@ -469,6 +484,7 @@ class DiccionarioTests(TestCase):
         self.assertEqual(estadistica.respuestas_correctas, 1)
         self.assertEqual(estadistica.respuestas_totales, 1)
         self.assertEqual(SesionJuego.objects.get(id=sesion_id).estadistica, estadistica)
+        self.assertTrue(ActividadUsuario.objects.filter(usuario=usuario, tipo='juego', estadistica=estadistica).exists())
 
     def test_primer_acierto_suma_puntos_una_sola_vez_por_palabra(self):
         usuario = User.objects.create_user('urku', password='clave-segura-123')

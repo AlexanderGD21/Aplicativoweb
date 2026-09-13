@@ -1,8 +1,9 @@
 import hashlib
+from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.conf import settings
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -15,13 +16,14 @@ from django.contrib.auth.views import (
 )
 from django.core.cache import cache
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q, Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm, RegistroForm, PerfilUsuarioForm, UserForm
+from .forms import CambioContrasenaForm, LoginForm, RegistroForm, PerfilUsuarioForm, UserForm
 from .models import PerfilUsuario
 
 
@@ -226,14 +228,15 @@ def perfil(request, username=None):
         'mostrar_puntos': es_propio or perfil_usuario.participa_ranking,
     }
     if es_propio:
-        from apps.diccionario.models import EstadisticaJuego, PalabraFavorita
+        from apps.diccionario.models import ActividadUsuario, PalabraFavorita
         from apps.diccionario.services.juegos import resumen_progreso
 
         context.update({
             'progreso': resumen_progreso(usuario),
-            'partidas_recientes': EstadisticaJuego.objects.filter(usuario=usuario)[:4],
-            'total_partidas': EstadisticaJuego.objects.filter(usuario=usuario).count(),
             'total_favoritas': PalabraFavorita.objects.filter(usuario=usuario).count(),
+            'actividad_reciente': ActividadUsuario.objects.filter(usuario=usuario).select_related(
+                'palabra', 'busqueda', 'estadistica',
+            )[:4],
         })
     return render(request, 'usuarios/perfil.html', context)
 
@@ -261,8 +264,67 @@ def editar_perfil(request):
     context = {
         'user_form': user_form,
         'perfil_form': perfil_form,
+        'edad_actual': perfil_usuario.edad,
     }
     return render(request, 'usuarios/editar_perfil.html', context)
+
+
+@login_required
+def cambiar_contrasena(request):
+    clave_limite = _clave_limite('cambio-clave', request, str(request.user.pk))
+    bloqueado = request.method == 'POST' and cache.get(clave_limite, 0) >= settings.LOGIN_MAX_ATTEMPTS
+    formulario = CambioContrasenaForm(request.user, request.POST if request.method == 'POST' else None)
+    if bloqueado:
+        formulario.add_error(None, 'Demasiados intentos. Espera unos minutos antes de volver a intentarlo.')
+    elif request.method == 'POST':
+        if formulario.is_valid():
+            usuario = formulario.save()
+            update_session_auth_hash(request, usuario)
+            cache.delete(clave_limite)
+            messages.success(request, 'Tu contraseña se cambió correctamente.')
+            return redirect('usuarios:perfil')
+        _incrementar_limite(clave_limite, settings.LOGIN_LOCKOUT_SECONDS)
+    return render(request, 'usuarios/cambiar_contrasena.html', {
+        'form': formulario,
+    }, status=429 if bloqueado else 200)
+
+
+@login_required
+def mi_actividad(request):
+    """Registro y métricas privados; nunca se sirven desde un perfil público."""
+    from apps.diccionario.models import ActividadUsuario, EstadisticaJuego
+
+    actividades = ActividadUsuario.objects.filter(usuario=request.user)
+    tipo = request.GET.get('tipo', '')
+    if tipo not in {'busqueda', 'palabra', 'juego'}:
+        tipo = ''
+    ventana = timezone.now() - timedelta(days=30)
+    recientes = actividades.filter(fecha__gte=ventana)
+    conteos = recientes.aggregate(
+        busquedas=Count('pk', filter=Q(tipo='busqueda')),
+        palabras=Count('pk', filter=Q(tipo='palabra')),
+        partidas=Count('pk', filter=Q(tipo='juego')),
+    )
+    juegos = EstadisticaJuego.objects.filter(usuario=request.user, fecha_juego__gte=ventana).aggregate(
+        segundos=Sum('tiempo_jugado'),
+        aciertos=Sum('respuestas_correctas'),
+        respuestas=Sum('respuestas_totales'),
+    )
+    precision = round(100 * (juegos['aciertos'] or 0) / juegos['respuestas']) if juegos['respuestas'] else 0
+    if tipo:
+        actividades = actividades.filter(tipo=tipo)
+    from django.core.paginator import Paginator
+    pagina = Paginator(actividades.select_related('palabra', 'busqueda', 'estadistica'), 20).get_page(
+        request.GET.get('page'),
+    )
+    return render(request, 'usuarios/actividad.html', {
+        'pagina': pagina,
+        'tipo': tipo,
+        'conteos': conteos,
+        'minutos_jugados': round((juegos['segundos'] or 0) / 60),
+        'precision': precision,
+        'total_actividad': recientes.count(),
+    })
 
 @login_required
 def eliminar_cuenta(request):

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class PerfilUsuario(models.Model):
     GENERO_CHOICES = [
@@ -53,8 +54,7 @@ class PerfilUsuario(models.Model):
     @property
     def edad(self):
         if self.fecha_nacimiento:
-            from datetime import date
-            today = date.today()
+            today = timezone.localdate()
             return today.year - self.fecha_nacimiento.year - ((today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day))
         return None
 

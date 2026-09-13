@@ -55,15 +55,15 @@
                     </section>
 
                     <section class="profile-history" aria-labelledby="profile-history-title">
-                        <div class="profile-section-heading profile-section-heading--compact"><div><p class="profile-kicker">Actividad reciente</p><h2 id="profile-history-title">Tus últimas partidas</h2></div><span>{{ total_partidas }} en total</span></div>
-                        {% if partidas_recientes %}
+                        <div class="profile-section-heading profile-section-heading--compact"><div><h2 id="profile-history-title">Actividad reciente</h2></div><a href="{% url 'usuarios:mi_actividad' %}">Ver historial completo <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                        {% if actividad_reciente %}
                             <ol class="profile-session-list">
-                                {% for partida in partidas_recientes %}
-                                    <li><span class="profile-session-icon" aria-hidden="true"><i class="fas fa-gamepad"></i></span><span class="profile-session-copy"><strong>{{ partida.get_tipo_juego_display }}</strong><small>{{ partida.fecha_juego|date:"d M Y" }} · {{ partida.get_dificultad_display }}</small></span><span class="profile-session-score">{{ partida.puntuacion }} pts</span></li>
+                                {% for evento in actividad_reciente %}
+                                    <li><span class="profile-session-icon" aria-hidden="true"><i class="fas {% if evento.tipo == 'busqueda' %}fa-search{% elif evento.tipo == 'palabra' %}fa-book-open{% else %}fa-gamepad{% endif %}"></i></span><span class="profile-session-copy"><strong>{% if evento.tipo == 'busqueda' %}Buscaste “{{ evento.busqueda.termino_buscado }}”{% elif evento.tipo == 'palabra' %}Viste {{ evento.palabra.palabra_kichwa|default:'una entrada' }}{% else %}Jugaste {{ evento.estadistica.get_tipo_juego_display }}{% endif %}</strong><small>{{ evento.fecha|date:"d/m/Y · H:i" }}</small></span><span class="profile-session-score">{{ evento.get_tipo_display }}</span></li>
                                 {% endfor %}
                             </ol>
                         {% else %}
-                            <p class="profile-empty">Aún no terminas una partida. Elige un juego y comienza con las palabras que ya conoces.</p>
+                            <p class="profile-empty">Aún no hay actividad registrada. Busca una palabra o comienza una partida con tu sesión iniciada.</p>
                         {% endif %}
                     </section>
                 </div>
@@ -84,6 +84,8 @@
                         <p class="profile-kicker">A tu elección</p><h2 id="profile-privacy-title">Privacidad y cuenta</h2>
                         <p>{% if perfil.participa_ranking %}Participas en el ranking público.{% else %}Tus puntos no aparecen en el ranking público.{% endif %} {% if perfil.perfil_publico %}Tu perfil es visible para la comunidad.{% else %}Tu perfil es privado.{% endif %}</p>
                         <a class="profile-text-link" href="{% url 'usuarios:editar_perfil' %}">Cambiar preferencias <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="profile-text-link" href="{% url 'usuarios:cambiar_contrasena' %}">Cambiar contraseña <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="profile-text-link" href="{% url 'usuarios:mi_actividad' %}">Ver actividad y estadísticas <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                         <a class="profile-text-link profile-text-link--muted" href="{% url 'usuarios:eliminar_cuenta' %}">Gestionar eliminación de cuenta</a>
                     </section>
                 </aside>

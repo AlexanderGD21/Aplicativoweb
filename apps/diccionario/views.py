@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import unicodedata
 from datetime import timedelta
 from django.core.exceptions import ValidationError
@@ -14,6 +15,7 @@ from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from .models import (
+    ActividadUsuario,
     Categoria,
     BusquedaPopularDiaria,
     EstadisticaJuego,
@@ -241,10 +243,14 @@ def buscar(request):
 
     if formulario_valido and termino and 'page' not in request.GET:
         if request.user.is_authenticated:
-            HistorialBusqueda.objects.create(
+            busqueda = HistorialBusqueda.objects.create(
                 usuario=request.user,
                 termino_buscado=termino,
                 resultados_encontrados=paginator.count,
+            )
+            ActividadUsuario.objects.create(
+                usuario=request.user, tipo='busqueda', busqueda=busqueda,
+                fecha=busqueda.fecha_busqueda,
             )
         termino_exacto = normalizar_texto_busqueda(termino)
         coincidencias_exactas = list(palabras.filter(
@@ -344,6 +350,8 @@ def detalle_palabra(request, pk):
     palabra = get_object_or_404(Palabra.objects.select_related('categoria'), pk=pk, activa=True)
     Palabra.objects.filter(pk=palabra.pk).update(veces_vista=F('veces_vista') + 1)
     palabra.refresh_from_db(fields=['veces_vista'])
+    if request.user.is_authenticated:
+        ActividadUsuario.objects.create(usuario=request.user, tipo='palabra', palabra=palabra)
     es_favorita = request.user.is_authenticated and PalabraFavorita.objects.filter(
         usuario=request.user, palabra=palabra
     ).exists()
@@ -450,25 +458,16 @@ def mis_favoritas(request):
     if not request.user.is_authenticated:
         return redirect('usuarios:login')
     
-    try:
-        favoritas = PalabraFavorita.objects.filter(
-            usuario=request.user
-        ).select_related('palabra', 'palabra__categoria').order_by('-fecha_agregada')
-        
-        paginator = Paginator(favoritas, 12)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        
-        context = {
-            'favoritas': page_obj,
-            'total_favoritas': favoritas.count(),
-        }
-    except Exception:
-        context = {
-            'favoritas': None,
-            'total_favoritas': 0,
-        }
-    
+    favoritas = PalabraFavorita.objects.filter(
+        usuario=request.user,
+    ).select_related('palabra', 'palabra__categoria').order_by('-fecha_agregada')
+    paginator = Paginator(favoritas, 12)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    page_obj.object_list = list(page_obj.object_list)
+    for favorita in page_obj.object_list:
+        color = favorita.palabra.categoria.color or ''
+        favorita.color_seguro = color if re.fullmatch(r'#[0-9a-fA-F]{6}', color) else '#17684d'
+    context = {'favoritas': page_obj, 'total_favoritas': paginator.count}
     return render(request, 'diccionario/mis_favoritas.html', context)
 
 @require_http_methods(["POST"])
@@ -545,7 +544,7 @@ def quitar_favorita(request, palabra_id):
     except Exception:
         messages.error(request, 'Error al quitar de favoritas.')
     
-    return redirect('diccionario:detalle_palabra', pk=palabra_id)
+    return redirect('diccionario:mis_favoritas')
 
 # ==================== VISTAS DE JUEGOS ====================
 
@@ -774,6 +773,10 @@ def guardar_estadistica_juego(request):
             respuestas_totales=totales,
             dificultad=sesion.dificultad,
             tiempo_jugado=tiempo_jugado,
+        )
+        ActividadUsuario.objects.create(
+            usuario=request.user, tipo='juego', estadistica=estadistica,
+            fecha=estadistica.fecha_juego,
         )
         sesion.estadistica = estadistica
         sesion.finalizada_en = timezone.now()

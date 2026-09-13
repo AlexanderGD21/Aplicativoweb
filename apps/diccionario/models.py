@@ -292,6 +292,32 @@ class EstadisticaJuego(models.Model):
         return 0
 
 
+class ActividadUsuario(models.Model):
+    """Cronología privada de consultas y partidas de una cuenta."""
+
+    TIPOS = [
+        ('busqueda', 'Búsqueda'),
+        ('palabra', 'Palabra consultada'),
+        ('juego', 'Partida terminada'),
+    ]
+
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='actividades')
+    tipo = models.CharField(max_length=10, choices=TIPOS, db_index=True)
+    palabra = models.ForeignKey(Palabra, on_delete=models.SET_NULL, null=True, blank=True)
+    busqueda = models.OneToOneField(HistorialBusqueda, on_delete=models.CASCADE, null=True, blank=True)
+    estadistica = models.OneToOneField(EstadisticaJuego, on_delete=models.CASCADE, null=True, blank=True)
+    fecha = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        verbose_name = 'Actividad de usuario'
+        verbose_name_plural = 'Actividades de usuarios'
+        ordering = ['-fecha', '-id']
+        indexes = [models.Index(fields=['usuario', '-fecha'], name='actividad_usuario_fecha_idx')]
+
+    def __str__(self):
+        return f'{self.usuario.username}: {self.get_tipo_display()}'
+
+
 class SesionJuego(models.Model):
     """Conjunto cerrado de palabras que el servidor autoriza para una partida."""
 

@@ -13,6 +13,8 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('perfil/<str:username>/', views.perfil, name='perfil_usuario'),
     path('editar-perfil/', views.editar_perfil, name='editar_perfil'),
+    path('cambiar-contrasena/', views.cambiar_contrasena, name='cambiar_contrasena'),
+    path('mi-actividad/', views.mi_actividad, name='mi_actividad'),
     path('eliminar-cuenta/', views.eliminar_cuenta, name='eliminar_cuenta'),
     
     # Páginas legales
