@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.db.models import F
 from .models import (
-    Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
-    PalabraFavorita, ProgresoPalabraJuego, SesionJuego,
+    ActividadUsuario, Categoria, EstadisticaJuego, HistorialBusqueda,
+    IntentoPalabraJuego, Palabra, PalabraFavorita, ProgresoPalabraJuego, SesionJuego,
 )
 
 @admin.register(Categoria)
@@ -87,6 +87,38 @@ class HistorialBusquedaAdmin(admin.ModelAdmin):
     search_fields = ['termino_buscado', 'usuario__username']
     ordering = ['-fecha_busqueda']
     readonly_fields = ['fecha_busqueda']
+
+
+@admin.register(ActividadUsuario)
+class ActividadUsuarioAdmin(admin.ModelAdmin):
+    """Consulta de actividad individual para personal con permiso de lectura."""
+
+    list_display = ['usuario', 'tipo', 'detalle', 'fecha']
+    list_filter = ['tipo', 'fecha']
+    search_fields = ['usuario__username', 'busqueda__termino_buscado', 'palabra__palabra_kichwa']
+    list_select_related = ['usuario', 'busqueda', 'palabra', 'estadistica']
+    readonly_fields = ['usuario', 'tipo', 'palabra', 'busqueda', 'estadistica', 'fecha']
+    ordering = ['-fecha', '-id']
+
+    @admin.display(description='Detalle')
+    def detalle(self, obj):
+        if obj.tipo == 'busqueda' and obj.busqueda:
+            return obj.busqueda.termino_buscado
+        if obj.tipo == 'palabra' and obj.palabra:
+            return obj.palabra.palabra_kichwa
+        if obj.tipo == 'juego' and obj.estadistica:
+            return obj.estadistica.get_tipo_juego_display()
+        return 'Registro ya no disponible'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(EstadisticaJuego)
 class EstadisticaJuegoAdmin(admin.ModelAdmin):

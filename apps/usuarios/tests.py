@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from datetime import timedelta
 from django.conf import settings
 from django.core.cache import cache
@@ -185,6 +185,7 @@ class PerfilYProgresoTests(TestCase):
         ActividadUsuario.objects.create(usuario=self.usuario, tipo='juego', estadistica=estadistica)
         respuesta = self.client.get(reverse('usuarios:mi_actividad'))
         self.assertEqual(respuesta.status_code, 200)
+        self.assertIn('no-store', respuesta['Cache-Control'])
         self.assertEqual(respuesta.context['total_actividad'], 3)
         self.assertContains(respuesta, 'Yaku')
         self.assertContains(respuesta, '2</strong><span>Minutos de juego', html=False)
@@ -196,6 +197,29 @@ class PerfilYProgresoTests(TestCase):
         self.assertNotContains(self.client.get(reverse('usuarios:mi_actividad')), 'Yaku')
         self.client.logout()
         self.assertEqual(self.client.get(reverse('usuarios:mi_actividad')).status_code, 302)
+
+    def test_admin_solo_consulta_actividad_con_permiso_de_lectura(self):
+        categoria = Categoria.objects.create(nombre='Naturaleza')
+        palabra = Palabra.objects.create(palabra_kichwa='Yaku', traduccion_espanol='Agua', categoria=categoria)
+        actividad = ActividadUsuario.objects.create(usuario=self.usuario, tipo='palabra', palabra=palabra)
+        lista = reverse('admin:diccionario_actividadusuario_changelist')
+        detalle = reverse('admin:diccionario_actividadusuario_change', args=[actividad.pk])
+
+        self.assertEqual(self.client.get(lista).status_code, 302)
+        administrador = User.objects.create_user('administrador', password='clave-segura-123', is_staff=True)
+        self.client.force_login(administrador)
+        self.assertEqual(self.client.get(lista).status_code, 403)
+        permiso = Permission.objects.get(codename='view_actividadusuario', content_type__app_label='diccionario')
+        administrador.user_permissions.add(permiso)
+
+        self.assertContains(self.client.get(lista), 'Yaku')
+        self.assertEqual(self.client.get(detalle).status_code, 200)
+        self.assertEqual(self.client.get(reverse('admin:diccionario_actividadusuario_add')).status_code, 403)
+        self.assertEqual(self.client.post(detalle, {'tipo': 'busqueda'}).status_code, 403)
+        eliminar = reverse('admin:diccionario_actividadusuario_delete', args=[actividad.pk])
+        self.assertEqual(self.client.post(eliminar).status_code, 403)
+        actividad.refresh_from_db()
+        self.assertEqual(actividad.tipo, 'palabra')
 
 
 class RegistroYSesionTests(TestCase):

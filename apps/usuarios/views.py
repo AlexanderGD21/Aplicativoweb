@@ -21,6 +21,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .forms import CambioContrasenaForm, LoginForm, RegistroForm, PerfilUsuarioForm, UserForm
@@ -210,6 +211,7 @@ def cerrar_sesion(request):
     messages.success(request, 'Sesión cerrada correctamente.')
     return redirect('diccionario:home')
 
+@never_cache
 def perfil(request, username=None):
     if not username and not request.user.is_authenticated:
         return redirect(f"{reverse('usuarios:login')}?{urlencode({'next': request.path})}")
@@ -240,6 +242,7 @@ def perfil(request, username=None):
         })
     return render(request, 'usuarios/perfil.html', context)
 
+@never_cache
 @login_required
 def editar_perfil(request):
     perfil_usuario = get_object_or_404(PerfilUsuario, usuario=request.user)
@@ -269,6 +272,7 @@ def editar_perfil(request):
     return render(request, 'usuarios/editar_perfil.html', context)
 
 
+@never_cache
 @login_required
 def cambiar_contrasena(request):
     clave_limite = _clave_limite('cambio-clave', request, str(request.user.pk))
@@ -289,6 +293,7 @@ def cambiar_contrasena(request):
     }, status=429 if bloqueado else 200)
 
 
+@never_cache
 @login_required
 def mi_actividad(request):
     """Registro y métricas privados; nunca se sirven desde un perfil público."""
