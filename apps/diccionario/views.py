@@ -30,6 +30,7 @@ from .models import (
 )
 from .forms import BusquedaForm, ContactoForm
 from .services.relaciones import obtener_palabras_relacionadas
+from .services.reto_semanal import reto_semanal
 from .services.juegos import (
     categorias_jugables,
     filtros_juego,
@@ -182,6 +183,7 @@ def home(request):
             'total_busquedas': total_busquedas,
             'ranking': ranking,
             'tendencias': tendencias,
+            'reto_semana': reto_semanal(request.user),
         }
         
         return render(request, 'diccionario/home.html', context)
@@ -196,6 +198,7 @@ def home(request):
             'total_busquedas': 0,
             'ranking': [],
             'tendencias': [],
+            'reto_semana': None,
             'error': str(e)
         }
         return render(request, 'diccionario/home.html', context)

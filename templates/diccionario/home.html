@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}">
-<link rel="stylesheet" href="{% static 'css/home-refined.css' %}?v=20260912-1">
+<link rel="stylesheet" href="{% static 'css/home-refined.css' %}?v=20260913-3">
 {% endblock %}
 
 {% block content %}
@@ -79,6 +79,30 @@
             <a href="{% url 'diccionario:buscar' %}" data-tooltip="Abrir las {{ total_palabras }} entradas del diccionario">Explorar el corpus <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
     </section>
+
+    {% if reto_semana %}
+    <section class="weekly-challenge" aria-labelledby="weekly-challenge-title">
+        <div class="container weekly-challenge-inner">
+            <div>
+                <p class="weekly-challenge-kicker">Del {{ reto_semana.inicio|date:'j M' }} al {{ reto_semana.fin|date:'j M' }}</p>
+                <h2 id="weekly-challenge-title">Reto de esta semana</h2>
+                <p>Acierta cinco palabras distintas en <strong>{{ reto_semana.modalidad }}</strong>. El reto cambia cada lunes.</p>
+            </div>
+            <div class="weekly-challenge-action">
+                {% if user.is_authenticated %}
+                <div class="weekly-challenge-progress">
+                    <strong>{% if reto_semana.completado %}Reto completado{% else %}{{ reto_semana.avance }} de {{ reto_semana.meta }} palabras{% endif %}</strong>
+                    <progress value="{{ reto_semana.avance }}" max="{{ reto_semana.meta }}" aria-label="Avance privado del reto semanal: {{ reto_semana.avance }} de {{ reto_semana.meta }} palabras"></progress>
+                    <span>Tu avance es privado y se reinicia cada lunes.</span>
+                </div>
+                {% else %}
+                <p>Juega sin cuenta. <a href="{% url 'usuarios:login' %}">Inicia sesión</a> para guardar tu avance.</p>
+                {% endif %}
+                <a class="weekly-challenge-link" href="{% url reto_semana.url %}">{% if reto_semana.completado %}Volver a practicar{% else %}Empezar reto{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <section class="home-section topic-section" aria-labelledby="topics-title">
         <div class="container">

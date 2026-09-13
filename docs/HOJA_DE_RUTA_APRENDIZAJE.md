@@ -11,8 +11,11 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
    cuatro misiones calculadas desde aciertos, partidas y rachas; perfil privado
    con métricas, objetivos e historial. El nivel de práctica no sustituye el
    nivel de Kichwa que declara la persona. Las misiones no dan puntos extra.
-3. **Inicio con reto semanal, tendencias y ranking opcional — parcial.** Tendencias
-   agregadas de siete días y ranking voluntario ya existen. Falta el reto semanal.
+3. **Inicio con reto semanal, tendencias y ranking opcional — completada.** El
+   reto rota entre las cinco modalidades cada lunes y cuenta cinco palabras
+   distintas acertadas durante la semana para la persona autenticada. Las
+   tendencias agregadas muestran los últimos siete días y el ranking requiere
+   participación voluntaria.
 4. **Sonidos interactivos y juego de escucha — parcial.** Los juegos tienen sonidos
    de respuesta y opción de silencio. Falta la modalidad de escucha.
 5. **Oraciones de ejemplo revisadas — pendiente.** Existe el campo de ejemplo de

@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import date, timedelta
 from io import StringIO
 
 from django.contrib.auth.models import User
@@ -23,6 +23,7 @@ from .services.clasificacion import (
 )
 from .services.ia_kichwa import obtener_configuracion_ia
 from .services.relaciones import obtener_palabras_relacionadas
+from .services.reto_semanal import reto_semanal
 
 
 class DiccionarioTests(TestCase):
@@ -87,6 +88,64 @@ class DiccionarioTests(TestCase):
         self.assertEqual([item.usuario.username for item in respuesta.context['ranking']], ['amaru'])
         self.assertContains(respuesta, 'amaru')
         self.assertNotContains(respuesta, 'killa</span>')
+
+    def test_reto_semanal_rota_los_lunes_y_no_muestra_avance_anonimo(self):
+        lunes = date(2026, 9, 7)
+        actual = reto_semanal(None, lunes)
+        self.assertEqual(actual['inicio'], lunes)
+        self.assertEqual(reto_semanal(None, lunes + timedelta(days=6))['tipo'], actual['tipo'])
+        self.assertNotEqual(reto_semanal(None, lunes + timedelta(days=7))['tipo'], actual['tipo'])
+        retos = [reto_semanal(None, lunes + timedelta(weeks=numero)) for numero in range(5)]
+        self.assertEqual(len({reto['tipo'] for reto in retos}), 5)
+        for reto in retos:
+            self.assertTrue(reverse(reto['url']).startswith('/juegos/'))
+        self.assertIsNone(actual['avance'])
+        inicio = self.client.get(reverse('diccionario:home'))
+        self.assertContains(inicio, 'Reto de esta semana')
+        self.assertNotContains(inicio, 'Avance privado del reto semanal')
+
+    def test_reto_semanal_cuenta_solo_aciertos_distintos_del_titular_y_semana(self):
+        usuario = User.objects.create_user('reto', password='contrasena-segura-123')
+        otro = User.objects.create_user('otro-reto', password='contrasena-segura-123')
+        reto = reto_semanal(usuario)
+        palabras = [self.palabra, self.misi]
+        for numero in range(3):
+            palabras.append(Palabra.objects.create(
+                palabra_kichwa=f'Palabra {numero}', traduccion_espanol=f'Traducción {numero}',
+                categoria=self.categoria,
+            ))
+        sesion = SesionJuego.objects.create(
+            usuario=usuario, tipo_juego=reto['tipo'], dificultad='medio',
+            palabras_ids=[palabra.pk for palabra in palabras],
+        )
+        for palabra in palabras[:4]:
+            IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabra, correcta=True)
+        IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabras[0], correcta=True)
+        IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabras[4], correcta=False)
+        otra_modalidad = 'completar' if reto['tipo'] == 'traduccion' else 'traduccion'
+        sesion_distinta = SesionJuego.objects.create(
+            usuario=usuario, tipo_juego=otra_modalidad, dificultad='medio',
+            palabras_ids=[palabras[4].pk],
+        )
+        IntentoPalabraJuego.objects.create(sesion=sesion_distinta, palabra=palabras[4], correcta=True)
+        anterior = IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabras[4], correcta=True)
+        IntentoPalabraJuego.objects.filter(pk=anterior.pk).update(
+            fecha=timezone.now() - timedelta(days=8),
+        )
+        otra_sesion = SesionJuego.objects.create(
+            usuario=otro, tipo_juego=reto['tipo'], dificultad='medio',
+            palabras_ids=[palabras[4].pk],
+        )
+        IntentoPalabraJuego.objects.create(sesion=otra_sesion, palabra=palabras[4], correcta=True)
+
+        self.client.force_login(usuario)
+        inicio = self.client.get(reverse('diccionario:home'))
+        self.assertEqual(inicio.context['reto_semana']['avance'], 4)
+        self.assertFalse(inicio.context['reto_semana']['completado'])
+        self.assertContains(inicio, '4 de 5 palabras')
+        IntentoPalabraJuego.objects.create(sesion=sesion, palabra=palabras[4], correcta=True)
+        self.assertTrue(reto_semanal(usuario)['completado'])
+        self.assertEqual(reto_semanal(usuario)['avance'], 5)
 
     def test_detalle_incrementa_vistas(self):
         self.client.get(self.palabra.get_absolute_url())

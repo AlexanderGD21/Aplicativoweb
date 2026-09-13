@@ -35,6 +35,18 @@ html:has(.home-surface)::-webkit-scrollbar-thumb { background:#74867f; border:3p
 .corpus-facts strong { font-size:1.45rem; font-variant-numeric:tabular-nums; }
 .corpus-facts span { color:var(--home-muted); font-size:.85rem; }
 .corpus-facts>a { display:inline-flex; min-height:44px; align-items:center; gap:.5rem; }
+.weekly-challenge { background:#f6f2e7; border-bottom:1px solid #d8cfba; }
+.weekly-challenge-inner { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(230px,.7fr); align-items:center; gap:clamp(1.5rem,5vw,4rem); padding-top:2.5rem; padding-bottom:2.5rem; }
+.weekly-challenge-kicker { color:#685831; font-size:.72rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.weekly-challenge h2 { margin:.3rem 0 .5rem; font-size:clamp(1.65rem,3vw,2.3rem); font-weight:780; letter-spacing:-.03em; }
+.weekly-challenge p { max-width:57ch; margin:0; color:#43544c; line-height:1.5; }
+.weekly-challenge-action { min-width:0; }
+.weekly-challenge-action>p { font-size:.88rem; }
+.weekly-challenge-action>p a { color:var(--home-green); font-weight:760; }
+.weekly-challenge-progress strong { display:block; margin-bottom:.55rem; font-size:.93rem; }
+.weekly-challenge-progress progress { display:block; width:100%; height:.62rem; margin:0 0 .5rem; accent-color:var(--home-green); }
+.weekly-challenge-progress span { color:var(--home-muted); font-size:.8rem; }
+.weekly-challenge-link { display:inline-flex; min-height:44px; align-items:center; gap:.55rem; margin-top:.75rem; color:var(--home-green); font-weight:760; text-underline-offset:.2em; }
 .home-section { padding:4.5rem 0; }
 .home-section-heading { display:flex; align-items:end; justify-content:space-between; gap:2rem; margin-bottom:1.5rem; }
 .home-section-heading h2,.home-close h2 { margin:0 0 .5rem; font-size:clamp(1.7rem,3vw,2.5rem); font-weight:780; letter-spacing:-.03em; }
@@ -81,6 +93,7 @@ html:has(.home-surface)::-webkit-scrollbar-thumb { background:#74867f; border:3p
 .home-close-actions a { display:inline-flex; min-height:44px; align-items:center; padding:.65rem .9rem; color:#fff; }
 .home-close-actions .home-primary-action { padding-right:1.1rem; padding-left:1.1rem; color:#fff; background:var(--home-green); border-radius:10px; text-decoration:none; }
 @media(max-width:980px){.home-hero-grid{grid-template-columns:1fr;min-height:auto}.open-entry{max-width:620px}.corpus-facts{grid-template-columns:repeat(3,1fr);padding-top:1rem;padding-bottom:1rem}.corpus-facts>a{grid-column:1/-1}.featured-entries{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:680px){.home-hero-grid{gap:2.2rem;padding:3rem .9rem}.home-intro h1{font-size:clamp(2.25rem,12vw,3.35rem)}.home-search .search-control{grid-template-columns:40px minmax(0,1fr)}.home-search .search-control button{grid-column:1/-1;width:calc(100% - 10px);margin:0 5px 5px}.home-filter-row,.topic-list,.featured-entries,.corpus-facts{grid-template-columns:1fr}.corpus-facts{gap:.65rem;padding:1.2rem .9rem}.corpus-facts>a{grid-column:auto}.home-section{padding:3.3rem 0}.home-section-heading,.home-close-inner,.home-close-actions{align-items:flex-start;flex-direction:column}.topic-row:nth-child(odd){border-right:0}.topic-row{grid-template-columns:12px minmax(0,1fr) 16px}.topic-count{display:none}.home-close-inner{min-height:0;padding:3.2rem .9rem}}
+@media(max-width:680px){.home-hero-grid{gap:2.2rem;padding:3rem .9rem}.home-intro h1{font-size:clamp(2.25rem,12vw,3.35rem)}.home-search .search-control{grid-template-columns:40px minmax(0,1fr)}.home-search .search-control button{grid-column:1/-1;width:calc(100% - 10px);margin:0 5px 5px}.home-filter-row,.topic-list,.featured-entries,.corpus-facts{grid-template-columns:1fr}.corpus-facts{gap:.65rem;padding:1.2rem .9rem}.corpus-facts>a{grid-column:auto}.weekly-challenge-inner{grid-template-columns:1fr;gap:1.2rem;padding:2rem .9rem}.home-section{padding:3.3rem 0}.home-section-heading,.home-close-inner,.home-close-actions{align-items:flex-start;flex-direction:column}.topic-row:nth-child(odd){border-right:0}.topic-row{grid-template-columns:12px minmax(0,1fr) 16px}.home-close-inner{min-height:0;padding:3.2rem .9rem}}
 @media(max-width:760px){.community-grid{grid-template-columns:1fr;gap:2.2rem}.community-list+.community-list{padding:2rem 0 0;border-left:0;border-top:1px solid #cbd7cf}.community-list-heading{min-height:0;padding-bottom:1rem}}
+@media(max-width:680px){.topic-count{display:none}}
 @media(prefers-reduced-motion:reduce){.lexeme-field span{animation:none}}
