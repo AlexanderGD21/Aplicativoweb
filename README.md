@@ -22,6 +22,19 @@ primero las variables `DATABASE_*` en `.env` y ejecuta:
 El script conserva un respaldo y un volcado JSON en `backups/`; no borra la
 base SQLite original.
 
+## Pruebas con PostgreSQL
+
+Con PostgreSQL 18 instalado localmente, ejecuta la suite en una instancia
+temporal separada de la base configurada en `.env`:
+
+```powershell
+.\scripts\probar_postgresql_aislado.ps1
+```
+
+El script crea un clúster con contraseña aleatoria en un puerto local libre,
+ejecuta `manage.py test` y detiene y elimina el clúster al terminar. Si los
+binarios están en otra carpeta, indica `-PostgresBin 'ruta\al\bin'`.
+
 ## Curación
 
 ```powershell
