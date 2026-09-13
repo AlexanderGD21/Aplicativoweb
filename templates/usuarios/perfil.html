@@ -77,7 +77,7 @@
                     </section>
                     <section class="profile-side-panel" aria-labelledby="profile-library-title">
                         <p class="profile-kicker">Tu colección</p><h2 id="profile-library-title">Palabras favoritas</h2>
-                        <p><strong>{{ total_favoritas }}</strong> palabras guardadas para volver a consultar.</p>
+                        <p><strong>{{ total_favoritas }}</strong> palabra{{ total_favoritas|pluralize }} guardada{{ total_favoritas|pluralize }} para volver a consultar.</p>
                         <a class="profile-text-link" href="{% url 'diccionario:mis_favoritas' %}">Ver mis favoritas <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                     </section>
                     <section class="profile-side-panel" aria-labelledby="profile-privacy-title">

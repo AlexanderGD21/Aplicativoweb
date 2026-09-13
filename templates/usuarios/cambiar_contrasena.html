@@ -11,7 +11,7 @@
     {% if form.non_field_errors %}<div class="auth-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
     <form method="post" class="auth-form" data-auth-form>{% csrf_token %}
       {% for field in form %}<div class="auth-field{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.name == 'new_password1' %}<span class="auth-help">Usa al menos 8 caracteres y evita contraseñas comunes.</span>{% endif %}{% for error in field.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}</div>{% endfor %}
-      <div class="auth-actions"><button type="submit" class="auth-button" data-loading-text="Actualizando…">Guardar contraseña</button><a class="auth-button auth-button--secondary" href="{% url 'usuarios:editar_perfil' %}">Volver al perfil</a></div>
+      <div class="auth-actions"><button type="submit" class="auth-button" data-loading-text="Actualizando…">Guardar contraseña</button><a class="auth-button auth-button--secondary" href="{% url 'usuarios:perfil' %}">Volver al perfil</a></div>
     </form>
   </div>
 </div></div></section>
