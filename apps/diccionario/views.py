@@ -360,10 +360,14 @@ def detalle_palabra(request, pk):
     ).exists()
     
     palabras_relacionadas = obtener_palabras_relacionadas(palabra)
+    ejemplos_uso = palabra.ejemplos_uso.filter(
+        estado='publicado', revisado_por__isnull=False, fecha_revision__isnull=False,
+    ).order_by('id')
     
     context = {
         'palabra': palabra,
         'palabras_relacionadas': palabras_relacionadas,
+        'ejemplos_uso': ejemplos_uso,
         'es_favorita': es_favorita,
     }
     

@@ -3,7 +3,7 @@
 
 {% block title %}{{ palabra.palabra_kichwa }} — {{ palabra.traduccion_espanol }} | Diccionario Kichwa{% endblock %}
 
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/word-detail.css' %}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/word-detail.css' %}?v=20260914-1">{% endblock %}
 
 {% block content %}
 <article class="entry-surface" style="--entry-accent: {{ palabra.categoria.color|default:'#17684d' }}">
@@ -58,10 +58,16 @@
                     {% endif %}
                 </section>
 
-                {% if palabra.ejemplo_uso %}
+                {% if ejemplos_uso %}
                 <section class="usage-example" aria-labelledby="example-title">
-                    <h2 id="example-title"><i class="fas fa-quote-left" aria-hidden="true"></i> Ejemplo de uso</h2>
-                    <blockquote>{{ palabra.ejemplo_uso }}</blockquote>
+                    <h2 id="example-title"><i class="fas fa-quote-left" aria-hidden="true"></i> En contexto</h2>
+                    {% for ejemplo in ejemplos_uso %}
+                    <figure class="usage-example__item">
+                        <blockquote>{{ ejemplo.oracion_kichwa }}</blockquote>
+                        <figcaption><span>Español</span> {{ ejemplo.traduccion_espanol }}</figcaption>
+                        <p class="usage-example__source">Fuente: {{ ejemplo.fuente }}</p>
+                    </figure>
+                    {% endfor %}
                 </section>
                 {% endif %}
 

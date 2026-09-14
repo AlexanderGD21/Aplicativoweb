@@ -66,7 +66,7 @@ class PalabraForm(forms.ModelForm):
             'pronunciacion', 'audio', 'categoria', 'categoria_propuesta', 'dificultad', 'nivel_dificultad',
             'tipo', 'estado_revision', 'apta_para_juegos', 'dificultad_juego',
             'descripcion_juego_espanol', 'descripcion_juego_kichwa',
-            'notas_gramaticales', 'ejemplo_uso', 'activa'
+            'notas_gramaticales', 'activa'
         ]
         widgets = {
             'palabra_kichwa': forms.TextInput(attrs={'class': 'form-control'}),
@@ -84,7 +84,6 @@ class PalabraForm(forms.ModelForm):
             'descripcion_juego_espanol': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'descripcion_juego_kichwa': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'notas_gramaticales': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'ejemplo_uso': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'apta_para_juegos': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'activa': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

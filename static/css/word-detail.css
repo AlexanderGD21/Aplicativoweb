@@ -37,6 +37,11 @@ html:has(.entry-surface)::-webkit-scrollbar-thumb { background:#74867f; border:3
 .usage-example { padding:1.6rem; background:#f6f2e7; border-radius:14px; }
 .usage-example h2 { color:#5d4d25; }
 .usage-example blockquote { max-width:70ch; margin:0; color:#433b29; font-size:1.05rem; line-height:1.7; }
+.usage-example__item { margin:0; padding:1rem 0; border-top:1px solid #ded5bd; }
+.usage-example__item:first-of-type { padding-top:.3rem; border-top:0; }
+.usage-example__item figcaption { margin-top:.6rem; color:#5b5549; line-height:1.55; }
+.usage-example__item figcaption span { margin-right:.4rem; color:#655628; font-size:.72rem; font-weight:780; letter-spacing:.04em; text-transform:uppercase; }
+.usage-example__source { margin:.5rem 0 0; color:#6c685f; font-size:.78rem; overflow-wrap:anywhere; }
 .lexical-notes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-content:start; border-top:1px solid var(--detail-line); }
 .lexical-notes section { padding:1.5rem 1.2rem 1.5rem 0; border-bottom:1px solid var(--detail-line); }
 .lexical-notes section:nth-child(even) { padding-right:0; padding-left:1.2rem; border-left:1px solid var(--detail-line); }

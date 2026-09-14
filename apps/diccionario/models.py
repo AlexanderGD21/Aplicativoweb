@@ -153,6 +153,7 @@ class Palabra(models.Model):
     etimologia = models.TextField(blank=True, null=True)
     sinonimos = models.TextField(blank=True, null=True, help_text='Separar con comas')
     notas_gramaticales = models.TextField(blank=True, null=True)
+    # Campo heredado: los ejemplos publicables viven en EjemploUso.
     ejemplo_uso = models.TextField(blank=True, null=True)
     
     # Campos de control
@@ -193,6 +194,62 @@ class Palabra(models.Model):
     
     def get_absolute_url(self):
         return reverse('diccionario:detalle_palabra', kwargs={'pk': self.pk})
+
+
+class EjemploUso(models.Model):
+    ESTADO_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('publicado', 'Publicado'),
+    ]
+
+    palabra = models.ForeignKey(Palabra, on_delete=models.CASCADE, related_name='ejemplos_uso')
+    oracion_kichwa = models.TextField(help_text='Oración en Kichwa revisada en contexto.')
+    traduccion_espanol = models.TextField(help_text='Traducción fiel de la oración completa.')
+    fuente = models.CharField(max_length=300, help_text='Obra, informante autorizado o autoría propia.')
+    estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default='borrador', db_index=True)
+    revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
+    fecha_revision = models.DateTimeField(null=True, blank=True, editable=False)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Ejemplo de uso'
+        verbose_name_plural = 'Ejemplos de uso'
+        ordering = ['id']
+
+    def __str__(self):
+        return f'{self.palabra.palabra_kichwa}: {self.oracion_kichwa[:70]}'
+
+    def clean(self):
+        super().clean()
+        errores = {}
+        for campo in ('oracion_kichwa', 'traduccion_espanol', 'fuente'):
+            if not (getattr(self, campo) or '').strip():
+                errores[campo] = 'Este campo no puede estar vacío.'
+        if self.palabra_id and self.oracion_kichwa:
+            marcador = f'{self.palabra.palabra_kichwa} - {self.palabra.traduccion_espanol}'
+            if self.oracion_kichwa.strip() == marcador:
+                errores['oracion_kichwa'] = 'La equivalencia automática no es una oración de ejemplo.'
+        if self.estado == 'publicado' and (not self.revisado_por_id or not self.fecha_revision):
+            errores['estado'] = 'La publicación requiere un responsable y una fecha de revisión.'
+        if errores:
+            raise ValidationError(errores)
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            anterior = type(self).objects.filter(pk=self.pk).values(
+                'palabra_id', 'oracion_kichwa', 'traduccion_espanol', 'fuente',
+            ).first()
+            if anterior and any(getattr(self, campo) != anterior[campo] for campo in anterior):
+                self.estado = 'borrador'
+                self.revisado_por = None
+                self.fecha_revision = None
+                if kwargs.get('update_fields') is not None:
+                    kwargs['update_fields'] = set(kwargs['update_fields']) | {
+                        'estado', 'revisado_por', 'fecha_revision',
+                    }
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 class PalabraFavorita(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)

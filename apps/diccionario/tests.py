@@ -1,18 +1,22 @@
 import json
+from importlib import import_module
 from datetime import date, timedelta
 from io import StringIO
+from types import SimpleNamespace
 
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.db import connection
 from django.db.models.deletion import ProtectedError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from .models import (
-    ActividadUsuario, BusquedaPopularDiaria, Categoria, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
+    ActividadUsuario, BusquedaPopularDiaria, Categoria, EjemploUso, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
     ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
 )
 from .models import PalabraFavorita
@@ -151,6 +155,92 @@ class DiccionarioTests(TestCase):
         self.client.get(self.palabra.get_absolute_url())
         self.palabra.refresh_from_db()
         self.assertEqual(self.palabra.veces_vista, 1)
+
+    def test_ejemplos_solo_se_publican_tras_revision_y_se_retiran_al_editar(self):
+        self.palabra.ejemplo_uso = 'Yaku - Agua'
+        self.palabra.save(update_fields=['ejemplo_uso'])
+        ejemplo = EjemploUso.objects.create(
+            palabra=self.palabra, oracion_kichwa='Yaku shamun.',
+            traduccion_espanol='El agua llega.', fuente='Material de prueba',
+        )
+        detalle = self.client.get(self.palabra.get_absolute_url())
+        self.assertNotContains(detalle, 'Yaku - Agua')
+        self.assertNotContains(detalle, 'Yaku shamun.')
+
+        revisor = User.objects.create_superuser('revisor', 'revisor@example.com', 'clave-segura-123')
+        self.client.force_login(revisor)
+        respuesta = self.client.post(reverse('admin:diccionario_ejemplouso_changelist'), {
+            'action': 'publicar_revisados', '_selected_action': [ejemplo.pk], 'index': 0,
+        })
+        self.assertEqual(respuesta.status_code, 302)
+        ejemplo.refresh_from_db()
+        self.assertEqual(ejemplo.estado, 'publicado')
+        self.assertEqual(ejemplo.revisado_por, revisor)
+        self.assertIsNotNone(ejemplo.fecha_revision)
+        self.client.logout()
+        detalle = self.client.get(self.palabra.get_absolute_url())
+        self.assertContains(detalle, 'Yaku shamun.')
+        self.assertContains(detalle, 'El agua llega.')
+        self.assertContains(detalle, 'Material de prueba')
+
+        self.client.force_login(revisor)
+        self.client.post(reverse('admin:diccionario_ejemplouso_changelist'), {
+            'action': 'retirar_publicacion', '_selected_action': [ejemplo.pk], 'index': 0,
+        })
+        ejemplo.refresh_from_db()
+        self.assertEqual(ejemplo.estado, 'borrador')
+        self.assertNotContains(self.client.get(self.palabra.get_absolute_url()), 'Yaku shamun.')
+        self.client.post(reverse('admin:diccionario_ejemplouso_changelist'), {
+            'action': 'publicar_revisados', '_selected_action': [ejemplo.pk], 'index': 0,
+        })
+        ejemplo.refresh_from_db()
+        self.assertEqual(ejemplo.estado, 'publicado')
+        self.client.logout()
+
+        ejemplo.oracion_kichwa = 'Yaku chiri kan.'
+        ejemplo.save(update_fields=['oracion_kichwa'])
+        ejemplo.refresh_from_db()
+        self.assertEqual(ejemplo.estado, 'borrador')
+        self.assertIsNone(ejemplo.revisado_por)
+        self.assertIsNone(ejemplo.fecha_revision)
+        self.assertNotContains(self.client.get(self.palabra.get_absolute_url()), 'Yaku chiri kan.')
+
+    def test_ejemplo_rechaza_equivalencia_automatica_y_fuente_vacia(self):
+        with self.assertRaises(ValidationError):
+            EjemploUso.objects.create(
+                palabra=self.palabra, oracion_kichwa='Yaku - Agua',
+                traduccion_espanol='Agua', fuente='Material de prueba',
+            )
+        with self.assertRaises(ValidationError):
+            EjemploUso.objects.create(
+                palabra=self.palabra, oracion_kichwa='Yaku shamun.',
+                traduccion_espanol='El agua llega.', fuente='   ',
+            )
+        borrador = EjemploUso.objects.create(
+            palabra=self.palabra, oracion_kichwa='Yaku shamun.',
+            traduccion_espanol='El agua llega.', fuente='Material de prueba',
+        )
+        EjemploUso.objects.filter(pk=borrador.pk).update(oracion_kichwa='Yaku - Agua')
+        revisor = User.objects.create_superuser('revisor', 'revisor@example.com', 'clave-segura-123')
+        self.client.force_login(revisor)
+        self.client.post(reverse('admin:diccionario_ejemplouso_changelist'), {
+            'action': 'publicar_revisados', '_selected_action': [borrador.pk], 'index': 0,
+        })
+        borrador.refresh_from_db()
+        self.assertEqual(borrador.estado, 'borrador')
+        self.assertIsNone(borrador.revisado_por)
+
+    def test_migracion_limpia_solo_marcadores_automaticos(self):
+        self.palabra.ejemplo_uso = 'Yaku - Agua'
+        self.palabra.save(update_fields=['ejemplo_uso'])
+        self.misi.ejemplo_uso = 'Texto heredado distinto para revisar.'
+        self.misi.save(update_fields=['ejemplo_uso'])
+        migracion = import_module('apps.diccionario.migrations.0025_ejemplos_uso_revisados')
+        migracion.limpiar_equivalencias_automaticas(apps, SimpleNamespace(connection=connection))
+        self.palabra.refresh_from_db()
+        self.misi.refresh_from_db()
+        self.assertIsNone(self.palabra.ejemplo_uso)
+        self.assertEqual(self.misi.ejemplo_uso, 'Texto heredado distinto para revisar.')
 
     def test_detalle_indica_favorita_del_usuario_actual(self):
         usuario = User.objects.create_user('killa', password='contrasena-segura-123')

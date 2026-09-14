@@ -20,8 +20,11 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
    efectos de respuesta que se pueden silenciar. La modalidad de escucha usa
    grabaciones del corpus, ofrece reproducción lenta y texto alternativo, y
    guarda el progreso por palabra sin generar pronunciaciones artificiales.
-5. **Oraciones de ejemplo revisadas — pendiente.** Existe el campo de ejemplo de
-   uso; falta la revisión editorial del contenido que se muestre al público.
+5. **Oraciones de ejemplo revisadas — parcial.** Se retiraron de la vista pública
+   las equivalencias automáticas que se mostraban como ejemplos. Django Admin
+   permite preparar oraciones bilingües con fuente, aprobarlas con responsable y
+   fecha, y devolverlas a borrador si cambian. Falta aportar y revisar oraciones
+   reales; ninguna se marca como revisada automáticamente.
 6. **Imágenes para vocabulario prioritario — pendiente.** Definir la selección de
    palabras y producir o licenciar sus imágenes antes de mostrarlas.
 7. **Internacionalización de la interfaz y traducciones al inglés — pendiente.**

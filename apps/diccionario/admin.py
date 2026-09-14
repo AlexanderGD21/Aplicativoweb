@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.db.models import F
+from django.utils import timezone
 from .models import (
     ActividadUsuario, Categoria, EstadisticaJuego, HistorialBusqueda,
-    IntentoPalabraJuego, Palabra, PalabraFavorita, ProgresoPalabraJuego, SesionJuego,
+    EjemploUso, IntentoPalabraJuego, Palabra, PalabraFavorita, ProgresoPalabraJuego, SesionJuego,
 )
 
 @admin.register(Categoria)
@@ -41,7 +43,7 @@ class PalabraAdmin(admin.ModelAdmin):
             'fields': ('apta_para_juegos', 'dificultad_juego', 'descripcion_juego_espanol', 'descripcion_juego_kichwa', 'frecuencia_uso')
         }),
         ('Información Adicional', {
-            'fields': ('etimologia', 'sinonimos', 'notas_gramaticales', 'ejemplo_uso'),
+            'fields': ('etimologia', 'sinonimos', 'notas_gramaticales'),
             'classes': ('collapse',)
         }),
         ('Control', {
@@ -72,6 +74,48 @@ class PalabraAdmin(admin.ModelAdmin):
     @admin.action(description='Marcar como validada')
     def marcar_validada(self, request, queryset):
         self.message_user(request, f'{queryset.update(estado_revision="validada")} entradas validadas.')
+
+
+@admin.register(EjemploUso)
+class EjemploUsoAdmin(admin.ModelAdmin):
+    list_display = ['palabra', 'oracion_corta', 'estado', 'fuente', 'revisado_por', 'fecha_revision']
+    list_filter = ['estado', 'palabra__categoria', 'fecha_revision']
+    search_fields = ['palabra__palabra_kichwa', 'palabra__traduccion_espanol', 'oracion_kichwa', 'fuente']
+    autocomplete_fields = ['palabra']
+    readonly_fields = ['estado', 'revisado_por', 'fecha_revision', 'fecha_creacion', 'fecha_actualizacion']
+    fields = [
+        'palabra', 'oracion_kichwa', 'traduccion_espanol', 'fuente',
+        'estado', 'revisado_por', 'fecha_revision', 'fecha_creacion', 'fecha_actualizacion',
+    ]
+    actions = ['publicar_revisados', 'retirar_publicacion']
+
+    @admin.display(description='Oración en Kichwa')
+    def oracion_corta(self, obj):
+        return obj.oracion_kichwa[:90]
+
+    @admin.action(description='Publicar tras revisión editorial')
+    def publicar_revisados(self, request, queryset):
+        publicados = 0
+        invalidos = 0
+        for ejemplo in queryset.filter(estado='borrador').select_related('palabra'):
+            ejemplo.estado = 'publicado'
+            ejemplo.revisado_por = request.user
+            ejemplo.fecha_revision = timezone.now()
+            try:
+                ejemplo.save(update_fields=['estado', 'revisado_por', 'fecha_revision', 'fecha_actualizacion'])
+            except ValidationError:
+                invalidos += 1
+            else:
+                publicados += 1
+        self.message_user(request, f'{publicados} ejemplos publicados; {invalidos} incompletos o inválidos.')
+
+    @admin.action(description='Retirar publicación y devolver a borrador')
+    def retirar_publicacion(self, request, queryset):
+        retirados = queryset.filter(estado='publicado').update(
+            estado='borrador', revisado_por=None, fecha_revision=None,
+            fecha_actualizacion=timezone.now(),
+        )
+        self.message_user(request, f'{retirados} ejemplos retirados.')
 
 @admin.register(PalabraFavorita)
 class PalabraFavoritaAdmin(admin.ModelAdmin):

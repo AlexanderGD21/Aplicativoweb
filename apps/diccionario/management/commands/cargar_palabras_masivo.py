@@ -4897,7 +4897,6 @@ class Command(BaseCommand):
                         traduccion_espanol=traduccion_espanol,
                         defaults={
                             'pronunciacion': pronunciacion,
-                            'ejemplo_uso': f'{palabra_kichwa} - {traduccion_espanol}',
                             'notas_gramaticales': descripcion,
                             'tipo': tipo_palabra,
                             'dificultad': dificultad,
