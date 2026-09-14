@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.diccionario.models import Palabra
+from apps.diccionario.models import Palabra, limpiar_termino
 
 class Command(BaseCommand):
     help = 'Carga palabras masivamente en el diccionario Kichwa-Español'
@@ -4882,6 +4882,9 @@ class Command(BaseCommand):
                     else:  # espanol_kichwa
                         palabra_kichwa = palabra_data[1]  # La traducción kichwa
                         traduccion_espanol = palabra_data[0]  # La palabra española
+
+                    palabra_kichwa = limpiar_termino(palabra_kichwa)
+                    traduccion_espanol = limpiar_termino(traduccion_espanol)
 
                     # Descripción (tercer elemento si existe)
                     descripcion = palabra_data[2] if len(palabra_data) > 2 else ''

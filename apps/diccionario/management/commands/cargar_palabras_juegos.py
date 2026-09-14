@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from apps.diccionario.models import Categoria, Palabra
+from apps.diccionario.models import Categoria, Palabra, limpiar_termino
 
 class Command(BaseCommand):
     help = 'Carga palabras específicamente para mini juegos con descripciones especiales'
@@ -867,8 +867,9 @@ class Command(BaseCommand):
         contador = 0
         for termino_kichwa, descripcion_espanol in palabras_juegos_kichwa_espanol:
             if termino_kichwa and descripcion_espanol:  # Verificar que no estén vacías
+                termino_kichwa = limpiar_termino(termino_kichwa)
                 # Extraer una traducción simple de la descripción (primeras palabras)
-                traduccion_simple = descripcion_espanol.split('.')[0].split(',')[0][:50]
+                traduccion_simple = limpiar_termino(descripcion_espanol.split('.')[0].split(',')[0][:50])
                 
                 categoria_nombre = self.determinar_categoria_juego(termino_kichwa, traduccion_simple, descripcion_espanol)
                 categoria = Categoria.objects.get(nombre=categoria_nombre)
@@ -2471,8 +2472,9 @@ class Command(BaseCommand):
         contador = 0
         for termino_espanol, descripcion_kichwa in palabras_juegos_espanol_kichwa:
             if termino_espanol and descripcion_kichwa:  # Verificar que no estén vacías
+                termino_espanol = limpiar_termino(termino_espanol)
                 # Extraer una traducción simple de la descripción (primera palabra en kichwa)
-                traduccion_kichwa = descripcion_kichwa.split(',')[0].split(' ')[0]
+                traduccion_kichwa = limpiar_termino(descripcion_kichwa.split(',')[0].split(' ')[0])
                 
                 categoria_nombre = self.determinar_categoria_juego(traduccion_kichwa, termino_espanol, descripcion_kichwa)
                 categoria = Categoria.objects.get(nombre=categoria_nombre)

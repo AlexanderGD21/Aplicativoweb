@@ -21,6 +21,11 @@ def normalizar_texto_busqueda(texto):
     return re.sub(r'[^a-z0-9ñ]+', ' ', texto).strip()
 
 
+def limpiar_termino(texto):
+    """Quita puntos editoriales al final de un lema o traducción breve."""
+    return (texto or '').strip().rstrip('.').rstrip()
+
+
 def validar_tamano_audio(archivo):
     if archivo.size > 10 * 1024 * 1024:
         raise ValidationError('El audio no puede superar 10 MB.')
@@ -178,6 +183,8 @@ class Palabra(models.Model):
         return f"{self.palabra_kichwa} - {self.traduccion_espanol}"
 
     def save(self, *args, **kwargs):
+        self.palabra_kichwa = limpiar_termino(self.palabra_kichwa)
+        self.traduccion_espanol = limpiar_termino(self.traduccion_espanol)
         self.busqueda_kichwa = normalizar_texto_busqueda(self.palabra_kichwa)
         self.busqueda_espanol = normalizar_texto_busqueda(self.traduccion_espanol)
         self.busqueda_contenido = normalizar_texto_busqueda(' '.join(filter(None, (
@@ -188,7 +195,8 @@ class Palabra(models.Model):
         ))))
         if kwargs.get('update_fields') is not None:
             kwargs['update_fields'] = set(kwargs['update_fields']) | {
-                'busqueda_kichwa', 'busqueda_espanol', 'busqueda_contenido',
+                'palabra_kichwa', 'traduccion_espanol', 'busqueda_kichwa',
+                'busqueda_espanol', 'busqueda_contenido',
             }
         super().save(*args, **kwargs)
     

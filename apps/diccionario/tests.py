@@ -30,6 +30,77 @@ from .services.relaciones import obtener_palabras_relacionadas
 from .services.reto_semanal import reto_semanal
 
 
+class LimpiezaTerminosTests(TestCase):
+    def test_guardado_e_importacion_quitan_puntos_terminales(self):
+        categoria = Categoria.objects.create(nombre='Animales')
+        palabra = Palabra.objects.create(
+            palabra_kichwa=' Misi. ', traduccion_espanol=' Gato. ', categoria=categoria,
+            apta_para_juegos=True,
+        )
+        palabra.refresh_from_db()
+        self.assertEqual((palabra.palabra_kichwa, palabra.traduccion_espanol), ('Misi', 'Gato'))
+        self.assertEqual((palabra.busqueda_kichwa, palabra.busqueda_espanol), ('misi', 'gato'))
+
+        comando = import_module('apps.diccionario.management.commands.cargar_palabras_masivo').Command(stdout=StringIO())
+        creadas, existentes = comando.cargar_palabras([('Misi.', 'Gato.', 'Animal doméstico')], 'kichwa_espanol')
+        self.assertEqual((creadas, existentes), (0, 1))
+        self.assertEqual(Palabra.objects.count(), 1)
+
+    def test_migracion_unifica_duplicados_y_conserva_progreso_y_sesiones(self):
+        categoria = Categoria.objects.create(nombre='Animales')
+        usuario = User.objects.create_user('runa', password='clave-segura-123')
+        principal = Palabra.objects.create(
+            palabra_kichwa='misi', traduccion_espanol='gato', categoria=categoria,
+            pronunciacion='mi-si',
+        )
+        duplicada = Palabra.objects.create(
+            palabra_kichwa='misi variante', traduccion_espanol='gato', categoria=categoria,
+            apta_para_juegos=True, descripcion_juego_kichwa='misi',
+        )
+        Palabra.objects.filter(pk=duplicada.pk).update(palabra_kichwa='misi.', pronunciacion='mi-si-.')
+        tercera = Palabra.objects.create(
+            palabra_kichwa='allku variante', traduccion_espanol='perro', categoria=categoria,
+        )
+        Palabra.objects.filter(pk=tercera.pk).update(palabra_kichwa='allku.', pronunciacion='al-lk-u.')
+        PalabraFavorita.objects.create(usuario=usuario, palabra=principal)
+        PalabraFavorita.objects.create(usuario=usuario, palabra=duplicada)
+        BusquedaPopularDiaria.objects.create(palabra=principal, consultas=2)
+        BusquedaPopularDiaria.objects.create(palabra=duplicada, consultas=3)
+        ProgresoPalabraJuego.objects.create(usuario=usuario, palabra=principal, intentos=2, respuestas_correctas=1)
+        ProgresoPalabraJuego.objects.create(usuario=usuario, palabra=duplicada, intentos=3, respuestas_correctas=2)
+        sesion = SesionJuego.objects.create(
+            usuario=usuario, tipo_juego='traduccion', dificultad='medio',
+            palabras_ids=[duplicada.pk, tercera.pk], pistas_palabras_ids=[duplicada.pk],
+        )
+        IntentoPalabraJuego.objects.create(sesion=sesion, palabra=duplicada, correcta=True)
+        RelacionPalabra.objects.create(origen=tercera, destino=duplicada, tipo='contexto')
+        EjemploUso.objects.create(
+            palabra=duplicada, oracion_kichwa='Misi shamun.',
+            traduccion_espanol='El gato viene.', fuente='Prueba',
+        )
+
+        migracion = import_module('apps.diccionario.migrations.0026_limpiar_puntos_terminales')
+        migracion.limpiar_puntos_terminales(apps, SimpleNamespace(connection=connection))
+
+        self.assertFalse(Palabra.objects.filter(pk=duplicada.pk).exists())
+        principal.refresh_from_db()
+        tercera.refresh_from_db()
+        sesion.refresh_from_db()
+        self.assertEqual((principal.palabra_kichwa, principal.traduccion_espanol), ('misi', 'gato'))
+        self.assertTrue(principal.apta_para_juegos)
+        self.assertEqual(principal.descripcion_juego_kichwa, 'misi')
+        self.assertEqual((tercera.palabra_kichwa, tercera.pronunciacion), ('allku', 'al-lk-u'))
+        self.assertEqual(sesion.palabras_ids, [principal.pk, tercera.pk])
+        self.assertEqual(sesion.pistas_palabras_ids, [principal.pk])
+        self.assertEqual(IntentoPalabraJuego.objects.get(sesion=sesion).palabra_id, principal.pk)
+        self.assertEqual(EjemploUso.objects.get().palabra_id, principal.pk)
+        self.assertEqual(RelacionPalabra.objects.get().destino_id, principal.pk)
+        self.assertEqual(PalabraFavorita.objects.filter(usuario=usuario, palabra=principal).count(), 1)
+        self.assertEqual(BusquedaPopularDiaria.objects.get(palabra=principal).consultas, 5)
+        progreso = ProgresoPalabraJuego.objects.get(usuario=usuario, palabra=principal)
+        self.assertEqual((progreso.intentos, progreso.respuestas_correctas), (5, 3))
+
+
 class DiccionarioTests(TestCase):
     @classmethod
     def setUpTestData(cls):
