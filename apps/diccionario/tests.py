@@ -326,7 +326,7 @@ class DiccionarioTests(TestCase):
         rutas = [
             'home', 'buscar', 'categorias', 'acerca_de', 'contacto', 'juegos',
             'juego_traduccion', 'juego_completar', 'juego_memoria', 'juego_conexion',
-            'juego_sopa_letras',
+            'juego_sopa_letras', 'juego_escucha',
         ]
         for ruta in rutas:
             with self.subTest(ruta=ruta):
@@ -351,8 +351,49 @@ class DiccionarioTests(TestCase):
         self.assertContains(sopa, 'id="game-sound-toggle"')
 
         portada = self.client.get(reverse('diccionario:juegos'))
-        for tipo in ('traduccion', 'conectar', 'memoria', 'completar', 'sopa_letras'):
+        for tipo in ('traduccion', 'escucha', 'conectar', 'memoria', 'completar', 'sopa_letras'):
             self.assertContains(portada, f'learning-path__item--{tipo}')
+
+    def test_escucha_usa_solo_grabaciones_y_guarda_aciertos_por_palabra(self):
+        self.misi.audio = 'audios/misi.mp3'
+        self.misi.save(update_fields=['audio'])
+        filtros = {'categoria': self.animales.slug, 'dificultad': 'medio'}
+        usuario = User.objects.create_user('escucha', password='contrasena-segura-123')
+        self.client.force_login(usuario)
+
+        pagina = self.client.get(reverse('diccionario:juego_escucha'), filtros)
+        self.assertEqual(pagina.status_code, 200)
+        self.assertEqual(pagina.context['palabras'], [self.misi])
+        self.assertEqual(pagina.context['palabras_data'][0]['audio'], self.misi.audio.url)
+        self.assertEqual(pagina.context['tipo_juego'], 'escucha')
+        self.assertEqual(list(pagina.context['categorias_jugables']), [self.animales])
+        self.assertNotContains(pagina, 'No hay grabaciones con estos filtros')
+        self.assertContains(pagina, 'Escucha grabaciones del corpus')
+        datos_api = self.client.get(reverse('diccionario:obtener_palabras_juego'), {
+            'tipo': 'escucha', 'dificultad': 'medio', 'categoria': self.animales.slug,
+        }).json()['palabras']
+        self.assertEqual([item['id'] for item in datos_api], [self.misi.pk])
+        self.assertEqual(datos_api[0]['audio'], self.misi.audio.url)
+
+        respuesta = self.client.post(reverse('diccionario:registrar_respuesta_juego'), data=json.dumps({
+            'sesion_id': pagina.context['sesion_id'], 'tipo_juego': 'escucha',
+            'palabra_id': self.misi.pk, 'respuesta_id': self.misi.pk,
+        }), content_type='application/json')
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertTrue(respuesta.json()['correcta'])
+        self.assertEqual(respuesta.json()['puntos_ganados'], 10)
+        self.assertEqual(ProgresoPalabraJuego.objects.get(usuario=usuario, palabra=self.misi).respuestas_correctas, 1)
+        cierre = self.client.post(reverse('diccionario:guardar_estadistica_juego'), data=json.dumps({
+            'sesion_id': pagina.context['sesion_id'],
+        }), content_type='application/json')
+        self.assertEqual(cierre.status_code, 201)
+        self.assertEqual(EstadisticaJuego.objects.get(usuario=usuario).tipo_juego, 'escucha')
+
+        vacia = self.client.get(reverse('diccionario:juego_escucha'), {
+            'categoria': self.categoria.slug, 'dificultad': 'medio',
+        })
+        self.assertEqual(vacia.context['palabras'], [])
+        self.assertContains(vacia, 'No hay grabaciones con estos filtros')
 
     def test_filtros_de_juego_no_se_rellenan_con_otro_tema_o_dificultad(self):
         alimentos = Categoria.objects.create(nombre='Alimentos')
@@ -368,6 +409,8 @@ class DiccionarioTests(TestCase):
         self.assertContains(respuesta, 'No hay palabras disponibles con estos filtros')
 
     def test_tema_y_dificultad_se_aplican_en_todas_las_modalidades(self):
+        self.misi.audio = 'audios/misi.mp3'
+        self.misi.save(update_fields=['audio'])
         Palabra.objects.create(
             palabra_kichwa='Allku', traduccion_espanol='Perro', categoria=self.animales,
             apta_para_juegos=True, dificultad='facil', dificultad_juego='facil',
@@ -377,7 +420,7 @@ class DiccionarioTests(TestCase):
             apta_para_juegos=True, dificultad='medio', dificultad_juego='medio',
         )
         filtros = {'categoria': self.animales.slug, 'dificultad': 'medio'}
-        for ruta in ('juego_traduccion', 'juego_conexion', 'juego_memoria', 'juego_completar', 'juego_sopa_letras'):
+        for ruta in ('juego_traduccion', 'juego_escucha', 'juego_conexion', 'juego_memoria', 'juego_completar', 'juego_sopa_letras'):
             with self.subTest(ruta=ruta):
                 respuesta = self.client.get(reverse(f'diccionario:{ruta}'), filtros)
                 self.assertEqual(respuesta.status_code, 200)

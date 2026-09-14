@@ -425,6 +425,11 @@ JUEGOS_DISPONIBLES = [
         'url': 'diccionario:juego_traduccion', 'icono': 'fa-language', 'duracion': '3–5 min',
     },
     {
+        'tipo': 'escucha', 'etapa': 'Escuchar', 'nombre': 'Escucha y reconoce',
+        'descripcion': 'Escucha una grabación de Kichwa y elige su significado en español.',
+        'url': 'diccionario:juego_escucha', 'icono': 'fa-headphones', 'duracion': '3–5 min',
+    },
+    {
         'tipo': 'conectar', 'etapa': 'Asociar', 'nombre': 'Conectar significados',
         'descripcion': 'Une cada palabra Kichwa con su significado en español mediante selecciones claras.',
         'url': 'diccionario:juego_conexion', 'icono': 'fa-link', 'duracion': '3–4 min',
@@ -561,15 +566,16 @@ def _datos_palabras_juego(palabras):
             'pista': _pista_de_traduccion(palabra),
             'tablero': getattr(palabra, 'palabra_tablero', ''),
             'categoria': palabra.categoria.nombre,
+            'audio': palabra.audio.url if palabra.audio else '',
         }
         for palabra in palabras
     ]
 
 
-def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=None):
+def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=None, requiere_audio=False):
     dificultad, categoria = filtros_juego(request, dificultad_predeterminada)
     palabras = seleccionar_palabras_juego(
-        request.user, dificultad, categoria, limite=limite, filtro=filtro,
+        request.user, dificultad, categoria, limite=limite, filtro=filtro, requiere_audio=requiere_audio,
     )
     datos = _datos_palabras_juego(palabras)
     meta = next(juego for juego in JUEGOS_DISPONIBLES if juego['tipo'] == tipo)
@@ -596,6 +602,7 @@ def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=Non
                 'palabra_kichwa': dato['kichwa'],
                 'traduccion_espanol': dato['espanol'],
                 'pronunciacion': dato['pronunciacion'],
+                'audio': dato['audio'],
                 'descripcion_juego_espanol': dato['pista'],
                 'descripcion_juego_kichwa': '',
             }
@@ -603,7 +610,7 @@ def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=Non
         ]),
         'dificultad': dificultad,
         'categoria_seleccionada': categoria,
-        'categorias_jugables': categorias_jugables(),
+        'categorias_jugables': categorias_jugables(requiere_audio=requiere_audio),
         'total_palabras': len(palabras),
         'sesion_id': str(sesion.id) if sesion else '',
         'pistas_base': PISTAS_BASE_DIFICULTAD[dificultad],
@@ -620,6 +627,19 @@ def juego_traduccion(request):
     except Exception as e:
         messages.error(request, f'Error al cargar el juego: {str(e)}')
         return redirect('diccionario:juegos')
+
+
+def juego_escucha(request):
+    """Reconocimiento auditivo con pronunciaciones grabadas del corpus."""
+    try:
+        return render(request, 'diccionario/juegos/escucha.html', _contexto_juego(
+            request, 'escucha', 'facil', 10, requiere_audio=True,
+        ))
+    except Exception:
+        logger.exception('No se pudo cargar la práctica de escucha')
+        messages.error(request, 'No se pudo cargar el juego de escucha.')
+        return redirect('diccionario:juegos')
+
 
 def juego_completar(request):
     """Producción escrita de vocabulario Kichwa."""
@@ -884,13 +904,16 @@ def obtener_palabras_juego(request):
         return _respuesta_error(f'cantidad debe ser un entero entre 0 y {API_MAX_CANTIDAD_JUEGO}.')
 
     categoria = request.GET.get('categoria', '').strip()
-    palabras = seleccionar_palabras_juego(request.user, dificultad, categoria, cantidad)
+    palabras = seleccionar_palabras_juego(
+        request.user, dificultad, categoria, cantidad, requiere_audio=tipo_juego == 'escucha',
+    )
     return JsonResponse({'palabras': [
         {
             'id': palabra.id,
             'palabra_kichwa': palabra.palabra_kichwa,
             'traduccion_espanol': palabra.traduccion_espanol,
             'pronunciacion': palabra.pronunciacion or '',
+            'audio': palabra.audio.url if palabra.audio else '',
             'descripcion_juego_espanol': _pista_de_traduccion(palabra),
             'descripcion_juego_kichwa': palabra.descripcion_juego_kichwa or '',
         }

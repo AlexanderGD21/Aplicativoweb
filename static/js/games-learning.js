@@ -47,6 +47,7 @@
   let sessionDirty = false;
   let pendingExit = null;
   let audioContext = null;
+  let pronunciationAudio = null;
   let soundEnabled = true;
   let promptPreviousFocus = null;
   let hintsBaseLeft = Number(root.dataset.hintBase) || 0;
@@ -115,7 +116,7 @@
     if (!soundButton) return;
     soundButton.setAttribute('aria-pressed', String(soundEnabled));
     soundButton.querySelector('i').className = `fas ${soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark'}`;
-    soundButton.querySelector('span').textContent = soundEnabled ? 'Sonido activado' : 'Sonido silenciado';
+    soundButton.querySelector('span').textContent = soundEnabled ? 'Efectos activados' : 'Efectos silenciados';
   };
 
   updateSoundButton();
@@ -266,7 +267,17 @@
     showFeedback(false, 'No pudimos comprobar la respuesta.', 'Revisa la conexión e inténtalo nuevamente.');
   };
 
+  const revealListeningAnswer = () => {
+    if (type !== 'escucha') return;
+    pronunciationAudio?.pause();
+    const transcript = stage.querySelector('.listening-transcript');
+    if (transcript) transcript.open = true;
+    const status = stage.querySelector('.listening-status');
+    if (status) status.textContent = 'La palabra está escrita debajo.';
+  };
+
   const finishGame = async () => {
+    pronunciationAudio?.pause();
     finished = true;
     sessionDirty = false;
     window.clearInterval(timer);
@@ -293,6 +304,8 @@
   };
 
   const nextQuestion = () => {
+    pronunciationAudio?.pause();
+    pronunciationAudio = null;
     current += 1;
     questionLocked = false;
     revealedLetters = new Set();
@@ -323,6 +336,7 @@
         button.classList.add(result.correcta ? 'is-correct' : 'is-wrong');
         button.setAttribute('aria-pressed', 'true');
         if (!result.correcta) stage.querySelector(`[data-answer-id="${correctId}"]`)?.classList.add('is-correct');
+        revealListeningAnswer();
         applyResult(result);
         nextButton.hidden = false;
         skipButton.hidden = true;
@@ -364,6 +378,86 @@
           showFeedback(true, 'Pista', 'Se descartó una opción que no corresponde a esta palabra.');
         } else {
           showFeedback(true, 'Pista', word.pronunciacion ? `Pronunciación: ${word.pronunciacion}` : `Tema: ${word.categoria}.`);
+        }
+      },
+    });
+  };
+
+  const renderListening = () => {
+    const word = words[current];
+    const question = document.createElement('div');
+    question.className = 'game-question game-question--listening';
+    const direction = document.createElement('p');
+    direction.className = 'game-question__direction';
+    direction.textContent = 'Kichwa → Español';
+    const prompt = document.createElement('h2');
+    prompt.className = 'game-question__word';
+    prompt.textContent = 'Escucha la palabra';
+    const support = document.createElement('p');
+    support.className = 'game-question__support';
+    support.textContent = 'Reproduce la grabación y elige su significado en español.';
+    const player = document.createElement('div');
+    player.className = 'listening-player';
+    const audio = document.createElement('audio');
+    audio.preload = 'none';
+    audio.src = word.audio;
+    audio.hidden = true;
+    pronunciationAudio = audio;
+    const controls = document.createElement('div');
+    controls.className = 'listening-controls';
+    const normal = document.createElement('button');
+    normal.type = 'button';
+    normal.className = 'learning-primary';
+    normal.textContent = 'Escuchar';
+    normal.setAttribute('aria-label', 'Escuchar la palabra en Kichwa');
+    const speed = document.createElement('button');
+    speed.type = 'button';
+    speed.className = 'learning-secondary';
+    speed.textContent = 'Escuchar despacio';
+    const status = document.createElement('p');
+    status.className = 'listening-status';
+    status.setAttribute('role', 'status');
+    status.textContent = 'Pulsa escuchar para reproducir la grabación.';
+    const playRecording = async (rate) => {
+      audio.pause();
+      audio.playbackRate = rate;
+      try {
+        audio.currentTime = 0;
+        await audio.play();
+        status.textContent = rate === 1 ? 'Reproduciendo la grabación.' : 'Reproduciendo más despacio.';
+      }
+      catch (_) { status.textContent = 'No se pudo reproducir. Puedes leer la palabra como alternativa.'; }
+    };
+    normal.addEventListener('click', () => playRecording(1));
+    speed.addEventListener('click', () => playRecording(.8));
+    audio.addEventListener('ended', () => { status.textContent = 'Grabación terminada. Puedes escucharla otra vez.'; });
+    audio.addEventListener('error', () => {
+      status.textContent = 'No se pudo cargar la grabación. Puedes leer la palabra como alternativa.';
+      showFeedback(false, 'No se pudo cargar la grabación.', 'Puedes leer la palabra como alternativa y continuar.');
+    });
+    controls.append(normal, speed);
+    player.append(audio, controls, status);
+    const transcript = document.createElement('details');
+    transcript.className = 'listening-transcript';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Leer la palabra como alternativa al audio';
+    const written = document.createElement('p');
+    written.textContent = `Kichwa: ${word.kichwa}`;
+    transcript.append(summary, written);
+    const options = document.createElement('div');
+    options.className = 'game-options';
+    const pool = shuffle([word, ...shuffle(words.filter((item) => item.id !== word.id)).slice(0, 3)]);
+    pool.forEach((item) => options.append(makeOption(item.espanol, item.id, word.id, 'kichwa_espanol')));
+    question.append(direction, prompt, support, player, transcript, options);
+    stage.replaceChildren(question);
+    getHintOffer = () => ({
+      wordId: word.id,
+      apply: () => {
+        const wrong = [...options.querySelectorAll('.game-option')].find((item) => item.dataset.answerId !== String(word.id) && !item.disabled);
+        if (wrong) {
+          wrong.disabled = true;
+          wrong.classList.add('is-hint-eliminated');
+          showFeedback(true, 'Pista', 'Se descartó una opción que no corresponde a la grabación.');
         }
       },
     });
@@ -438,6 +532,7 @@
     setProgress(current);
     document.getElementById('game-progress-label').textContent = `Pregunta ${current + 1} de ${words.length}`;
     if (type === 'traduccion') renderTranslation();
+    else if (type === 'escucha') renderListening();
     else renderCompletion();
   };
 
@@ -782,17 +877,19 @@
     }
   });
   skipButton.addEventListener('click', async () => {
-    if (questionLocked || !['traduccion','completar'].includes(type)) return;
+    if (questionLocked || !['traduccion','escucha','completar'].includes(type)) return;
     questionLocked = true;
     try {
       const result = await registerAnswer(words[current], type === 'completar' ? { respuesta: '' } : { respuesta_id: 0 });
-      applyResult(result); nextButton.hidden = false; skipButton.hidden = true; setProgress(current + 1);
+      revealListeningAnswer();
+      applyResult(result);
+      nextButton.hidden = false; skipButton.hidden = true; setProgress(current + 1);
     } catch (_) { handleRequestError(); }
   });
   nextButton.addEventListener('click', nextQuestion);
   document.getElementById('game-restart')?.addEventListener('click', () => window.location.reload());
 
-  if (type === 'traduccion' || type === 'completar') renderSequential();
+  if (['traduccion', 'escucha', 'completar'].includes(type)) renderSequential();
   else if (type === 'memoria') renderMemory();
   else if (type === 'conectar') renderConnect();
   else renderWordSearch();

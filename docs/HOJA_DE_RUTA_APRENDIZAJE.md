@@ -3,7 +3,7 @@
 Orden acordado para continuar el Diccionario Kichwa. El estado describe el código
 actual; no implica que el contenido lingüístico haya recibido revisión humana.
 
-1. **Juegos y progreso por palabra — completada.** Cinco modalidades, selección de
+1. **Juegos y progreso por palabra — completada.** Seis modalidades, selección de
    vocabulario por tema y dificultad, respuestas validadas por el servidor y
    progreso individual por palabra.
 2. **Puntos, niveles, misiones y perfil de aprendizaje — completada.** Diez puntos
@@ -16,8 +16,10 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
    distintas acertadas durante la semana para la persona autenticada. Las
    tendencias agregadas muestran los últimos siete días y el ranking requiere
    participación voluntaria.
-4. **Sonidos interactivos y juego de escucha — parcial.** Los juegos tienen sonidos
-   de respuesta y opción de silencio. Falta la modalidad de escucha.
+4. **Sonidos interactivos y juego de escucha — completada.** Los juegos tienen
+   efectos de respuesta que se pueden silenciar. La modalidad de escucha usa
+   grabaciones del corpus, ofrece reproducción lenta y texto alternativo, y
+   guarda el progreso por palabra sin generar pronunciaciones artificiales.
 5. **Oraciones de ejemplo revisadas — pendiente.** Existe el campo de ejemplo de
    uso; falta la revisión editorial del contenido que se muestre al público.
 6. **Imágenes para vocabulario prioritario — pendiente.** Definir la selección de

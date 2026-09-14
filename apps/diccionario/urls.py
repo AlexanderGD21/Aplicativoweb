@@ -18,6 +18,7 @@ urlpatterns = [
     # Juegos
     path('juegos/', views.juegos, name='juegos'),
     path('juegos/traduccion/', views.juego_traduccion, name='juego_traduccion'),
+    path('juegos/escucha/', views.juego_escucha, name='juego_escucha'),
     path('juegos/completar/', views.juego_completar, name='juego_completar'),
     path('juegos/memoria/', views.juego_memoria, name='juego_memoria'),
     path('juegos/conexion/', views.juego_conectar, name='juego_conexion'),

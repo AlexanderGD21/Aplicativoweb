@@ -29,10 +29,12 @@ def filtros_juego(request, dificultad_predeterminada='medio'):
     return dificultad, categoria
 
 
-def categorias_jugables():
+def categorias_jugables(requiere_audio=False):
     candidatas = Palabra.objects.filter(activa=True).only(
         'categoria_id', 'palabra_kichwa', 'traduccion_espanol',
     )
+    if requiere_audio:
+        candidatas = candidatas.exclude(audio='').exclude(audio__isnull=True)
     categorias_ids = {palabra.categoria_id for palabra in candidatas if entrada_jugable(palabra)}
     return Categoria.objects.filter(pk__in=categorias_ids).order_by('grupo', 'orden', 'nombre')
 
@@ -51,9 +53,11 @@ def _corpus_jugable(dificultad, categoria_slug=''):
     return palabras
 
 
-def seleccionar_palabras_juego(usuario, dificultad, categoria_slug='', limite=10, filtro=None):
+def seleccionar_palabras_juego(usuario, dificultad, categoria_slug='', limite=10, filtro=None, requiere_audio=False):
     """Prioriza vocabulario no visto o en aprendizaje sin mezclar filtros."""
     palabras = _corpus_jugable(dificultad, categoria_slug)
+    if requiere_audio:
+        palabras = palabras.exclude(audio='').exclude(audio__isnull=True)
     if getattr(usuario, 'is_authenticated', False):
         dominio_usuario = ProgresoPalabraJuego.objects.filter(
             usuario=usuario, palabra=OuterRef('pk'),

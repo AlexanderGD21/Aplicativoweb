@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Practicar Kichwa - Diccionario Kichwa{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260911-3">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260913-6">{% endblock %}
 {% block content %}
 <div class="learning-hub">
   <section class="learning-hero" aria-labelledby="learning-title">
     <div class="learning-wrap learning-hero__grid">
       <div class="learning-hero__copy">
         <h1 id="learning-title">Practica palabras con un propósito</h1>
-        <p>Avanza desde reconocer una traducción hasta producirla por tu cuenta. Cada partida respeta el tema y la dificultad que elijas.</p>
+        <p>Reconoce, escucha y produce vocabulario en Kichwa. Cada partida respeta el tema y la dificultad que elijas.</p>
       </div>
       <div class="learning-progress" aria-label="Resumen de aprendizaje">
         {% if user.is_authenticated %}
@@ -24,7 +24,7 @@
   </section>
   <section class="learning-wrap learning-route" aria-labelledby="route-title">
     <div class="learning-route__intro">
-      <h2 id="route-title">Una ruta, cinco habilidades</h2>
+      <h2 id="route-title">Una ruta, seis habilidades</h2>
       <p>Empieza por reconocer y continúa cuando quieras. No necesitas completar una modalidad para abrir la siguiente.</p>
     </div>
     <div class="learning-filter" aria-label="Preferencias para empezar">
@@ -47,4 +47,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'js/games-learning.js' %}?v=20260912-6" defer></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'js/games-learning.js' %}?v=20260913-8" defer></script>{% endblock %}

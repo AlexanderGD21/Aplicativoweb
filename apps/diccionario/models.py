@@ -262,6 +262,7 @@ class BusquedaPopularDiaria(models.Model):
 class EstadisticaJuego(models.Model):
     TIPO_JUEGO_CHOICES = [
         ('traduccion', 'Traducción'),
+        ('escucha', 'Escucha'),
         ('completar', 'Completar Palabras'),
         ('memoria', 'Juego de Memoria'),
         ('conectar', 'Conectar Traducciones'),
