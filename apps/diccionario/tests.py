@@ -242,6 +242,23 @@ class DiccionarioTests(TestCase):
         self.assertIsNone(self.palabra.ejemplo_uso)
         self.assertEqual(self.misi.ejemplo_uso, 'Texto heredado distinto para revisar.')
 
+    def test_modulo_autorizado_prepara_borradores_sin_publicarlos_ni_duplicarlos(self):
+        from .management.commands.preparar_ejemplos_modulo_2023 import EJEMPLOS
+
+        for kichwa, significado in {(fila[0], fila[1]) for fila in EJEMPLOS}:
+            Palabra.objects.create(
+                palabra_kichwa=kichwa, traduccion_espanol=significado, categoria=self.categoria,
+            )
+        salida = StringIO()
+        call_command('preparar_ejemplos_modulo_2023', stdout=salida)
+        self.assertEqual(EjemploUso.objects.count(), 9)
+        self.assertEqual(EjemploUso.objects.filter(estado='publicado').count(), 0)
+        self.assertTrue(EjemploUso.objects.filter(fuente__contains='página PDF 29').exists())
+        call_command('preparar_ejemplos_modulo_2023', stdout=salida)
+        self.assertEqual(EjemploUso.objects.count(), 9)
+        shamuna = Palabra.objects.get(palabra_kichwa='shamuna')
+        self.assertNotContains(self.client.get(shamuna.get_absolute_url()), 'Kayman shamuy.')
+
     def test_detalle_indica_favorita_del_usuario_actual(self):
         usuario = User.objects.create_user('killa', password='contrasena-segura-123')
         PalabraFavorita.objects.create(usuario=usuario, palabra=self.palabra)

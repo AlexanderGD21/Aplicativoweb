@@ -23,10 +23,13 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
 5. **Oraciones de ejemplo revisadas — parcial.** Se retiraron de la vista pública
    las equivalencias automáticas que se mostraban como ejemplos. Django Admin
    permite preparar oraciones bilingües con fuente, aprobarlas con responsable y
-   fecha, y devolverlas a borrador si cambian. Falta aportar y revisar oraciones
-   reales; ninguna se marca como revisada automáticamente.
-6. **Imágenes para vocabulario prioritario — pendiente.** Definir la selección de
-   palabras y producir o licenciar sus imágenes antes de mostrarlas.
+   fecha, y devolverlas a borrador si cambian. Nueve oraciones del módulo
+   autorizado de IST Tena están preparadas como borradores con página de origen;
+   falta su aprobación editorial antes de mostrarlas.
+6. **Imágenes para vocabulario prioritario — parcial.** El módulo de IST Tena
+   permitió seleccionar once acepciones concretas. Falta producir o licenciar
+   imágenes propias antes de mostrarlas; no se reutilizan ilustraciones de
+   terceros incluidas en el PDF sin derechos específicos.
 7. **Internacionalización de la interfaz y traducciones al inglés — pendiente.**
    Traducir la interfaz y revisar el contenido en inglés antes de habilitarlo.
 
