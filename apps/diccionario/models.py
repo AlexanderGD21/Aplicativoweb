@@ -213,6 +213,67 @@ class Palabra(models.Model):
         return reverse('diccionario:detalle_palabra', kwargs={'pk': self.pk})
 
 
+class PreparacionImagenVocabulario(models.Model):
+    TIPO_VISUAL_CHOICES = [
+        ('ser_vivo', 'Animal o planta'),
+        ('objeto', 'Objeto o elemento concreto'),
+        ('paisaje', 'Lugar, naturaleza o clima'),
+        ('persona', 'Persona, familia u oficio'),
+        ('accion', 'Acción representada en una escena'),
+        ('cualidad', 'Cualidad o emoción'),
+        ('diagrama', 'Concepto que requiere diagrama'),
+        ('no_recomendada', 'Imagen no recomendada'),
+    ]
+    ESTADO_CHOICES = [
+        ('clasificada', 'Clasificada'),
+        ('preparada', 'Prompt preparado'),
+        ('generada', 'Imagen generada'),
+        ('revisada', 'Revisada'),
+        ('publicada', 'Publicada'),
+        ('descartada', 'Descartada'),
+    ]
+
+    palabra = models.OneToOneField(
+        Palabra, on_delete=models.CASCADE, related_name='preparacion_imagen',
+    )
+    tipo_visual = models.CharField(max_length=16, choices=TIPO_VISUAL_CHOICES, db_index=True)
+    estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default='clasificada', db_index=True)
+    lote = models.PositiveIntegerField(blank=True, null=True, db_index=True)
+    orden_lote = models.PositiveSmallIntegerField(blank=True, null=True)
+    prompt = models.TextField(blank=True)
+    ruta_candidata = models.CharField(
+        max_length=300, blank=True,
+        help_text='Ruta estática de la imagen generada; todavía no se muestra al público.',
+    )
+    descripcion_candidata = models.CharField(
+        max_length=240, blank=True,
+        help_text='Texto alternativo que debe comprobarse antes de publicar.',
+    )
+    credito_candidato = models.CharField(
+        max_length=240, blank=True,
+        default='Ilustración original creada para este proyecto.',
+    )
+    notas_revision = models.CharField(max_length=300, blank=True)
+    revisada_por = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, editable=False,
+    )
+    fecha_revision = models.DateTimeField(null=True, blank=True, editable=False)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Preparación de imagen de vocabulario'
+        verbose_name_plural = 'Preparación de imágenes de vocabulario'
+        ordering = ['lote', 'orden_lote', 'palabra__palabra_kichwa']
+        indexes = [
+            models.Index(fields=['estado', 'tipo_visual'], name='imagen_estado_tipo_idx'),
+            models.Index(fields=['lote', 'orden_lote'], name='imagen_lote_orden_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.palabra} — {self.get_estado_display()}'
+
+
 class EjemploUso(models.Model):
     ESTADO_CHOICES = [
         ('borrador', 'Borrador'),

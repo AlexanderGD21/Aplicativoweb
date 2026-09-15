@@ -75,33 +75,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'diccionario_kichwa.wsgi.application'
 
 DATABASE_ENGINE = os.getenv('DATABASE_ENGINE', 'postgresql').strip().lower()
-if DATABASE_ENGINE in {'sqlite', 'sqlite3', 'django.db.backends.sqlite3'}:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            # La ruta SQLite se mantiene separada de DATABASE_NAME, que identifica
-            # la base PostgreSQL durante una migración entre motores.
-            'NAME': os.getenv('SQLITE_DATABASE_PATH') or BASE_DIR / 'db.sqlite3',
-        }
-    }
-elif DATABASE_ENGINE in {'postgres', 'postgresql', 'django.db.backends.postgresql'}:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DATABASE_NAME', 'diccionario_kichwa'),
-            'USER': os.getenv('DATABASE_USER', 'postgres'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
-            'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
-            'PORT': os.getenv('DATABASE_PORT', '5432'),
-            'CONN_MAX_AGE': int(os.getenv('DATABASE_CONN_MAX_AGE', '60')),
-            'CONN_HEALTH_CHECKS': True,
-        }
-    }
-else:
+if DATABASE_ENGINE not in {'postgres', 'postgresql', 'django.db.backends.postgresql'}:
     raise ImproperlyConfigured(
-        'DATABASE_ENGINE debe ser sqlite3 o postgresql. '
+        'Esta aplicación usa únicamente PostgreSQL; DATABASE_ENGINE debe ser postgresql. '
         f'Recibido: {DATABASE_ENGINE!r}.'
     )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DATABASE_NAME', 'diccionario_kichwa'),
+        'USER': os.getenv('DATABASE_USER', 'postgres'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+        'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DATABASE_PORT', '5432'),
+        'CONN_MAX_AGE': int(os.getenv('DATABASE_CONN_MAX_AGE', '60')),
+        'CONN_HEALTH_CHECKS': True,
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

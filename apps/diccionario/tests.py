@@ -2,6 +2,8 @@ import json
 from importlib import import_module
 from datetime import date, timedelta
 from io import StringIO
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 
 from django.apps import apps
@@ -18,7 +20,7 @@ from django.utils import timezone
 
 from .models import (
     ActividadUsuario, BusquedaPopularDiaria, Categoria, EjemploUso, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
-    ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
+    PreparacionImagenVocabulario, ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
 )
 from .models import PalabraFavorita
 from apps.usuarios.models import PerfilUsuario
@@ -361,6 +363,74 @@ class DiccionarioTests(TestCase):
         detalle = self.client.get(palabra.get_absolute_url())
         self.assertContains(detalle, palabra.imagen_vocabulario)
         self.assertContains(detalle, palabra.descripcion_imagen)
+
+    def test_lote_clasifica_todas_las_acepciones_y_prepara_solo_concretas(self):
+        animales = self.animales
+        acciones = Categoria.objects.create(nombre='Acciones y procesos')
+        misi = Palabra.objects.create(
+            palabra_kichwa='misi lote', traduccion_espanol='gato', categoria=animales,
+            apta_para_juegos=True,
+        )
+        rina = Palabra.objects.create(
+            palabra_kichwa='rina lote', traduccion_espanol='ir', categoria=acciones,
+            apta_para_juegos=True,
+        )
+
+        call_command('preparar_lote_imagenes', '--solo-clasificar', stdout=StringIO())
+        preparacion_misi = PreparacionImagenVocabulario.objects.get(palabra=misi)
+        preparacion_rina = PreparacionImagenVocabulario.objects.get(palabra=rina)
+        self.assertEqual(preparacion_misi.tipo_visual, 'ser_vivo')
+        self.assertEqual(preparacion_rina.tipo_visual, 'accion')
+        PreparacionImagenVocabulario.objects.exclude(palabra__in=[misi, rina]).update(estado='descartada')
+
+        with TemporaryDirectory() as temporal:
+            salida = Path(temporal) / 'lote.csv'
+            call_command(
+                'preparar_lote_imagenes', '--cantidad', '1', '--lote', '77',
+                '--salida', str(salida), stdout=StringIO(),
+            )
+            self.assertTrue(salida.exists())
+            self.assertIn('palabra_id', salida.read_text(encoding='utf-8-sig'))
+
+        preparacion_misi.refresh_from_db()
+        preparacion_rina.refresh_from_db()
+        self.assertEqual((preparacion_misi.tipo_visual, preparacion_misi.estado), ('ser_vivo', 'preparada'))
+        self.assertEqual((preparacion_misi.lote, preparacion_misi.orden_lote), (77, 1))
+        self.assertIn('“misi lote”', preparacion_misi.prompt)
+        self.assertEqual((preparacion_rina.tipo_visual, preparacion_rina.estado), ('accion', 'clasificada'))
+
+    def test_admin_publica_imagen_solo_despues_de_revision(self):
+        administrador = User.objects.create_superuser('imagenadmin', 'admin@example.com', 'clave-segura-123')
+        palabra = Palabra.objects.create(
+            palabra_kichwa='misi imagen', traduccion_espanol='gato', categoria=self.categoria,
+        )
+        otra_acepcion = Palabra.objects.create(
+            palabra_kichwa='misi imagen', traduccion_espanol='felino', categoria=self.categoria,
+        )
+        preparacion = PreparacionImagenVocabulario.objects.create(
+            palabra=palabra, tipo_visual='ser_vivo', estado='generada',
+            ruta_candidata='img/vocabulario/misi-gato.webp',
+            descripcion_candidata='Gato gris sentado sobre una estera tejida.',
+        )
+        self.client.force_login(administrador)
+        listado = reverse('admin:diccionario_preparacionimagenvocabulario_changelist')
+        self.client.post(listado, {
+            'action': 'aprobar_revisadas', '_selected_action': [preparacion.pk], 'index': 0,
+        })
+        preparacion.refresh_from_db()
+        self.assertEqual(preparacion.estado, 'revisada')
+        self.assertEqual(preparacion.revisada_por, administrador)
+        self.assertEqual(palabra.imagen_vocabulario, '')
+
+        self.client.post(listado, {
+            'action': 'publicar_aprobadas', '_selected_action': [preparacion.pk], 'index': 0,
+        })
+        preparacion.refresh_from_db()
+        palabra.refresh_from_db()
+        otra_acepcion.refresh_from_db()
+        self.assertEqual(preparacion.estado, 'publicada')
+        self.assertEqual(palabra.imagen_vocabulario, 'img/vocabulario/misi-gato.webp')
+        self.assertEqual(otra_acepcion.imagen_vocabulario, '')
 
     def test_detalle_indica_favorita_del_usuario_actual(self):
         usuario = User.objects.create_user('killa', password='contrasena-segura-123')

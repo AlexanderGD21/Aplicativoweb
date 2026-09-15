@@ -3,7 +3,7 @@
 Usa `docker-compose.postgres.yml` solo para desarrollo local. Para producción,
 configura un servidor PostgreSQL administrado, `DEBUG=False`, una `SECRET_KEY`
 aleatoria, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` y HTTPS antes de ejecutar.
-Las únicas variables de base admitidas por Django son `DATABASE_ENGINE`,
+La aplicación Django admite únicamente PostgreSQL. Las variables de base son `DATABASE_ENGINE`,
 `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_HOST` y
 `DATABASE_PORT`; no uses los nombres antiguos `DB_*`.
 
@@ -16,5 +16,5 @@ python manage.py check --deploy
 python manage.py collectstatic --noinput
 ```
 
-No elimines SQLite hasta validar una migración lógica en una copia y conservar
-un respaldo recuperable.
+Los archivos SQLite antiguos pueden conservarse únicamente como respaldo de la
+migración; la aplicación no puede iniciarse con ese motor.

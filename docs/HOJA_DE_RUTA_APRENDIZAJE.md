@@ -27,10 +27,13 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
    oraciones de 11 lemas del módulo autorizado, con página, sección y alcance de
    revisión visibles; 20 amplían las tablas de conjugación. El cotejo documental
    no se presenta como validación lingüística independiente.
-6. **Imágenes para vocabulario prioritario — completada.** Once acepciones
+6. **Imágenes para vocabulario prioritario — completada y ampliable por lotes.** Once acepciones
    concretas tienen ilustraciones originales, infantiles y educativas en formato
    WebP, con texto alternativo y crédito. Se muestran en resultados, temas y
-   detalle; no se reutilizan imágenes de terceros incluidas en el PDF.
+   detalle; no se reutilizan imágenes de terceros incluidas en el PDF. PostgreSQL
+   contiene además la clasificación visual de las 4.454 acepciones y una cola con
+   estados de generación, revisión y publicación. El lote inicial de expansión
+   reúne 100 acepciones concretas sin publicarlas automáticamente.
 7. **Internacionalización de la interfaz y traducciones al inglés — pendiente.**
    Traducir la interfaz y revisar el contenido en inglés antes de habilitarlo.
 

@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.core.exceptions import ValidationError
+from django.contrib.staticfiles import finders
+from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
 from .models import (
     ActividadUsuario, Categoria, EstadisticaJuego, HistorialBusqueda,
-    EjemploUso, IntentoPalabraJuego, Palabra, PalabraFavorita, ProgresoPalabraJuego, SesionJuego,
+    EjemploUso, IntentoPalabraJuego, Palabra, PalabraFavorita, PreparacionImagenVocabulario,
+    ProgresoPalabraJuego, SesionJuego,
 )
 
 @admin.register(Categoria)
@@ -77,6 +80,92 @@ class PalabraAdmin(admin.ModelAdmin):
     @admin.action(description='Marcar como validada')
     def marcar_validada(self, request, queryset):
         self.message_user(request, f'{queryset.update(estado_revision="validada")} entradas validadas.')
+
+
+@admin.register(PreparacionImagenVocabulario)
+class PreparacionImagenVocabularioAdmin(admin.ModelAdmin):
+    list_display = [
+        'palabra', 'tipo_visual', 'estado', 'lote', 'orden_lote',
+        'tiene_archivo', 'revisada_por', 'fecha_revision',
+    ]
+    list_filter = ['estado', 'tipo_visual', 'lote', 'palabra__categoria']
+    search_fields = [
+        'palabra__palabra_kichwa', 'palabra__traduccion_espanol',
+        'prompt', 'notas_revision',
+    ]
+    autocomplete_fields = ['palabra']
+    list_select_related = ['palabra', 'palabra__categoria', 'revisada_por']
+    readonly_fields = ['estado', 'revisada_por', 'fecha_revision', 'fecha_creacion', 'fecha_actualizacion']
+    ordering = ['lote', 'orden_lote', 'palabra__palabra_kichwa']
+    actions = ['marcar_generadas', 'aprobar_revisadas', 'publicar_aprobadas', 'descartar']
+
+    @admin.display(boolean=True, description='Archivo localizado')
+    def tiene_archivo(self, obj):
+        return bool(obj.ruta_candidata and finders.find(obj.ruta_candidata))
+
+    @admin.action(description='Marcar como generadas si el archivo existe')
+    def marcar_generadas(self, request, queryset):
+        correctas = []
+        omitidas = 0
+        for preparacion in queryset.filter(estado='preparada'):
+            if preparacion.ruta_candidata and finders.find(preparacion.ruta_candidata):
+                correctas.append(preparacion.pk)
+            else:
+                omitidas += 1
+        actualizadas = PreparacionImagenVocabulario.objects.filter(pk__in=correctas).update(
+            estado='generada', fecha_actualizacion=timezone.now(),
+        )
+        self.message_user(request, f'{actualizadas} marcadas como generadas; {omitidas} sin archivo local.')
+
+    @admin.action(description='Aprobar imágenes generadas tras revisión')
+    def aprobar_revisadas(self, request, queryset):
+        correctas = []
+        omitidas = 0
+        for preparacion in queryset.filter(estado='generada'):
+            if (
+                preparacion.ruta_candidata
+                and preparacion.descripcion_candidata.strip()
+                and finders.find(preparacion.ruta_candidata)
+            ):
+                correctas.append(preparacion.pk)
+            else:
+                omitidas += 1
+        actualizadas = PreparacionImagenVocabulario.objects.filter(pk__in=correctas).update(
+            estado='revisada', revisada_por=request.user, fecha_revision=timezone.now(),
+            fecha_actualizacion=timezone.now(),
+        )
+        self.message_user(request, f'{actualizadas} aprobadas; {omitidas} incompletas o sin archivo local.')
+
+    @admin.action(description='Publicar imágenes revisadas')
+    def publicar_aprobadas(self, request, queryset):
+        publicadas = 0
+        omitidas = 0
+        with transaction.atomic():
+            for preparacion in queryset.filter(estado='revisada').select_related('palabra'):
+                if not (
+                    preparacion.ruta_candidata
+                    and preparacion.descripcion_candidata.strip()
+                    and finders.find(preparacion.ruta_candidata)
+                ):
+                    omitidas += 1
+                    continue
+                Palabra.objects.filter(pk=preparacion.palabra_id).update(
+                    imagen_vocabulario=preparacion.ruta_candidata,
+                    descripcion_imagen=preparacion.descripcion_candidata,
+                    credito_imagen=preparacion.credito_candidato,
+                    fecha_actualizacion=timezone.now(),
+                )
+                preparacion.estado = 'publicada'
+                preparacion.save(update_fields=['estado', 'fecha_actualizacion'])
+                publicadas += 1
+        self.message_user(request, f'{publicadas} publicadas; {omitidas} incompletas o sin archivo local.')
+
+    @admin.action(description='Descartar propuestas seleccionadas')
+    def descartar(self, request, queryset):
+        descartadas = queryset.exclude(estado='publicada').update(
+            estado='descartada', fecha_actualizacion=timezone.now(),
+        )
+        self.message_user(request, f'{descartadas} propuestas descartadas.')
 
 
 @admin.register(EjemploUso)

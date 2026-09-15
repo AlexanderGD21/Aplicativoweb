@@ -34,3 +34,9 @@ La autorización del módulo permite usarlo como referencia de vocabulario; para
 la aplicación se produjeron ilustraciones originales en WebP. Cada entrada guarda
 la ruta estática, una descripción accesible y el crédito. Las imágenes aparecen
 en los resultados, las páginas por tema y el detalle de la acepción.
+
+La ampliación ya cuenta con una cola de producción en PostgreSQL. Las 4.454
+acepciones están clasificadas por tipo visual, las 11 imágenes existentes se
+conservan como publicadas y un primer lote de 100 propuestas concretas quedó
+preparado para revisión y generación. El proceso completo se describe en
+`docs/PRODUCCION_IMAGENES_POR_LOTES.md`.
