@@ -85,6 +85,11 @@ class Palabra(models.Model):
         ('espanol_kichwa', 'Español-Kichwa'),
     ]
 
+    PROVEEDOR_IMAGEN_CHOICES = [
+        ('original', 'Ilustración original'),
+        ('pexels', 'Fotografía de Pexels'),
+    ]
+
     ESTADO_REVISION_CHOICES = [
         ('pendiente', 'Pendiente de revisión'),
         ('revisada', 'Revisada'),
@@ -122,6 +127,12 @@ class Palabra(models.Model):
         help_text='Descripción accesible de la ilustración.',
     )
     credito_imagen = models.CharField(max_length=240, blank=True)
+    proveedor_imagen = models.CharField(
+        max_length=12, choices=PROVEEDOR_IMAGEN_CHOICES, blank=True,
+    )
+    autor_imagen = models.CharField(max_length=200, blank=True)
+    autor_imagen_url = models.URLField(max_length=500, blank=True)
+    fuente_imagen_url = models.URLField(max_length=500, blank=True)
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
@@ -253,6 +264,12 @@ class PreparacionImagenVocabulario(models.Model):
         max_length=240, blank=True,
         default='Ilustración original creada para este proyecto.',
     )
+    proveedor_candidato = models.CharField(
+        max_length=12, choices=Palabra.PROVEEDOR_IMAGEN_CHOICES, blank=True,
+    )
+    autor_candidato = models.CharField(max_length=200, blank=True)
+    autor_candidato_url = models.URLField(max_length=500, blank=True)
+    fuente_candidata_url = models.URLField(max_length=500, blank=True)
     notas_revision = models.CharField(max_length=300, blank=True)
     revisada_por = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, editable=False,
@@ -272,6 +289,43 @@ class PreparacionImagenVocabulario(models.Model):
 
     def __str__(self):
         return f'{self.palabra} — {self.get_estado_display()}'
+
+
+class CandidataImagenPexels(models.Model):
+    preparacion = models.ForeignKey(
+        PreparacionImagenVocabulario,
+        on_delete=models.CASCADE,
+        related_name='candidatas_pexels',
+    )
+    pexels_id = models.PositiveBigIntegerField()
+    orden = models.PositiveSmallIntegerField()
+    url_foto = models.URLField(max_length=500)
+    url_imagen = models.URLField(max_length=1000)
+    fotografo = models.CharField(max_length=200)
+    url_fotografo = models.URLField(max_length=500)
+    descripcion_original = models.CharField(max_length=500, blank=True)
+    ancho = models.PositiveIntegerField()
+    alto = models.PositiveIntegerField()
+    color_promedio = models.CharField(max_length=7, blank=True)
+    seleccionada = models.BooleanField(default=False, db_index=True)
+    fecha_consulta = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Candidata de Pexels'
+        verbose_name_plural = 'Candidatas de Pexels'
+        ordering = ['preparacion__lote', 'preparacion__orden_lote', 'orden']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['preparacion', 'pexels_id'], name='pexels_unica_por_acepcion',
+            ),
+            models.UniqueConstraint(
+                fields=['preparacion'], condition=models.Q(seleccionada=True),
+                name='pexels_una_seleccionada',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.preparacion.palabra} — Pexels {self.pexels_id}'
 
 
 class EjemploUso(models.Model):

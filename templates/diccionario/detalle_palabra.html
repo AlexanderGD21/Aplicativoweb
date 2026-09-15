@@ -52,7 +52,9 @@
                 {% if palabra.imagen_vocabulario %}
                 <figure class="entry-vocabulary-image">
                     <img src="{% static palabra.imagen_vocabulario %}" alt="{{ palabra.descripcion_imagen }}" width="768" height="768">
-                    {% if palabra.credito_imagen %}<figcaption>{{ palabra.credito_imagen }}</figcaption>{% endif %}
+                    {% if palabra.proveedor_imagen == 'pexels' and palabra.fuente_imagen_url %}
+                    <figcaption>Fotografía de {% if palabra.autor_imagen_url %}<a href="{{ palabra.autor_imagen_url }}" target="_blank" rel="noopener noreferrer">{{ palabra.autor_imagen }}</a>{% else %}{{ palabra.autor_imagen }}{% endif %} en <a href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer">Pexels</a>.</figcaption>
+                    {% elif palabra.credito_imagen %}<figcaption>{{ palabra.credito_imagen }}</figcaption>{% endif %}
                 </figure>
                 {% endif %}
                 <section class="meaning-section" aria-labelledby="meaning-title">

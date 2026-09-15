@@ -169,6 +169,10 @@ KICHWA_AI_API_KEY = os.getenv('KICHWA_AI_API_KEY', '')
 KICHWA_AI_MODEL = os.getenv('KICHWA_AI_MODEL', '').strip()
 KICHWA_AI_TIMEOUT = int(os.getenv('KICHWA_AI_TIMEOUT', '15'))
 
+# Pexels solo aporta fotografías candidatas; la publicación exige revisión en Admin.
+PEXELS_API_KEY = os.getenv('PEXELS_API_KEY', '')
+PEXELS_API_TIMEOUT = int(os.getenv('PEXELS_API_TIMEOUT', '20'))
+
 if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True

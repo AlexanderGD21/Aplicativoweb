@@ -446,6 +446,14 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
   grid-column: 1 / -1;
 }
 
+.image-source-link {
+  color: #356a5a;
+  font-size: .72rem;
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .word-kichwa-line {
   display: flex;
   align-items: center;

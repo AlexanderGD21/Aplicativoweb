@@ -79,6 +79,10 @@ class Command(BaseCommand):
                     ruta_candidata=palabra.imagen_vocabulario,
                     descripcion_candidata=palabra.descripcion_imagen,
                     credito_candidato=palabra.credito_imagen or 'Ilustración original creada para este proyecto.',
+                    proveedor_candidato=palabra.proveedor_imagen or ('original' if palabra.imagen_vocabulario else ''),
+                    autor_candidato=palabra.autor_imagen,
+                    autor_candidato_url=palabra.autor_imagen_url,
+                    fuente_candidata_url=palabra.fuente_imagen_url,
                 ))
         PreparacionImagenVocabulario.objects.bulk_create(nuevas, batch_size=500)
 

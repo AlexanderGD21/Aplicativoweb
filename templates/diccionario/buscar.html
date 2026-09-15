@@ -102,6 +102,7 @@
                                 {% if palabra.pronunciacion %}<p class="word-pronunciation"><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabra.pronunciacion }}</p>{% endif %}
                             </div>
                             <div class="word-meta">
+                                {% if palabra.proveedor_imagen == 'pexels' and palabra.fuente_imagen_url %}<a class="image-source-link" href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer" aria-label="Ver fotografía de {{ palabra.autor_imagen }} en Pexels">Foto en Pexels</a>{% endif %}
                                 <a class="category-tag" style="--tag-color: {{ palabra.categoria.color }}" href="{% url 'diccionario:buscar' %}?categoria={{ palabra.categoria.pk }}" data-tooltip="Ver más palabras de {{ palabra.categoria.nombre }}">{{ palabra.categoria.nombre }}</a>
                                 <a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}" aria-label="Ver detalles de {{ palabra.palabra_kichwa }}" data-tooltip="Abrir significado, pronunciación y relaciones">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                             </div>

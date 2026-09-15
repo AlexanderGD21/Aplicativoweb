@@ -32,12 +32,50 @@ Para preparar un lote posterior:
   --salida docs\lotes_imagenes\lote-002.csv
 ```
 
-El comando es deliberadamente independiente del proveedor de imágenes. Una
-integración externa deberá leer la credencial desde `.env`, guardar la autoría,
-licencia y página de origen, y colocar primero el archivo como candidato. La
-publicación se realiza con las acciones de revisión de Django Admin.
+## Fotografías candidatas de Pexels
+
+Pexels funciona como buscador de fotografías de terceros; no genera
+ilustraciones originales. Por ese motivo sus resultados se guardan como
+candidatas y no sustituyen automáticamente las once ilustraciones infantiles
+originales. La revisión debe comprobar que la foto representa la acepción y que
+es adecuada para público infantil.
+
+Guarda la clave únicamente en el `.env` local:
+
+```dotenv
+PEXELS_API_KEY=tu_clave_privada
+PEXELS_API_TIMEOUT=20
+```
+
+Para buscar tres opciones cuadradas por cada acepción del lote:
+
+```powershell
+.\venv\Scripts\python.exe manage.py buscar_candidatas_pexels `
+  --lote 1 --cantidad 100 --resultados 3
+```
+
+Cada resultado conserva el ID de Pexels, la página de la foto, la URL del autor,
+la descripción original y el tamaño. En Django Admin, abre **Candidatas de
+Pexels**, revisa las opciones y ejecuta **Seleccionar una candidata por
+acepción**. Luego descarga y convierte las seleccionadas a WebP de 768 × 768:
+
+```powershell
+.\venv\Scripts\python.exe manage.py descargar_candidatas_pexels `
+  --lote 1 --cantidad 100
+```
+
+La descarga deja cada preparación en estado `generada`. Todavía se requieren
+las acciones **Aprobar imágenes generadas tras revisión** y **Publicar imágenes
+revisadas**. Al publicar, la entrada muestra el fotógrafo y enlaces a su perfil
+y a la foto en Pexels.
+
+La [documentación oficial de Pexels](https://www.pexels.com/api/documentation/)
+indica autenticación con el encabezado `Authorization`, búsquedas localizadas y
+un límite inicial de 200 solicitudes por hora y 20.000 por mes. Sus directrices
+para la API solicitan un enlace visible a Pexels y acreditar al fotógrafo cuando
+sea posible. La [licencia de Pexels](https://www.pexels.com/license/) permite usar
+y modificar las fotos, con las restricciones descritas en esa página.
+Las conexiones HTTPS usan `truststore` para validar certificados con el almacén
+nativo del sistema operativo; no se desactiva la verificación TLS.
 
 Las claves de API nunca deben copiarse al repositorio, a un CSV ni a los prompts.
-Antes de conectar un servicio se debe confirmar si la clave pertenece a Pexels,
-Pixabay, Unsplash u otro proveedor, porque sus endpoints y requisitos de
-atribución son diferentes.

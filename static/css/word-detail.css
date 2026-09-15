@@ -34,6 +34,7 @@ html:has(.entry-surface)::-webkit-scrollbar-thumb { background:#74867f; border:3
 .entry-vocabulary-image { overflow:hidden; margin:0; background:#f7f0df; border:1px solid color-mix(in srgb,var(--entry-accent) 22%,var(--detail-line)); border-radius:16px; }
 .entry-vocabulary-image img { display:block; width:100%; max-height:560px; aspect-ratio:16/10; object-fit:cover; }
 .entry-vocabulary-image figcaption { padding:.7rem 1rem; color:var(--detail-muted); background:#fffdf7; font-size:.78rem; }
+.entry-vocabulary-image figcaption a { color:#356a5a; font-weight:750; text-underline-offset:2px; }
 .meaning-section { padding:clamp(1.5rem,4vw,2.6rem); background:color-mix(in srgb,var(--entry-accent) 5%,var(--detail-paper)); border:1px solid color-mix(in srgb,var(--entry-accent) 20%,var(--detail-line)); border-radius:16px; }
 .meaning-section h2,.usage-example h2,.lexical-notes h2,.entry-facts h2,.entry-actions h2 { margin:0 0 .75rem; font-size:1.05rem; font-weight:780; letter-spacing:-.015em; }
 .meaning-section>p { max-width:70ch; margin:0; color:#294139; font-size:clamp(1.1rem,2vw,1.35rem); line-height:1.7; }

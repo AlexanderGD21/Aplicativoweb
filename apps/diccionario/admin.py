@@ -3,9 +3,10 @@ from django.core.exceptions import ValidationError
 from django.contrib.staticfiles import finders
 from django.db import transaction
 from django.db.models import F
+from django.utils.html import format_html
 from django.utils import timezone
 from .models import (
-    ActividadUsuario, Categoria, EstadisticaJuego, HistorialBusqueda,
+    ActividadUsuario, CandidataImagenPexels, Categoria, EstadisticaJuego, HistorialBusqueda,
     EjemploUso, IntentoPalabraJuego, Palabra, PalabraFavorita, PreparacionImagenVocabulario,
     ProgresoPalabraJuego, SesionJuego,
 )
@@ -36,7 +37,9 @@ class PalabraAdmin(admin.ModelAdmin):
         ('Información Básica', {
             'fields': (
                 'palabra_kichwa', 'traduccion_espanol', 'definicion', 'pronunciacion',
-                'audio', 'imagen_vocabulario', 'descripcion_imagen', 'credito_imagen', 'categoria',
+                'audio', 'imagen_vocabulario', 'descripcion_imagen', 'credito_imagen',
+                'proveedor_imagen', 'autor_imagen', 'autor_imagen_url',
+                'fuente_imagen_url', 'categoria',
             )
         }),
         ('Clasificación', {
@@ -153,6 +156,10 @@ class PreparacionImagenVocabularioAdmin(admin.ModelAdmin):
                     imagen_vocabulario=preparacion.ruta_candidata,
                     descripcion_imagen=preparacion.descripcion_candidata,
                     credito_imagen=preparacion.credito_candidato,
+                    proveedor_imagen=preparacion.proveedor_candidato,
+                    autor_imagen=preparacion.autor_candidato,
+                    autor_imagen_url=preparacion.autor_candidato_url,
+                    fuente_imagen_url=preparacion.fuente_candidata_url,
                     fecha_actualizacion=timezone.now(),
                 )
                 preparacion.estado = 'publicada'
@@ -166,6 +173,56 @@ class PreparacionImagenVocabularioAdmin(admin.ModelAdmin):
             estado='descartada', fecha_actualizacion=timezone.now(),
         )
         self.message_user(request, f'{descartadas} propuestas descartadas.')
+
+
+@admin.register(CandidataImagenPexels)
+class CandidataImagenPexelsAdmin(admin.ModelAdmin):
+    list_display = [
+        'preparacion', 'orden', 'pexels_id', 'fotografo', 'seleccionada', 'abrir_foto',
+    ]
+    list_filter = ['seleccionada', 'preparacion__lote', 'preparacion__palabra__categoria']
+    search_fields = [
+        'preparacion__palabra__palabra_kichwa',
+        'preparacion__palabra__traduccion_espanol', 'fotografo', 'pexels_id',
+    ]
+    list_select_related = ['preparacion', 'preparacion__palabra']
+    readonly_fields = [
+        'preparacion', 'pexels_id', 'orden', 'url_foto', 'url_imagen', 'fotografo',
+        'url_fotografo', 'descripcion_original', 'ancho', 'alto', 'color_promedio',
+        'seleccionada', 'fecha_consulta',
+    ]
+    actions = ['seleccionar_para_descarga']
+
+    @admin.display(description='Origen')
+    def abrir_foto(self, obj):
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener noreferrer">Ver en Pexels</a>',
+            obj.url_foto,
+        )
+
+    @admin.action(description='Seleccionar una candidata por acepción')
+    def seleccionar_para_descarga(self, request, queryset):
+        candidatas = list(queryset.select_related('preparacion'))
+        repetidas = {
+            candidata.preparacion_id
+            for candidata in candidatas
+            if sum(item.preparacion_id == candidata.preparacion_id for item in candidatas) > 1
+        }
+        seleccionadas = 0
+        with transaction.atomic():
+            for candidata in candidatas:
+                if candidata.preparacion_id in repetidas:
+                    continue
+                CandidataImagenPexels.objects.filter(
+                    preparacion_id=candidata.preparacion_id,
+                ).update(seleccionada=False)
+                CandidataImagenPexels.objects.filter(pk=candidata.pk).update(seleccionada=True)
+                seleccionadas += 1
+        self.message_user(
+            request,
+            f'{seleccionadas} candidatas seleccionadas; '
+            f'{len(repetidas)} acepciones omitidas por selección múltiple.',
+        )
 
 
 @admin.register(EjemploUso)

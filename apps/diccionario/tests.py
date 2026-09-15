@@ -1,11 +1,13 @@
 import json
 from importlib import import_module
 from datetime import date, timedelta
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
+from unittest.mock import patch
 
+from PIL import Image
 from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -19,7 +21,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import (
-    ActividadUsuario, BusquedaPopularDiaria, Categoria, EjemploUso, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
+    ActividadUsuario, BusquedaPopularDiaria, CandidataImagenPexels, Categoria, EjemploUso, EstadisticaJuego, HistorialBusqueda, IntentoPalabraJuego, Palabra,
     PreparacionImagenVocabulario, ProgresoPalabraJuego, RelacionPalabra, SesionJuego,
 )
 from .models import PalabraFavorita
@@ -411,6 +413,10 @@ class DiccionarioTests(TestCase):
             palabra=palabra, tipo_visual='ser_vivo', estado='generada',
             ruta_candidata='img/vocabulario/misi-gato.webp',
             descripcion_candidata='Gato gris sentado sobre una estera tejida.',
+            proveedor_candidato='pexels', autor_candidato='Killa Foto',
+            autor_candidato_url='https://www.pexels.com/@killa-foto',
+            fuente_candidata_url='https://www.pexels.com/photo/gato-123/',
+            credito_candidato='Fotografía de Killa Foto en Pexels.',
         )
         self.client.force_login(administrador)
         listado = reverse('admin:diccionario_preparacionimagenvocabulario_changelist')
@@ -430,7 +436,104 @@ class DiccionarioTests(TestCase):
         otra_acepcion.refresh_from_db()
         self.assertEqual(preparacion.estado, 'publicada')
         self.assertEqual(palabra.imagen_vocabulario, 'img/vocabulario/misi-gato.webp')
+        self.assertEqual(palabra.proveedor_imagen, 'pexels')
+        detalle = self.client.get(palabra.get_absolute_url())
+        self.assertContains(detalle, 'Killa Foto')
+        self.assertContains(detalle, 'https://www.pexels.com/photo/gato-123/')
         self.assertEqual(otra_acepcion.imagen_vocabulario, '')
+
+    def test_pexels_guarda_candidatas_y_descarga_webp_sin_publicar(self):
+        palabra = Palabra.objects.create(
+            palabra_kichwa='challwa lote', traduccion_espanol='pez', categoria=self.animales,
+        )
+        preparacion = PreparacionImagenVocabulario.objects.create(
+            palabra=palabra, tipo_visual='ser_vivo', estado='preparada', lote=88, orden_lote=1,
+            prompt='Prompt de prueba', descripcion_candidata='Pez nadando en agua clara.',
+        )
+        respuesta_pexels = {
+            'fotos': [{
+                'pexels_id': 12345,
+                'url_foto': 'https://www.pexels.com/photo/pez-12345/',
+                'url_imagen': 'https://images.pexels.com/photos/12345/pez.jpeg',
+                'fotografo': 'Runa Foto',
+                'url_fotografo': 'https://www.pexels.com/@runa-foto',
+                'descripcion_original': 'Fish underwater',
+                'ancho': 1200,
+                'alto': 1200,
+                'color_promedio': '#336699',
+            }],
+            'limite': '20000', 'restantes': '19999', 'reinicio': '0',
+        }
+        with override_settings(PEXELS_API_KEY='clave-de-prueba'):
+            with patch(
+                'apps.diccionario.management.commands.buscar_candidatas_pexels.PexelsClient.buscar_fotos',
+                return_value=respuesta_pexels,
+            ):
+                call_command(
+                    'buscar_candidatas_pexels', '--lote', '88', '--seleccionar-primera',
+                    stdout=StringIO(),
+                )
+        candidata = CandidataImagenPexels.objects.get(preparacion=preparacion)
+        self.assertTrue(candidata.seleccionada)
+
+        contenido = BytesIO()
+        Image.new('RGB', (900, 700), '#336699').save(contenido, 'PNG')
+        with TemporaryDirectory() as temporal:
+            with override_settings(STATICFILES_DIRS=[Path(temporal)]):
+                with patch(
+                    'apps.diccionario.management.commands.descargar_candidatas_pexels.descargar_imagen_pexels',
+                    return_value=contenido.getvalue(),
+                ):
+                    call_command('descargar_candidatas_pexels', '--lote', '88', stdout=StringIO())
+            preparacion.refresh_from_db()
+            archivo = Path(temporal) / preparacion.ruta_candidata
+            self.assertTrue(archivo.exists())
+            with Image.open(archivo) as imagen:
+                self.assertEqual((imagen.format, imagen.size), ('WEBP', (768, 768)))
+
+        palabra.refresh_from_db()
+        self.assertEqual(preparacion.estado, 'generada')
+        self.assertEqual(preparacion.proveedor_candidato, 'pexels')
+        self.assertEqual(preparacion.autor_candidato, 'Runa Foto')
+        self.assertEqual(palabra.imagen_vocabulario, '')
+
+    def test_cliente_pexels_usa_autorizacion_y_busqueda_cuadrada_en_espanol(self):
+        from .services.pexels import PexelsClient
+
+        datos = json.dumps({
+            'photos': [{
+                'id': 44,
+                'url': 'https://www.pexels.com/photo/gato-44/',
+                'photographer': 'Killa Foto',
+                'photographer_url': 'https://www.pexels.com/@killa-foto',
+                'width': 1000,
+                'height': 1000,
+                'avg_color': '#abcdef',
+                'alt': 'Cat',
+                'src': {'large2x': 'https://images.pexels.com/photos/44/gato.jpeg'},
+            }],
+        }).encode('utf-8')
+
+        class Respuesta:
+            headers = {'X-Ratelimit-Limit': '20000', 'X-Ratelimit-Remaining': '19999'}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self, _cantidad):
+                return datos
+
+        with patch('apps.diccionario.services.pexels.urlopen', return_value=Respuesta()) as abrir:
+            resultado = PexelsClient(api_key='clave-segura-de-prueba', timeout=1).buscar_fotos('gato')
+        solicitud = abrir.call_args.args[0]
+        self.assertEqual(solicitud.get_header('Authorization'), 'clave-segura-de-prueba')
+        self.assertIn('query=gato', solicitud.full_url)
+        self.assertIn('orientation=square', solicitud.full_url)
+        self.assertIn('locale=es-ES', solicitud.full_url)
+        self.assertEqual(resultado['fotos'][0]['fotografo'], 'Killa Foto')
 
     def test_detalle_indica_favorita_del_usuario_actual(self):
         usuario = User.objects.create_user('killa', password='contrasena-segura-123')

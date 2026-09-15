@@ -31,7 +31,10 @@
                             <p class="word-translation"><span>Español</span> {{ palabra.traduccion_espanol }}</p>
                             {% if palabra.pronunciacion %}<p class="word-pronunciation"><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabra.pronunciacion }}</p>{% endif %}
                         </div>
-                        <div class="word-meta"><a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                        <div class="word-meta">
+                            {% if palabra.proveedor_imagen == 'pexels' and palabra.fuente_imagen_url %}<a class="image-source-link" href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer" aria-label="Ver fotografía de {{ palabra.autor_imagen }} en Pexels">Foto en Pexels</a>{% endif %}
+                            <a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        </div>
                     </article>
                 {% endfor %}
             </div>

@@ -33,7 +33,9 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
    detalle; no se reutilizan imágenes de terceros incluidas en el PDF. PostgreSQL
    contiene además la clasificación visual de las 4.454 acepciones y una cola con
    estados de generación, revisión y publicación. El lote inicial de expansión
-   reúne 100 acepciones concretas sin publicarlas automáticamente.
+   reúne 100 acepciones concretas sin publicarlas automáticamente. La integración
+   opcional con Pexels busca y descarga fotografías candidatas, registra autoría
+   y enlaces de origen y mantiene la aprobación humana antes de mostrarlas.
 7. **Internacionalización de la interfaz y traducciones al inglés — pendiente.**
    Traducir la interfaz y revisar el contenido en inglés antes de habilitarlo.
 

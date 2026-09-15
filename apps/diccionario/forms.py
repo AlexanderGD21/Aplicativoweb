@@ -64,7 +64,8 @@ class PalabraForm(forms.ModelForm):
         fields = [
             'palabra_kichwa', 'traduccion_espanol', 'definicion',
             'pronunciacion', 'audio', 'imagen_vocabulario', 'descripcion_imagen',
-            'credito_imagen', 'categoria', 'categoria_propuesta', 'dificultad', 'nivel_dificultad',
+            'credito_imagen', 'proveedor_imagen', 'autor_imagen', 'autor_imagen_url',
+            'fuente_imagen_url', 'categoria', 'categoria_propuesta', 'dificultad', 'nivel_dificultad',
             'tipo', 'estado_revision', 'apta_para_juegos', 'dificultad_juego',
             'descripcion_juego_espanol', 'descripcion_juego_kichwa',
             'notas_gramaticales', 'activa'
@@ -78,6 +79,10 @@ class PalabraForm(forms.ModelForm):
             'imagen_vocabulario': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion_imagen': forms.TextInput(attrs={'class': 'form-control'}),
             'credito_imagen': forms.TextInput(attrs={'class': 'form-control'}),
+            'proveedor_imagen': forms.Select(attrs={'class': 'form-select'}),
+            'autor_imagen': forms.TextInput(attrs={'class': 'form-control'}),
+            'autor_imagen_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'fuente_imagen_url': forms.URLInput(attrs={'class': 'form-control'}),
             'categoria': forms.Select(attrs={'class': 'form-select'}),
             'categoria_propuesta': forms.Select(attrs={'class': 'form-select'}),
             'dificultad': forms.Select(attrs={'class': 'form-select'}),
