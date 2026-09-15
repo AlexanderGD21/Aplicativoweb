@@ -1,4 +1,5 @@
 from django.db.models import Case, IntegerField, OuterRef, Subquery, Sum, Value, When
+from django.utils.translation import get_language
 
 from ..models import Categoria, Palabra, ProgresoPalabraJuego, normalizar_texto_busqueda
 
@@ -10,14 +11,14 @@ SEPARADORES_AMBIGUOS = ',;:/[]()\n\r'
 def entrada_jugable(palabra):
     """Acepta pares bilingües breves; descarta listas de variantes y glosas extensas."""
     kichwa = (palabra.palabra_kichwa or '').strip()
-    espanol = (palabra.traduccion_espanol or '').strip()
+    equivalencia = (palabra.traduccion_localizada or '').strip()
     return (
-        bool(normalizar_texto_busqueda(kichwa) and normalizar_texto_busqueda(espanol))
-        and not any(separador in kichwa or separador in espanol for separador in SEPARADORES_AMBIGUOS)
+        bool(normalizar_texto_busqueda(kichwa) and normalizar_texto_busqueda(equivalencia))
+        and not any(separador in kichwa or separador in equivalencia for separador in SEPARADORES_AMBIGUOS)
         and len(kichwa) <= 48
-        and len(espanol) <= 65
+        and len(equivalencia) <= 65
         and len(kichwa.split()) <= 3
-        and len(espanol.split()) <= 5
+        and len(equivalencia.split()) <= 5
     )
 
 
@@ -32,9 +33,12 @@ def filtros_juego(request, dificultad_predeterminada='medio'):
 def categorias_jugables(requiere_audio=False):
     candidatas = Palabra.objects.filter(activa=True).only(
         'categoria_id', 'palabra_kichwa', 'traduccion_espanol',
+        'traduccion_ingles', 'estado_revision_ingles',
     )
     if requiere_audio:
         candidatas = candidatas.exclude(audio='').exclude(audio__isnull=True)
+    if get_language() == 'en':
+        candidatas = candidatas.filter(estado_revision_ingles='validada').exclude(traduccion_ingles='')
     categorias_ids = {palabra.categoria_id for palabra in candidatas if entrada_jugable(palabra)}
     return Categoria.objects.filter(pk__in=categorias_ids).order_by('grupo', 'orden', 'nombre')
 
@@ -50,6 +54,8 @@ def _corpus_jugable(dificultad, categoria_slug=''):
     )
     if categoria_slug:
         palabras = palabras.filter(categoria__slug=categoria_slug)
+    if get_language() == 'en':
+        palabras = palabras.filter(estado_revision_ingles='validada').exclude(traduccion_ingles='')
     return palabras
 
 
@@ -85,7 +91,7 @@ def seleccionar_palabras_juego(usuario, dificultad, categoria_slug='', limite=10
     vistos_espanol = set()
     for palabra in palabras:
         kichwa = normalizar_texto_busqueda(palabra.palabra_kichwa)
-        espanol = normalizar_texto_busqueda(palabra.traduccion_espanol)
+        espanol = normalizar_texto_busqueda(palabra.traduccion_localizada)
         if not kichwa or not espanol or kichwa in vistos_kichwa or espanol in vistos_espanol:
             continue
         seleccion.append(palabra)

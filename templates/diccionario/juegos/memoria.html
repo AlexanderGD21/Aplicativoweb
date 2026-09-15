@@ -1,5 +1,6 @@
 {% extends 'diccionario/juegos/base_juego.html' %}
-{% block game_title %}Memoria bilingüe{% endblock %}
-{% block game_heading %}Memoria bilingüe{% endblock %}
-{% block game_lead %}Encuentra cada pareja Kichwa–español y refuerza el recuerdo visual.{% endblock %}
-{% block game_instruction %}Abre dos fichas. Una pareja correcta comparte el mismo significado; las fichas incorrectas vuelven a cerrarse.{% endblock %}
+{% load i18n %}
+{% block game_title %}{% translate "Memoria bilingüe" %}{% endblock %}
+{% block game_heading %}{% translate "Memoria bilingüe" %}{% endblock %}
+{% block game_lead %}{% translate "Encuentra cada pareja bilingüe y refuerza el recuerdo visual." %}{% endblock %}
+{% block game_instruction %}{% translate "Abre dos fichas. Una pareja correcta comparte el mismo significado; las fichas incorrectas vuelven a cerrarse." %}{% endblock %}

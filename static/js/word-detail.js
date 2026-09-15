@@ -1,5 +1,7 @@
 (function () {
   'use strict';
+  const english = document.documentElement.lang === 'en';
+  const text = (spanish, translated) => english ? translated : spanish;
 
   const button = document.querySelector('#favorite-button');
   if (!button) return;
@@ -17,7 +19,7 @@
       headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
     })
       .then(function (response) {
-        if (!response.ok) throw new Error('No se pudo actualizar la palabra favorita.');
+        if (!response.ok) throw new Error(text('No se pudo actualizar la palabra favorita.', 'The favorite could not be updated.'));
         return response.json();
       })
       .then(function (data) {
@@ -25,11 +27,13 @@
           window.bootstrap.Modal.getOrCreateInstance(document.querySelector('#loginModal')).show();
           return;
         }
-        if (!data.success) throw new Error(data.message || 'No se pudo actualizar la palabra favorita.');
+        if (!data.success) throw new Error(data.message || text('No se pudo actualizar la palabra favorita.', 'The favorite could not be updated.'));
         button.classList.toggle('is-favorite', data.es_favorita);
         button.setAttribute('aria-pressed', String(data.es_favorita));
         icon.className = (data.es_favorita ? 'fas' : 'far') + ' fa-heart';
-        label.textContent = data.es_favorita ? 'Guardada en favoritas' : 'Guardar en favoritas';
+        label.textContent = data.es_favorita
+          ? text('Guardada en favoritas', 'Saved to favorites')
+          : text('Guardar en favoritas', 'Save to favorites');
         if (typeof window.showNotification === 'function') window.showNotification(data.message, 'success');
       })
       .catch(function (error) {

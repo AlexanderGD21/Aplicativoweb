@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Cambiar contraseña · Diccionario Kichwa{% endblock %}
+{% block title %}{% translate "Cambiar contraseña · Diccionario Kichwa" %}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=20260911"><link rel="stylesheet" href="{% static 'css/account-editor.css' %}?v=20260912-1">{% endblock %}
 
 {% block content %}
 <section class="auth-page account-editor" aria-labelledby="change-password-title"><div class="auth-wrap"><div class="auth-frame account-password-frame">
-  <aside class="auth-orientation"><div class="auth-orientation-copy"><h1 id="change-password-title">Una clave segura para seguir aprendiendo.</h1><p>El cambio se aplica a tu cuenta sin borrar tus palabras favoritas, partidas ni progreso.</p></div><ul class="auth-benefits"><li><i class="fas fa-shield-alt" aria-hidden="true"></i><span>Usa una contraseña única y difícil de adivinar.</span></li><li><i class="fas fa-lock" aria-hidden="true"></i><span>Necesitamos tu contraseña actual para confirmar el cambio.</span></li></ul></aside>
-  <div class="auth-panel"><header class="auth-heading"><h2>Cambiar contraseña</h2><p>Escribe la contraseña actual y repite la nueva para evitar errores.</p></header>
+  <aside class="auth-orientation"><div class="auth-orientation-copy"><h1 id="change-password-title">{% translate "Una clave segura para seguir aprendiendo." %}</h1><p>{% translate "El cambio se aplica a tu cuenta sin borrar tus palabras favoritas, partidas ni progreso." %}</p></div><ul class="auth-benefits"><li><i class="fas fa-shield-alt" aria-hidden="true"></i><span>{% translate "Usa una contraseña única y difícil de adivinar." %}</span></li><li><i class="fas fa-lock" aria-hidden="true"></i><span>{% translate "Necesitamos tu contraseña actual para confirmar el cambio." %}</span></li></ul></aside>
+  <div class="auth-panel"><header class="auth-heading"><h2>{% translate "Cambiar contraseña" %}</h2><p>{% translate "Escribe la contraseña actual y repite la nueva para evitar errores." %}</p></header>
     {% if form.non_field_errors %}<div class="auth-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
     <form method="post" class="auth-form" data-auth-form>{% csrf_token %}
-      {% for field in form %}<div class="auth-field{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.name == 'new_password1' %}<span class="auth-help">Usa al menos 8 caracteres y evita contraseñas comunes.</span>{% endif %}{% for error in field.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}</div>{% endfor %}
-      <div class="auth-actions"><button type="submit" class="auth-button" data-loading-text="Actualizando…">Guardar contraseña</button><a class="auth-button auth-button--secondary" href="{% url 'usuarios:perfil' %}">Volver al perfil</a></div>
+      {% for field in form %}<div class="auth-field{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.name == 'new_password1' %}<span class="auth-help">{% translate "Usa al menos 8 caracteres y evita contraseñas comunes." %}</span>{% endif %}{% for error in field.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}</div>{% endfor %}
+      <div class="auth-actions"><button type="submit" class="auth-button" data-loading-text="{% translate 'Actualizando…' %}">{% translate "Guardar contraseña" %}</button><a class="auth-button auth-button--secondary" href="{% url 'usuarios:perfil' %}">{% translate "Volver al perfil" %}</a></div>
     </form>
   </div>
 </div></div></section>

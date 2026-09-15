@@ -1,5 +1,7 @@
 (function () {
   'use strict';
+  const english = document.documentElement.lang === 'en';
+  const text = (spanish, translated) => english ? translated : spanish;
 
   const input = document.querySelector('#id_termino');
   const wrapper = input ? input.closest('.search-control') : null;
@@ -65,7 +67,9 @@
     });
     list.hidden = items.length === 0;
     input.setAttribute('aria-expanded', items.length ? 'true' : 'false');
-    announce(items.length ? items.length + ' sugerencias disponibles.' : 'No hay sugerencias.');
+    announce(items.length
+      ? items.length + text(' sugerencias disponibles.', ' suggestions available.')
+      : text('No hay sugerencias.', 'No suggestions available.'));
   }
 
   input.addEventListener('input', function () {
@@ -80,17 +84,17 @@
     timer = window.setTimeout(function () {
       controller = new AbortController();
       wrapper.setAttribute('aria-busy', 'true');
-      announce('Buscando sugerencias.');
+      announce(text('Buscando sugerencias.', 'Searching for suggestions.'));
       fetch(endpoint + '?q=' + encodeURIComponent(query), { signal: controller.signal })
         .then(function (response) {
-          if (!response.ok) throw new Error('No se pudieron cargar las sugerencias.');
+          if (!response.ok) throw new Error(text('No se pudieron cargar las sugerencias.', 'Suggestions could not be loaded.'));
           return response.json();
         })
         .then(function (data) { renderSuggestions(data.palabras || []); })
         .catch(function (error) {
           if (error.name !== 'AbortError') {
             closeSuggestions();
-            announce('No se pudieron cargar las sugerencias. Puedes continuar con el botón Buscar.');
+            announce(text('No se pudieron cargar las sugerencias. Puedes continuar con el botón Buscar.', 'Suggestions could not be loaded. You can continue with the Search button.'));
           }
         })
         .finally(function () { wrapper.removeAttribute('aria-busy'); });

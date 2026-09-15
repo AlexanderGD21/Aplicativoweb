@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Crear una cuenta | Diccionario Kichwa{% endblock %}
+{% block title %}{% translate "Crear una cuenta | Diccionario Kichwa" %}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=20260912-2">{% endblock %}
 
 {% block content %}
@@ -10,10 +10,10 @@
     <div class="auth-frame auth-frame--register">
       <aside class="auth-orientation">
         <div class="auth-orientation-copy">
-          <h1 id="register-page-title">Crea tu espacio de aprendizaje.</h1>
-          <p>Los datos obligatorios permiten identificar tu cuenta y recuperarla. La información del perfil puede completarse después.</p>
+          <h1 id="register-page-title">{% translate "Crea tu espacio de aprendizaje." %}</h1>
+          <p>{% translate "Los datos obligatorios permiten identificar tu cuenta y recuperarla. La información del perfil puede completarse después." %}</p>
         </div>
-        <ul class="auth-benefits" aria-label="Compromisos del registro">
+        <ul class="auth-benefits" aria-label="{% translate 'Compromisos del registro' %}">
           <li><i class="fas fa-circle-check" aria-hidden="true"></i><span>Solo pedimos los datos necesarios para abrir la cuenta.</span></li>
           <li><i class="fas fa-envelope" aria-hidden="true"></i><span>Las novedades por correo son opcionales.</span></li>
         </ul>
@@ -22,8 +22,8 @@
 
       <div class="auth-panel auth-panel--wide">
         <header class="auth-heading">
-          <h2>Crear cuenta</h2>
-          <p>Todos los campos de esta sección son obligatorios, excepto las novedades educativas.</p>
+          <h2>{% translate "Crear cuenta" %}</h2>
+          <p>{% translate "Todos los campos de esta sección son obligatorios, excepto las novedades educativas." %}</p>
         </header>
 
         {% if form.non_field_errors %}
@@ -35,44 +35,44 @@
           {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
           <div class="auth-form-grid">
             <div class="auth-field{% if form.first_name.errors %} has-error{% endif %}">
-              <label for="{{ form.first_name.id_for_label }}">Nombre</label>
+              <label for="{{ form.first_name.id_for_label }}">{% translate "Nombre" %}</label>
               {{ form.first_name }}
               <span class="auth-help" id="first-name-help">Solo letras y espacios.</span>
               {% for error in form.first_name.errors %}<span class="auth-error" id="first-name-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.last_name.errors %} has-error{% endif %}">
-              <label for="{{ form.last_name.id_for_label }}">Apellido</label>
+              <label for="{{ form.last_name.id_for_label }}">{% translate "Apellido" %}</label>
               {{ form.last_name }}
               <span class="auth-help" id="last-name-help">Solo letras y espacios.</span>
               {% for error in form.last_name.errors %}<span class="auth-error" id="last-name-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.username.errors %} has-error{% endif %}">
-              <label for="{{ form.username.id_for_label }}">Nombre de usuario</label>
+              <label for="{{ form.username.id_for_label }}">{% translate "Nombre de usuario" %}</label>
               {{ form.username }}
               <span class="auth-help" id="username-help">Letras, números y los signos @ . + - _</span>
               {% for error in form.username.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.email.errors %} has-error{% endif %}">
-              <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
+              <label for="{{ form.email.id_for_label }}">{% translate "Correo electrónico" %}</label>
               {{ form.email }}
               <span class="auth-help" id="email-help">Se utilizará para recuperar el acceso.</span>
               {% for error in form.email.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.password1.errors %} has-error{% endif %}">
-              <label for="{{ form.password1.id_for_label }}">Contraseña</label>
+              <label for="{{ form.password1.id_for_label }}">{% translate "Contraseña" %}</label>
               <div class="password-wrap">
                 {{ form.password1 }}
-                <button class="password-toggle" type="button" data-password-toggle="id_password1" aria-label="Mostrar contraseña" aria-pressed="false" data-tooltip="Mostrar u ocultar la contraseña"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                <button class="password-toggle" type="button" data-password-toggle="id_password1" aria-label="{% translate 'Mostrar contraseña' %}" aria-pressed="false" data-tooltip="{% translate 'Mostrar u ocultar la contraseña' %}"><i class="fas fa-eye" aria-hidden="true"></i></button>
               </div>
               <div class="password-meter" data-password-meter data-score="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
               <span class="password-feedback" id="password-strength-help" data-password-feedback>Usa al menos 8 caracteres y evita contraseñas comunes.</span>
               {% for error in form.password1.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
             </div>
             <div class="auth-field{% if form.password2.errors %} has-error{% endif %}">
-              <label for="{{ form.password2.id_for_label }}">Confirmar contraseña</label>
+              <label for="{{ form.password2.id_for_label }}">{% translate "Confirmar contraseña" %}</label>
               <div class="password-wrap">
                 {{ form.password2 }}
-                <button class="password-toggle" type="button" data-password-toggle="id_password2" aria-label="Mostrar contraseña" aria-pressed="false" data-tooltip="Mostrar u ocultar la confirmación"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                <button class="password-toggle" type="button" data-password-toggle="id_password2" aria-label="{% translate 'Mostrar contraseña' %}" aria-pressed="false" data-tooltip="{% translate 'Mostrar u ocultar la confirmación' %}"><i class="fas fa-eye" aria-hidden="true"></i></button>
               </div>
               <span id="password-match-help" data-password-match aria-live="polite"></span>
               {% for error in form.password2.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
@@ -83,29 +83,29 @@
             <div class="auth-choice{% if form.acepto_terminos.errors %} has-error{% endif %}">
               {{ form.acepto_terminos }}
               <label for="{{ form.acepto_terminos.id_for_label }}">
-                He leído y acepto los <a href="{% url 'usuarios:terminos' %}" target="_blank" rel="noopener" data-tooltip="Leer los términos en una pestaña nueva">Términos de uso<span class="visually-hidden"> (se abre en otra pestaña)</span></a> y la <a href="{% url 'usuarios:privacidad' %}" target="_blank" rel="noopener" data-tooltip="Leer la política en una pestaña nueva">Política de privacidad<span class="visually-hidden"> (se abre en otra pestaña)</span></a>.
+                {% translate "He leído y acepto los" %} <a href="{% url 'usuarios:terminos' %}" target="_blank" rel="noopener">{% translate "Términos de uso" %}</a> {% translate "y la" %} <a href="{% url 'usuarios:privacidad' %}" target="_blank" rel="noopener">{% translate "Política de privacidad" %}</a>.
               </label>
             </div>
-            <span id="terms-consent-help">La aceptación es necesaria para crear la cuenta.</span>
+            <span id="terms-consent-help">{% translate "La aceptación es necesaria para crear la cuenta." %}</span>
             {% for error in form.acepto_terminos.errors %}<span class="auth-error" role="alert">{{ error }}</span>{% endfor %}
 
             <div class="auth-choice">
               {{ form.recibir_novedades }}
-              <label for="{{ form.recibir_novedades.id_for_label }}">Quiero recibir novedades educativas por correo. Puedo cambiar esta preferencia desde mi perfil.</label>
+              <label for="{{ form.recibir_novedades.id_for_label }}">{% translate "Quiero recibir novedades educativas por correo. Puedo cambiar esta preferencia desde mi perfil." %}</label>
             </div>
           </div>
 
           <div class="auth-actions">
-            <button class="auth-button" type="submit" data-loading-text="Creando cuenta…" data-tooltip="Validar los datos y crear tu cuenta">
+            <button class="auth-button" type="submit" data-loading-text="{% translate 'Creando cuenta…' %}" data-tooltip="{% translate 'Validar los datos y crear tu cuenta' %}">
               <i class="fas fa-user-plus" aria-hidden="true"></i>
-              Crear mi cuenta
+              {% translate "Crear mi cuenta" %}
             </button>
           </div>
         </form>
 
         <div class="auth-meta">
-          <span>¿Ya tienes una cuenta?</span>
-          <a href="{% url 'usuarios:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}" data-tooltip="Ya tengo una cuenta y quiero acceder">Iniciar sesión</a>
+          <span>{% translate "¿Ya tienes una cuenta?" %}</span>
+          <a href="{% url 'usuarios:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Iniciar sesión" %}</a>
         </div>
       </div>
     </div>

@@ -14,18 +14,9 @@ python manage.py runserver
 ```
 
 Las credenciales se configuran en `.env`, ignorado por Git. Copia
-`.env.example` y reemplaza sus valores de ejemplo. PostgreSQL es el motor
-predeterminado; configura `DATABASE_ENGINE=postgresql` y `DATABASE_*`.
-
-Si aún necesitas trasladar una copia antigua de SQLite a PostgreSQL, completa
-primero las variables `DATABASE_*` en `.env` y ejecuta:
-
-```powershell
-.\scripts\migrar_sqlite_a_postgres.ps1 -Confirmar
-```
-
-El script conserva un respaldo y un volcado JSON en `backups/`; no borra la
-base SQLite original.
+`.env.example` y reemplaza sus valores de ejemplo. La aplicación utiliza
+exclusivamente PostgreSQL: configura `DATABASE_ENGINE=postgresql` y las
+variables `DATABASE_*`.
 
 ## Pruebas con PostgreSQL
 
@@ -68,3 +59,11 @@ Las entradas de confianza baja aún requieren revisión lingüística humana.
 
 La IA está apagada por defecto; valida su configuración con
 `python manage.py verificar_ia_kichwa`.
+
+## Español e inglés
+
+La interfaz ofrece ambos idiomas y conserva la elección en una cookie. El
+procedimiento para ampliar y revisar las equivalencias inglesas está en
+[`docs/INTERNACIONALIZACION.md`](docs/INTERNACIONALIZACION.md). Ninguna
+traducción pendiente se incorpora automáticamente a la búsqueda ni a los
+juegos en inglés.

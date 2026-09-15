@@ -1,3 +1,4 @@
+import csv
 import json
 from importlib import import_module
 from datetime import date, timedelta
@@ -1026,3 +1027,72 @@ class DiccionarioTests(TestCase):
     @override_settings(KICHWA_AI_PROVIDER='none')
     def test_ia_esta_desactivada_por_defecto(self):
         self.assertIsNone(obtener_configuracion_ia())
+
+    def test_selector_cambia_la_interfaz_a_ingles_y_persiste(self):
+        respuesta = self.client.post(reverse('set_language'), {
+            'language': 'en', 'next': reverse('diccionario:home'),
+        })
+        self.assertRedirects(respuesta, reverse('diccionario:home'), fetch_redirect_response=False)
+        self.assertEqual(respuesta.cookies['django_language'].value, 'en')
+
+        inicio = self.client.get(reverse('diccionario:home'))
+        self.assertContains(inicio, '<html lang="en">', html=False)
+        self.assertContains(inicio, 'Find a word in Kichwa, Spanish, or English')
+        self.assertContains(inicio, 'Interface language')
+
+    def test_busqueda_ingles_solo_publica_traducciones_validadas(self):
+        self.palabra.traduccion_ingles = 'water'
+        self.palabra.estado_revision_ingles = 'validada'
+        self.palabra.save()
+        self.coincidencia_espanol.traduccion_ingles = 'flowing water'
+        self.coincidencia_espanol.estado_revision_ingles = 'pendiente'
+        self.coincidencia_espanol.save()
+        self.client.cookies['django_language'] = 'en'
+
+        respuesta = self.client.get(reverse('diccionario:buscar'), {'termino': 'water'})
+        self.assertContains(respuesta, 'Yaku')
+        self.assertNotContains(respuesta, 'Mayu')
+        self.assertContains(respuesta, '<span>English</span> water', html=True)
+
+    def test_detalle_ingles_indica_fallback_editorial(self):
+        self.client.cookies['django_language'] = 'en'
+        respuesta = self.client.get(self.misi.get_absolute_url())
+        self.assertContains(respuesta, 'The English translation for this entry is still under review')
+        self.assertContains(respuesta, '<span>Spanish</span>Gato', html=True)
+
+    def test_juego_ingles_usa_solo_vocabulario_validado(self):
+        self.misi.traduccion_ingles = 'cat'
+        self.misi.estado_revision_ingles = 'validada'
+        self.misi.dificultad = 'facil'
+        self.misi.save()
+        self.client.cookies['django_language'] = 'en'
+        respuesta = self.client.get(reverse('diccionario:juego_traduccion'))
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.context['dificultad'], 'facil')
+        self.assertEqual(respuesta.context['palabras_data'][0]['espanol'], 'cat')
+        self.assertEqual(respuesta.context['palabras_data'][0]['idioma'], 'English')
+
+    def test_flujo_csv_ingles_exporta_e_importa_revision(self):
+        with TemporaryDirectory() as temporal:
+            archivo = Path(temporal) / 'traducciones.csv'
+            call_command('gestionar_traducciones_ingles', '--exportar', str(archivo), stdout=StringIO())
+            contenido = archivo.read_text(encoding='utf-8-sig')
+            self.assertIn('palabra_kichwa,traduccion_espanol', contenido)
+            self.assertIn('Yaku,Agua', contenido)
+
+            filas = list(csv.DictReader(contenido.splitlines()))
+            for fila in filas:
+                if int(fila['id']) == self.palabra.pk:
+                    fila['traduccion_ingles'] = 'water.'
+                    fila['definicion_ingles'] = 'A clear liquid.'
+                    fila['estado_revision_ingles'] = 'validada'
+            with archivo.open('w', encoding='utf-8-sig', newline='') as salida:
+                escritor = csv.DictWriter(salida, fieldnames=filas[0].keys())
+                escritor.writeheader()
+                escritor.writerows(filas)
+            call_command('gestionar_traducciones_ingles', '--importar', str(archivo), stdout=StringIO())
+
+        self.palabra.refresh_from_db()
+        self.assertEqual(self.palabra.traduccion_ingles, 'water')
+        self.assertEqual(self.palabra.busqueda_ingles, 'water')
+        self.assertEqual(self.palabra.estado_revision_ingles, 'validada')

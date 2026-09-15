@@ -3,6 +3,7 @@
 from datetime import datetime, time, timedelta
 
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from ..models import IntentoPalabraJuego
 
@@ -39,7 +40,7 @@ def reto_semanal(usuario, fecha=None):
     return {
         'inicio': inicio,
         'fin': fin_exclusivo - timedelta(days=1),
-        'modalidad': modalidad,
+        'modalidad': _(modalidad),
         'tipo': tipo,
         'url': url,
         'meta': META_PALABRAS,

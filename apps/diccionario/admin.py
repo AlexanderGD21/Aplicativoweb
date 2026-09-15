@@ -13,23 +13,23 @@ from .models import (
 
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'grupo', 'orden', 'color', 'fecha_creacion']
+    list_display = ['nombre', 'nombre_ingles', 'grupo', 'orden', 'color', 'fecha_creacion']
     list_filter = ['grupo', 'fecha_creacion']
-    search_fields = ['nombre', 'descripcion']
+    search_fields = ['nombre', 'nombre_ingles', 'descripcion', 'descripcion_ingles']
     ordering = ['grupo', 'orden', 'nombre']
 
 @admin.register(Palabra)
 class PalabraAdmin(admin.ModelAdmin):
     list_display = [
-        'palabra_kichwa', 'traduccion_espanol', 'categoria', 'categoria_propuesta',
-        'estado_revision', 'clasificacion_confianza', 'dificultad', 'apta_para_juegos', 'activa', 'veces_vista'
+        'palabra_kichwa', 'traduccion_espanol', 'traduccion_ingles', 'categoria', 'categoria_propuesta',
+        'estado_revision', 'estado_revision_ingles', 'clasificacion_confianza', 'dificultad', 'apta_para_juegos', 'activa', 'veces_vista'
     ]
     list_filter = [
-        'categoria', 'categoria_propuesta', 'estado_revision', 'clasificacion_confianza',
+        'categoria', 'categoria_propuesta', 'estado_revision', 'estado_revision_ingles', 'clasificacion_confianza',
         'dificultad', 'nivel_dificultad', 'tipo',
         'apta_para_juegos', 'activa', 'fecha_creacion'
     ]
-    search_fields = ['palabra_kichwa', 'traduccion_espanol', 'definicion']
+    search_fields = ['palabra_kichwa', 'traduccion_espanol', 'traduccion_ingles', 'definicion', 'definicion_ingles']
     ordering = ['palabra_kichwa']
     readonly_fields = ['veces_vista', 'fecha_creacion', 'fecha_actualizacion']
     
@@ -55,12 +55,19 @@ class PalabraAdmin(admin.ModelAdmin):
             'fields': ('etimologia', 'sinonimos', 'notas_gramaticales'),
             'classes': ('collapse',)
         }),
+        ('Traducción al inglés', {
+            'fields': ('traduccion_ingles', 'definicion_ingles', 'estado_revision_ingles'),
+            'description': 'La traducción inglesa solo será pública cuando esté marcada como validada.',
+        }),
         ('Control', {
             'fields': ('activa', 'veces_vista', 'fecha_creacion', 'fecha_actualizacion'),
             'classes': ('collapse',)
         }),
     )
-    actions = ['aceptar_categoria_propuesta', 'rechazar_categoria_propuesta', 'marcar_revisada', 'marcar_validada']
+    actions = [
+        'aceptar_categoria_propuesta', 'rechazar_categoria_propuesta', 'marcar_revisada',
+        'marcar_validada', 'marcar_ingles_revisado', 'marcar_ingles_validado',
+    ]
 
     @admin.action(description='Aceptar categoría propuesta y marcar como revisada')
     def aceptar_categoria_propuesta(self, request, queryset):
@@ -83,6 +90,16 @@ class PalabraAdmin(admin.ModelAdmin):
     @admin.action(description='Marcar como validada')
     def marcar_validada(self, request, queryset):
         self.message_user(request, f'{queryset.update(estado_revision="validada")} entradas validadas.')
+
+    @admin.action(description='Marcar traducción inglesa como revisada')
+    def marcar_ingles_revisado(self, request, queryset):
+        validas = queryset.exclude(traduccion_ingles='')
+        self.message_user(request, f'{validas.update(estado_revision_ingles="revisada")} traducciones inglesas revisadas.')
+
+    @admin.action(description='Validar traducción inglesa para publicación')
+    def marcar_ingles_validado(self, request, queryset):
+        validas = queryset.exclude(traduccion_ingles='')
+        self.message_user(request, f'{validas.update(estado_revision_ingles="validada")} traducciones inglesas publicadas.')
 
 
 @admin.register(PreparacionImagenVocabulario)

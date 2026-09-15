@@ -1,9 +1,10 @@
+{% load i18n %}{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido al Diccionario Kichwa</title>
+    <title>{% translate "Bienvenido al Diccionario Kichwa" %}</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -87,35 +88,34 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>¡Bienvenido al Diccionario Kichwa!</h1>
-            <p>Preservando y compartiendo la riqueza cultural del idioma Kichwa</p>
+            <h1>{% translate "¡Bienvenido al Diccionario Kichwa!" %}</h1>
+            <p>{% translate "Preservando y compartiendo la riqueza cultural del idioma Kichwa" %}</p>
         </div>
         
         <div class="content">
-            <h2>Hola {{ user.first_name }},</h2>
-            <p>¡Nos alegra mucho tenerte en nuestra comunidad! Has dado el primer paso para explorar y aprender uno de los idiomas más ricos y antiguos de América.</p>
+            <h2>{% blocktranslate with name=user.first_name %}Hola {{ name }},{% endblocktranslate %}</h2>
+            <p>{% translate "Nos alegra tenerte en nuestra comunidad. Has dado el primer paso para explorar y aprender uno de los idiomas más ricos y antiguos de América." %}</p>
             
             <div class="features">
-                <h3>¿Qué puedes hacer ahora?</h3>
+                <h3>{% translate "¿Qué puedes hacer ahora?" %}</h3>
                 <ul>
-                    <li><strong>Explorar el diccionario:</strong> Busca palabras en Kichwa y español</li>
-                    <li><strong>Jugar y aprender:</strong> Disfruta de nuestros juegos educativos</li>
-                    <li><strong>Crear tu lista de favoritos:</strong> Guarda las palabras que más te interesen</li>
-                    <li><strong>Seguir tu progreso:</strong> Ve cómo mejoras día a día</li>
-                    <li><strong>Conectar con la cultura:</strong> Descubre la historia detrás de cada palabra</li>
+                    <li>{% translate "Explora el diccionario y busca palabras en Kichwa, español o inglés." %}</li>
+                    <li>{% translate "Practica con nuestros juegos educativos." %}</li>
+                    <li>{% translate "Guarda las palabras que más te interesen." %}</li>
+                    <li>{% translate "Sigue tu progreso de aprendizaje." %}</li>
                 </ul>
             </div>
             
-            <p>Nuestro diccionario no es solo una herramienta de traducción, es un puente hacia la comprensión de una cultura milenaria. Cada palabra que aprendas te conecta con la sabiduría ancestral de los pueblos Kichwa.</p>
+            <p>{% translate "Nuestro diccionario es un puente hacia la comprensión de una cultura milenaria. Cada palabra que aprendes te acerca a la sabiduría de los pueblos Kichwa." %}</p>
         </div>
         
         <div class="cta">
-            <a href="http://localhost:8000" class="btn">Comenzar a Explorar</a>
+            <a href="http://localhost:8000" class="btn">{% translate "Comenzar a explorar" %}</a>
         </div>
         
         <div class="footer">
-            <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
-            <p><strong>Equipo del Diccionario Kichwa</strong></p>
+            <p>{% translate "Si tienes alguna pregunta, no dudes en contactarnos." %}</p>
+            <p><strong>{% translate "Equipo del Diccionario Kichwa" %}</strong></p>
         </div>
     </div>
 </body>

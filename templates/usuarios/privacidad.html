@@ -1,10 +1,36 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
-{% block title %}Política de privacidad | Diccionario Kichwa{% endblock %}
+{% block title %}{% if LANGUAGE_CODE == 'en' %}Privacy policy | Kichwa Dictionary{% else %}Política de privacidad | Diccionario Kichwa{% endif %}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/legal.css' %}?v=20260910">{% endblock %}
 
 {% block content %}
+{% if LANGUAGE_CODE == 'en' %}
+<article class="legal-page">
+  <header class="legal-masthead"><div class="legal-masthead-inner">
+    <nav class="legal-breadcrumb" aria-label="Breadcrumb"><a href="{% url 'diccionario:home' %}">Home</a><i class="fas fa-chevron-right" aria-hidden="true"></i><span>Privacy policy</span></nav>
+    <h1>Privacy policy</h1><p>We explain which data the application currently uses, why it is needed, and what control each person has over their information.</p>
+    <div class="legal-meta"><span>Version {{ version_legal }}</span><span>Updated September 13, 2026</span></div>
+  </div></header>
+  <div class="legal-layout">
+    <aside class="legal-index"><strong>On this page</strong><nav data-legal-index aria-label="Privacy index"><a href="#responsable">Controller and scope</a><a href="#datos">Data used</a><a href="#finalidades">Purposes</a><a href="#cookies">Cookies</a><a href="#destinatarios">Recipients</a><a href="#conservacion">Retention</a><a href="#seguridad">Security</a><a href="#derechos">Your rights</a><a href="#menores">Children</a></nav></aside>
+    <div class="legal-document">
+      <p class="legal-summary">Summary: you do not need to register to look up words. If you create an account, your access details, preferences, and progress are stored. Educational communications are optional and remain disabled until you choose them.</p>
+      <section class="legal-section" id="responsable"><h2>1. Controller and scope</h2><p>This policy describes the processing carried out by the Kichwa Dictionary educational project in this web application. The effective operator depends on where the code is deployed.</p><div class="legal-callout">A public or institutional deployment must identify the legal controller, its location, and a private channel for exercising rights before collecting real registrations.</div></section>
+      <section class="legal-section" id="datos"><h2>2. Data used by the application</h2><h3>When you create an account</h3><ul><li>Username, first name, last name, and email address.</li><li>Password stored through Django's hashing system; the application does not need to store the original text.</li><li>Date and version of the accepted terms and policy.</li></ul><h3>Optional profile data</h3><ul><li>Avatar, biography, birth date, gender, city, country, phone number, and Kichwa level.</li><li>Independent preferences for displaying the profile, joining the ranking, and receiving email. Email, phone number, and birth date are never shown on the public profile or ranking.</li></ul><h3>Learning activity</h3><ul><li>Favorite words, progress, points, and game statistics linked to the account.</li><li>Signed-in accounts keep a private history of searches, opened entries, and completed games. Each person can view only their own records and 30-day summary in “My activity.” Authorized administrators with read permission can review an individual's activity in Django Admin. Tutor accounts cannot access another person's activity.</li><li>The weekly popular-word list uses a separate daily aggregate count of exact searches without visitor identity.</li></ul></section>
+      <section class="legal-section" id="finalidades"><h2>3. How the data is used</h2><ul><li>Create, authenticate, and recover an account.</li><li>Display the profile and retain favorites or progress.</li><li>Show the username and points in the ranking only when that option is enabled. It can be disabled without losing points.</li><li>Show popular entries from the previous seven days using aggregate counts.</li><li>Protect the service from repeated attempts or abusive use.</li><li>Send recovery messages and, only through a separate choice, educational updates.</li></ul><p>The account is retained to provide the requested features. Optional communications depend on your consent and can be disabled from your profile.</p></section>
+      <section class="legal-section" id="cookies"><h2>4. Cookies and browser storage</h2><p>Django uses technical session and CSRF cookies to maintain access and protect forms. They are required for account features. The current code does not declare behavioral advertising or a third-party analytics platform.</p><p>Blocking these cookies can prevent you from signing in, saving preferences, or submitting protected forms.</p></section>
+      <section class="legal-section" id="destinatarios"><h2>5. Services and recipients</h2><p>Data is stored in the database configured by the operator. The email provider receives the address and required content when a recovery or authorized communication is sent. Hosting conditions depend on the deployment.</p><p>To render the interface, the browser requests Bootstrap from jsDelivr, Font Awesome from cdnjs, and Inter from Google Fonts. These connections may communicate technical network data to those providers; versioned Bootstrap and Font Awesome resources use subresource integrity.</p><p>The application has no feature for selling personal data. No transfer, certification, or server location should be assumed unless documented by the actual operator.</p></section>
+      <section class="legal-section" id="conservacion"><h2>6. Retention and deletion</h2><p>Account data is retained while the account remains active. The deletion option in the profile removes the account and its relationships from the main database. Each infrastructure operator must define backup, technical-log, and disaster-recovery periods.</p><p>We do not claim fixed periods or immediate deletion from backups when the infrastructure cannot guarantee it.</p></section>
+      <section class="legal-section" id="seguridad"><h2>7. Security measures</h2><ul><li>Passwords processed through Django's hashing and validation mechanisms.</li><li>CSRF protection on forms and sign-out through POST requests.</li><li>Secure cookies, HTTPS redirection, and protective headers when the project runs with production settings.</li><li>Temporary limits on sign-in and recovery attempts.</li></ul><p>No system is infallible. Use a unique password and do not share recovery links.</p></section>
+      <section class="legal-section" id="derechos"><h2>8. Access to and control of your data</h2><p>Ecuador's Organic Law on Personal Data Protection recognizes rights including access, information, correction, updating, deletion, objection, portability, and suspension. You can edit profile details and delete the account in the application.</p><p>The <a href="https://www.gob.ec/sites/default/files/regulations/2025-01/01%20Ley%20Org%C3%A1nica%20de%20Protecci%C3%B3n%20de%20Datos%20Personales.pdf" target="_blank" rel="noopener">Organic Law on Personal Data Protection<span class="visually-hidden"> (opens in a new tab)</span></a> and the <a href="https://spdp.gob.ec/" target="_blank" rel="noopener">Superintendency for Personal Data Protection<span class="visually-hidden"> (opens in a new tab)</span></a> provide official information.</p><p>For a private request, use the channel published by the deployment operator. Do not include personal data in public repositories or forums.</p></section>
+      <section class="legal-section" id="menores"><h2>9. Children</h2><p>Public lookup avoids requesting personal data. If a child creates an account, they should do so with a parent or guardian when appropriate. Optional information that is not needed for learning should be left blank.</p><p>An operator specifically serving minors must define suitable consent, information, and rights procedures before enabling registration.</p></section>
+      <div class="legal-switch"><span>These rules are complemented by the terms of use.</span><a href="{% url 'usuarios:terminos' %}">Read the terms of use <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+    </div>
+  </div>
+</article>
+{% else %}
 <article class="legal-page">
   <header class="legal-masthead">
     <div class="legal-masthead-inner">
@@ -43,5 +69,6 @@
     </div>
   </div>
 </article>
+{% endif %}
 {% endblock %}
 {% block extra_js %}<script src="{% static 'js/legal.js' %}?v=20260910"></script>{% endblock %}

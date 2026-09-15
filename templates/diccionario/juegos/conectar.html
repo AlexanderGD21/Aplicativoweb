@@ -1,5 +1,6 @@
 {% extends 'diccionario/juegos/base_juego.html' %}
-{% block game_title %}Conectar significados{% endblock %}
-{% block game_heading %}Conectar significados{% endblock %}
-{% block game_lead %}Asocia las dos columnas por selección: funciona con teclado, ratón y pantalla táctil.{% endblock %}
-{% block game_instruction %}Elige primero una palabra Kichwa y después su significado en español. No necesitas arrastrar ni dibujar líneas.{% endblock %}
+{% load i18n %}
+{% block game_title %}{% translate "Conectar significados" %}{% endblock %}
+{% block game_heading %}{% translate "Conectar significados" %}{% endblock %}
+{% block game_lead %}{% translate "Asocia las dos columnas por selección: funciona con teclado, ratón y pantalla táctil." %}{% endblock %}
+{% block game_instruction %}{% translate "Elige primero una palabra Kichwa y después su significado. No necesitas arrastrar ni dibujar líneas." %}{% endblock %}

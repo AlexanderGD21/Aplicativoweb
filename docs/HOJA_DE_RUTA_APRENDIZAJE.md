@@ -36,8 +36,14 @@ actual; no implica que el contenido lingüístico haya recibido revisión humana
    reúne 100 acepciones concretas sin publicarlas automáticamente. La integración
    opcional con Pexels busca y descarga fotografías candidatas, registra autoría
    y enlaces de origen y mantiene la aprobación humana antes de mostrarlas.
-7. **Internacionalización de la interfaz y traducciones al inglés — pendiente.**
-   Traducir la interfaz y revisar el contenido en inglés antes de habilitarlo.
+7. **Internacionalización de la interfaz y traducciones al inglés — completada
+   con curación progresiva del corpus.** El selector persistente ofrece español
+   e inglés en navegación, búsqueda, cuentas, perfil y juegos. Las categorías
+   tienen nombre y descripción inglesa. Una equivalencia inglesa solo aparece
+   en búsquedas y juegos cuando su estado editorial es `validada`; las demás
+   entradas muestran de forma explícita la equivalencia española. El flujo CSV
+   permite ampliar las traducciones de las 4.454 acepciones sin publicarlas de
+   manera automática.
 
 La aplicación usa Python, Django y PostgreSQL. La actividad y las estadísticas
 personales pertenecen al titular de la cuenta; el personal administrador con

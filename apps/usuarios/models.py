@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 class PerfilUsuario(models.Model):
     GENERO_CHOICES = [
@@ -50,6 +51,13 @@ class PerfilUsuario(models.Model):
     @property
     def nombre_completo(self):
         return f"{self.usuario.first_name} {self.usuario.last_name}".strip()
+
+    @property
+    def nivel_kichwa_localizado(self):
+        return {
+            'principiante': _('Principiante'), 'intermedio': _('Intermedio'),
+            'avanzado': _('Avanzado'), 'nativo': _('Nativo'),
+        }.get(self.nivel_kichwa, self.get_nivel_kichwa_display())
 
     @property
     def edad(self):

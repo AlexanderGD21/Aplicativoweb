@@ -1,4 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const english = document.documentElement.lang.toLowerCase().startsWith("en")
+  const copy = english ? {
+    showPassword: "Show password", hidePassword: "Hide password",
+    strongPassword: "Good length and variety. Final validation is performed securely when you submit.",
+    weakPassword: "Use a long, unique phrase; avoid personal details and known passwords.",
+    emptyPassword: "Use at least 8 characters and avoid common passwords.",
+    passwordsMatch: "Passwords match.", passwordsDiffer: "Passwords do not match yet.",
+    processing: "Processing…",
+  } : {
+    showPassword: "Mostrar contraseña", hidePassword: "Ocultar contraseña",
+    strongPassword: "Buena longitud y variedad. La validación final se realiza de forma segura al enviar.",
+    weakPassword: "Usa una frase larga y única; evita datos personales y contraseñas conocidas.",
+    emptyPassword: "Usa al menos 8 caracteres y evita contraseñas comunes.",
+    passwordsMatch: "Las contraseñas coinciden.", passwordsDiffer: "Las contraseñas todavía no coinciden.",
+    processing: "Procesando…",
+  }
   const cleanPersonName = (value) => [...value.normalize("NFC").replace(/\s/gu, " ")]
     .filter((character) => /[\p{L} ]/u.test(character)).join("")
 
@@ -47,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const visible = field.type === "text"
       field.type = visible ? "password" : "text"
       button.setAttribute("aria-pressed", String(!visible))
-      button.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña")
+      button.setAttribute("aria-label", visible ? copy.showPassword : copy.hidePassword)
       const icon = button.querySelector("i")
       if (icon) {
         icon.classList.toggle("fa-eye", visible)
@@ -72,8 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (/[^A-Za-z0-9]/.test(value)) score += 1
     meter.dataset.score = String(value ? Math.max(1, score) : 0)
     feedback.textContent = value
-      ? (score >= 3 ? "Buena longitud y variedad. La validación final se realiza de forma segura al enviar." : "Usa una frase larga y única; evita datos personales y contraseñas conocidas.")
-      : "Usa al menos 8 caracteres y evita contraseñas comunes."
+      ? (score >= 3 ? copy.strongPassword : copy.weakPassword)
+      : copy.emptyPassword
   }
 
   if (password) {
@@ -90,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return
       }
       const matches = password.value === confirmation.value
-      match.textContent = matches ? "Las contraseñas coinciden." : "Las contraseñas todavía no coinciden."
+      match.textContent = matches ? copy.passwordsMatch : copy.passwordsDiffer
       match.classList.toggle("auth-error", !matches)
       match.classList.toggle("auth-help", matches)
     }
@@ -105,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!button || button.disabled) return
       button.disabled = true
       button.dataset.originalText = button.textContent.trim()
-      button.textContent = button.dataset.loadingText || "Procesando…"
+      button.textContent = button.dataset.loadingText || copy.processing
     })
   })
 })

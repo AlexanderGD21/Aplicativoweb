@@ -8,6 +8,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language, gettext as _
 from django.utils.text import slugify
 
 
@@ -41,6 +42,8 @@ class Categoria(models.Model):
 
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True, null=True)
+    nombre_ingles = models.CharField(max_length=100, blank=True)
+    descripcion_ingles = models.TextField(blank=True)
     slug = models.SlugField(blank=True, unique=True)
     color = models.CharField(max_length=7, default='#007bff', help_text='Color en formato hexadecimal')
     grupo = models.CharField(max_length=20, choices=GRUPO_CHOICES, default='lengua')
@@ -54,6 +57,18 @@ class Categoria(models.Model):
     
     def __str__(self):
         return self.nombre
+
+    @property
+    def nombre_localizado(self):
+        if get_language() == 'en' and self.nombre_ingles.strip():
+            return self.nombre_ingles
+        return self.nombre
+
+    @property
+    def descripcion_localizada(self):
+        if get_language() == 'en' and self.descripcion_ingles.strip():
+            return self.descripcion_ingles
+        return self.descripcion or ''
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -107,9 +122,19 @@ class Palabra(models.Model):
     palabra_kichwa = models.CharField(max_length=300, db_index=True)
     traduccion_espanol = models.CharField(max_length=200, db_index=True)
     definicion = models.TextField(blank=True, null=True)
+    traduccion_ingles = models.CharField(max_length=200, blank=True, db_index=True)
+    definicion_ingles = models.TextField(blank=True)
+    estado_revision_ingles = models.CharField(
+        max_length=10,
+        choices=ESTADO_REVISION_CHOICES,
+        default='pendiente',
+        db_index=True,
+        help_text='Solo las traducciones inglesas validadas se muestran al público.',
+    )
     pronunciacion = models.CharField(max_length=400, blank=True, null=True)
     busqueda_kichwa = models.CharField(max_length=300, blank=True, editable=False, db_index=True)
     busqueda_espanol = models.CharField(max_length=200, blank=True, editable=False, db_index=True)
+    busqueda_ingles = models.CharField(max_length=200, blank=True, editable=False, db_index=True)
     busqueda_contenido = models.TextField(blank=True, editable=False)
     audio = models.FileField(
         upload_to='audios/',
@@ -202,11 +227,41 @@ class Palabra(models.Model):
     def __str__(self):
         return f"{self.palabra_kichwa} - {self.traduccion_espanol}"
 
+    @property
+    def tiene_ingles_validado(self):
+        return self.estado_revision_ingles == 'validada' and bool(self.traduccion_ingles.strip())
+
+    @property
+    def traduccion_localizada(self):
+        if get_language() == 'en' and self.tiene_ingles_validado:
+            return self.traduccion_ingles
+        return self.traduccion_espanol
+
+    @property
+    def definicion_localizada(self):
+        if get_language() == 'en' and self.tiene_ingles_validado and self.definicion_ingles.strip():
+            return self.definicion_ingles
+        return self.definicion or ''
+
+    @property
+    def idioma_traduccion_localizada(self):
+        return 'English' if get_language() == 'en' and self.tiene_ingles_validado else _('Español')
+
+    @property
+    def dificultad_localizada(self):
+        return {
+            'facil': _('Fácil'),
+            'medio': _('Media'),
+            'dificil': _('Difícil'),
+        }.get(self.dificultad, self.get_dificultad_display())
+
     def save(self, *args, **kwargs):
         self.palabra_kichwa = limpiar_termino(self.palabra_kichwa)
         self.traduccion_espanol = limpiar_termino(self.traduccion_espanol)
+        self.traduccion_ingles = limpiar_termino(self.traduccion_ingles)
         self.busqueda_kichwa = normalizar_texto_busqueda(self.palabra_kichwa)
         self.busqueda_espanol = normalizar_texto_busqueda(self.traduccion_espanol)
+        self.busqueda_ingles = normalizar_texto_busqueda(self.traduccion_ingles)
         self.busqueda_contenido = normalizar_texto_busqueda(' '.join(filter(None, (
             self.definicion,
             self.pronunciacion,
@@ -217,6 +272,7 @@ class Palabra(models.Model):
             kwargs['update_fields'] = set(kwargs['update_fields']) | {
                 'palabra_kichwa', 'traduccion_espanol', 'busqueda_kichwa',
                 'busqueda_espanol', 'busqueda_contenido',
+                'traduccion_ingles', 'busqueda_ingles',
             }
         super().save(*args, **kwargs)
     
@@ -485,6 +541,14 @@ class EstadisticaJuego(models.Model):
     
     def __str__(self):
         return f"{self.usuario.username} - {self.get_tipo_juego_display()} - {self.puntuacion} pts"
+
+    @property
+    def tipo_juego_localizado(self):
+        return {
+            'traduccion': _('Traducción'), 'escucha': _('Escucha'),
+            'completar': _('Completar palabras'), 'memoria': _('Juego de memoria'),
+            'conectar': _('Conectar traducciones'), 'sopa_letras': _('Sopa de letras'),
+        }.get(self.tipo_juego, self.get_tipo_juego_display())
     
     @property
     def porcentaje_aciertos(self):
@@ -517,6 +581,13 @@ class ActividadUsuario(models.Model):
 
     def __str__(self):
         return f'{self.usuario.username}: {self.get_tipo_display()}'
+
+    @property
+    def tipo_localizado(self):
+        return {
+            'busqueda': _('Búsqueda'), 'palabra': _('Palabra consultada'),
+            'juego': _('Partida terminada'),
+        }.get(self.tipo, self.get_tipo_display())
 
 
 class SesionJuego(models.Model):

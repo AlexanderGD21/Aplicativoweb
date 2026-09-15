@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Temas del diccionario | Diccionario Kichwa{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}">{% endblock %}
@@ -9,10 +9,10 @@
     <header class="dictionary-intro">
         <div class="container dictionary-shell">
             <div>
-                <h1>Vocabulario organizado por temas</h1>
-                <p>Las categorías reúnen palabras por su significado: animales con animales, alimentos con alimentos y acciones con acciones.</p>
+                <h1>{% translate "Vocabulario organizado por temas" %}</h1>
+                <p>{% translate "Las categorías reúnen palabras por su significado: animales con animales, alimentos con alimentos y acciones con acciones." %}</p>
             </div>
-            <a class="text-link" href="{% url 'diccionario:buscar' %}"><i class="fas fa-magnifying-glass" aria-hidden="true"></i> Ir al buscador</a>
+            <a class="text-link" href="{% url 'diccionario:buscar' %}"><i class="fas fa-magnifying-glass" aria-hidden="true"></i> {% translate "Ir al buscador" %}</a>
         </div>
     </header>
 
@@ -28,12 +28,12 @@
                         <article class="category-row" style="--tag-color: {{ categoria.color }}">
                             <span class="category-marker" aria-hidden="true"></span>
                             <div>
-                                <h3>{{ categoria.nombre }}</h3>
-                                <p>{{ categoria.descripcion }}</p>
+                                <h3>{{ categoria.nombre_localizado }}</h3>
+                                <p>{{ categoria.descripcion_localizada }}</p>
                             </div>
                             <div class="category-action">
                                 <span>{{ categoria.total_palabras }} palabra{{ categoria.total_palabras|pluralize }}</span>
-                                <a href="{% url 'diccionario:buscar' %}?categoria={{ categoria.pk }}" aria-label="Explorar {{ categoria.nombre }}">Explorar <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                                <a href="{% url 'diccionario:buscar' %}?categoria={{ categoria.pk }}">{% translate "Explorar" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                             </div>
                         </article>
                     {% endfor %}

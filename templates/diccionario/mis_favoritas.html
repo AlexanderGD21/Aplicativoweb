@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}Mis palabras favoritas · Diccionario Kichwa{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/account-library.css' %}?v=20260912-1">{% endblock %}
@@ -8,9 +8,9 @@
 <div class="account-library">
   <header class="library-masthead">
     <div class="library-shell">
-      <a class="library-back" href="{% url 'usuarios:perfil' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Mi perfil</a>
+      <a class="library-back" href="{% url 'usuarios:perfil' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% translate "Mi perfil" %}</a>
       <div class="library-heading">
-        <div><h1>Palabras que guardaste</h1><p>Tu colección privada para volver a escuchar, leer y practicar Kichwa.</p></div>
+        <div><h1>{% translate "Palabras que guardaste" %}</h1><p>{% translate "Tu colección privada para volver a escuchar, leer y practicar Kichwa." %}</p></div>
         <span class="library-count"><strong>{{ total_favoritas }}</strong> palabra{{ total_favoritas|pluralize }} guardada{{ total_favoritas|pluralize }}</span>
       </div>
     </div>
@@ -22,22 +22,22 @@
       <div class="favorite-grid">
         {% for favorita in favoritas %}
           <article class="favorite-entry">
-            <div class="favorite-entry-top"><span class="favorite-topic" style="--favorite-accent: {{ favorita.color_seguro }}">{{ favorita.palabra.categoria.nombre|default:'Sin tema' }}</span><span class="favorite-level">{{ favorita.palabra.get_dificultad_display }}</span></div>
+            <div class="favorite-entry-top"><span class="favorite-topic" style="--favorite-accent: {{ favorita.color_seguro }}">{{ favorita.palabra.categoria.nombre_localizado|default:'Sin tema' }}</span><span class="favorite-level">{{ favorita.palabra.dificultad_localizada }}</span></div>
             <h3>{{ favorita.palabra.palabra_kichwa }}</h3>
-            <p class="favorite-translation"><span>Español</span> {{ favorita.palabra.traduccion_espanol }}</p>
-            {% if favorita.palabra.definicion %}<p class="favorite-definition">{{ favorita.palabra.definicion|truncatechars:120 }}</p>{% endif %}
+            <p class="favorite-translation"><span>{{ favorita.palabra.idioma_traduccion_localizada }}</span> {{ favorita.palabra.traduccion_localizada }}</p>
+            {% if favorita.palabra.definicion_localizada %}<p class="favorite-definition">{{ favorita.palabra.definicion_localizada|truncatechars:120 }}</p>{% endif %}
             <div class="favorite-entry-bottom">
               <small>Guardada el {{ favorita.fecha_agregada|date:'d/m/Y' }}</small>
               <div class="favorite-entry-actions">
-                <a href="{% url 'diccionario:detalle_palabra' favorita.palabra.pk %}" aria-label="Ver entrada de {{ favorita.palabra.palabra_kichwa }}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-                <form method="post" action="{% url 'diccionario:quitar_favorita' favorita.palabra.pk %}">{% csrf_token %}<button type="submit" aria-label="Quitar {{ favorita.palabra.palabra_kichwa }} de favoritas"><i class="far fa-heart" aria-hidden="true"></i> Quitar</button></form>
+                <a href="{% url 'diccionario:detalle_palabra' favorita.palabra.pk %}" aria-label="{% blocktranslate with word=favorita.palabra.palabra_kichwa %}Ver entrada de {{ word }}{% endblocktranslate %}">{% translate "Ver entrada" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <form method="post" action="{% url 'diccionario:quitar_favorita' favorita.palabra.pk %}">{% csrf_token %}<button type="submit" aria-label="{% blocktranslate with word=favorita.palabra.palabra_kichwa %}Quitar {{ word }} de favoritas{% endblocktranslate %}"><i class="far fa-heart" aria-hidden="true"></i> {% translate "Quitar" %}</button></form>
               </div>
             </div>
           </article>
         {% endfor %}
       </div>
       {% if favoritas.has_other_pages %}
-        <nav class="library-pagination" aria-label="Páginas de favoritas">
+        <nav class="library-pagination" aria-label="{% translate 'Páginas de favoritas' %}">
           {% if favoritas.has_previous %}<a href="?page={{ favoritas.previous_page_number }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</a>{% endif %}
           <span>Página {{ favoritas.number }} de {{ favoritas.paginator.num_pages }}</span>
           {% if favoritas.has_next %}<a href="?page={{ favoritas.next_page_number }}">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% endif %}

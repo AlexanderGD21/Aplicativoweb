@@ -19,9 +19,15 @@
 
   const root = document.querySelector('.game-session[data-game-type]');
   const dataNode = document.getElementById('game-data');
+  const i18nNode = document.getElementById('game-i18n');
   if (!root || !dataNode) return;
 
   const words = JSON.parse(dataNode.textContent);
+  const messages = i18nNode ? JSON.parse(i18nNode.textContent) : {};
+  const t = (message, values = {}) => Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    messages[message] || message,
+  );
   const type = root.dataset.gameType;
   const stage = document.getElementById('game-stage');
   const feedback = document.getElementById('game-feedback');
@@ -116,7 +122,7 @@
     if (!soundButton) return;
     soundButton.setAttribute('aria-pressed', String(soundEnabled));
     soundButton.querySelector('i').className = `fas ${soundEnabled ? 'fa-volume-high' : 'fa-volume-xmark'}`;
-    soundButton.querySelector('span').textContent = soundEnabled ? 'Efectos activados' : 'Efectos silenciados';
+    soundButton.querySelector('span').textContent = soundEnabled ? t('Efectos activados') : t('Efectos silenciados');
   };
 
   updateSoundButton();
@@ -138,7 +144,7 @@
 
   const updateHintStatus = () => {
     if (!hintStatus) return;
-    hintStatus.textContent = `${hintsBaseLeft} de partida${root.dataset.authenticated === 'true' ? ` · ${hintsBonusLeft} extra de cuenta` : ''}`;
+    hintStatus.textContent = `${hintsBaseLeft} ${t('de partida')}${root.dataset.authenticated === 'true' ? ` · ${hintsBonusLeft} ${t('extra de cuenta')}` : ''}`;
   };
   updateHintStatus();
 
@@ -212,7 +218,9 @@
     const percent = Math.round((done / safeTotal) * 100);
     document.getElementById('game-progress-fill').style.transform = `scaleX(${percent / 100})`;
     document.getElementById('game-progress-percent').textContent = `${percent}%`;
-    document.getElementById('game-progress-label').textContent = done >= total ? `Completadas ${total} palabras` : `${done} de ${total} completadas`;
+    document.getElementById('game-progress-label').textContent = done >= total
+      ? t('Completadas {total} palabras', { total })
+      : t('{done} de {total} completadas', { done, total });
   };
   const updateStats = () => {
     document.getElementById('game-correct').textContent = String(correct);
@@ -240,7 +248,7 @@
       headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
       body: JSON.stringify({ sesion_id: root.dataset.sessionId, tipo_juego: type, palabra_id: word.id, ...payload }),
     });
-    if (!response.ok) throw new Error('No se pudo validar la respuesta.');
+    if (!response.ok) throw new Error(t('No se pudo validar la respuesta.'));
     return response.json();
   };
 
@@ -249,13 +257,13 @@
       correct += 1;
       streak += 1;
       const detail = result.puntos_ganados
-        ? `¡Sumaste ${result.puntos_ganados} puntos por aprender esta palabra!`
-        : (result.progreso_guardado ? 'Tu avance quedó guardado. Esta palabra ya sumó puntos antes.' : 'Puedes continuar con la siguiente.');
-      showFeedback(true, 'Respuesta correcta.', detail);
+        ? t('¡Sumaste {points} puntos por aprender esta palabra!', { points: result.puntos_ganados })
+        : (result.progreso_guardado ? t('Tu avance quedó guardado. Esta palabra ya sumó puntos antes.') : t('Puedes continuar con la siguiente.'));
+      showFeedback(true, t('Respuesta correcta.'), detail);
       playSound('correct');
     } else {
       streak = 0;
-      showFeedback(false, 'Todavía no.', `La respuesta esperada era “${result.respuesta_correcta}”.`);
+      showFeedback(false, t('Todavía no.'), t('La respuesta esperada era “{answer}”.', { answer: result.respuesta_correcta }));
       playSound('error');
     }
     updateStats();
@@ -264,7 +272,7 @@
   const handleRequestError = () => {
     questionLocked = false;
     stage.querySelectorAll('button').forEach((item) => { item.disabled = false; });
-    showFeedback(false, 'No pudimos comprobar la respuesta.', 'Revisa la conexión e inténtalo nuevamente.');
+    showFeedback(false, t('No pudimos comprobar la respuesta.'), t('Revisa la conexión e inténtalo nuevamente.'));
   };
 
   const revealListeningAnswer = () => {
@@ -273,7 +281,7 @@
     const transcript = stage.querySelector('.listening-transcript');
     if (transcript) transcript.open = true;
     const status = stage.querySelector('.listening-status');
-    if (status) status.textContent = 'La palabra está escrita debajo.';
+    if (status) status.textContent = t('La palabra está escrita debajo.');
   };
 
   const finishGame = async () => {
@@ -286,7 +294,10 @@
     actions.hidden = true;
     completePanel.hidden = false;
     const accuracy = Math.round((correct / Math.max(sessionTotal, 1)) * 100);
-    document.getElementById('game-complete-copy').textContent = `Acertaste ${correct} de ${sessionTotal} palabras (${accuracy}%) en ${formatTime(elapsedSeconds())}.`;
+    document.getElementById('game-complete-copy').textContent = t(
+      'Acertaste {correct} de {total} palabras ({accuracy}%) en {time}.',
+      { correct, total: sessionTotal, accuracy, time: formatTime(elapsedSeconds()) },
+    );
     setProgress(sessionTotal, sessionTotal);
     playSound('complete');
     if (root.dataset.authenticated !== 'true') return;
@@ -354,13 +365,14 @@
     question.className = 'game-question';
     const direction = document.createElement('p');
     direction.className = 'game-question__direction';
-    direction.textContent = reverse ? 'Español → Kichwa' : 'Kichwa → Español';
+    const meaningLanguage = word.idioma || t('Español');
+    direction.textContent = reverse ? `${meaningLanguage} → Kichwa` : `Kichwa → ${meaningLanguage}`;
     const prompt = document.createElement('h2');
     prompt.className = 'game-question__word';
     prompt.textContent = reverse ? word.espanol : word.kichwa;
     const support = document.createElement('p');
     support.className = 'game-question__support';
-    support.textContent = word.pista || (reverse ? 'Elige la forma correspondiente en Kichwa.' : 'Elige el significado más preciso.');
+    support.textContent = word.pista || (reverse ? t('Elige la forma correspondiente en Kichwa.') : t('Elige el significado más preciso.'));
     const options = document.createElement('div');
     options.className = 'game-options';
     const pool = shuffle([word, ...shuffle(words.filter((item) => item.id !== word.id)).slice(0, 3)]);
@@ -375,9 +387,9 @@
         if (wrong) {
           wrong.classList.add('is-hint-eliminated');
           wrong.disabled = true;
-          showFeedback(true, 'Pista', 'Se descartó una opción que no corresponde a esta palabra.');
+          showFeedback(true, t('Pista'), t('Se descartó una opción que no corresponde a esta palabra.'));
         } else {
-          showFeedback(true, 'Pista', word.pronunciacion ? `Pronunciación: ${word.pronunciacion}` : `Tema: ${word.categoria}.`);
+          showFeedback(true, t('Pista'), word.pronunciacion ? t('Pronunciación: {value}', { value: word.pronunciacion }) : t('Tema: {value}.', { value: word.categoria }));
         }
       },
     });
@@ -389,13 +401,13 @@
     question.className = 'game-question game-question--listening';
     const direction = document.createElement('p');
     direction.className = 'game-question__direction';
-    direction.textContent = 'Kichwa → Español';
+    direction.textContent = `Kichwa → ${word.idioma || t('Español')}`;
     const prompt = document.createElement('h2');
     prompt.className = 'game-question__word';
-    prompt.textContent = 'Escucha la palabra';
+    prompt.textContent = t('Escucha la palabra');
     const support = document.createElement('p');
     support.className = 'game-question__support';
-    support.textContent = 'Reproduce la grabación y elige su significado en español.';
+    support.textContent = t('Reproduce la grabación y elige su significado.');
     const player = document.createElement('div');
     player.className = 'listening-player';
     const audio = document.createElement('audio');
@@ -408,39 +420,39 @@
     const normal = document.createElement('button');
     normal.type = 'button';
     normal.className = 'learning-primary';
-    normal.textContent = 'Escuchar';
-    normal.setAttribute('aria-label', 'Escuchar la palabra en Kichwa');
+    normal.textContent = t('Escuchar');
+    normal.setAttribute('aria-label', t('Escuchar la palabra en Kichwa'));
     const speed = document.createElement('button');
     speed.type = 'button';
     speed.className = 'learning-secondary';
-    speed.textContent = 'Escuchar despacio';
+    speed.textContent = t('Escuchar despacio');
     const status = document.createElement('p');
     status.className = 'listening-status';
     status.setAttribute('role', 'status');
-    status.textContent = 'Pulsa escuchar para reproducir la grabación.';
+    status.textContent = t('Pulsa escuchar para reproducir la grabación.');
     const playRecording = async (rate) => {
       audio.pause();
       audio.playbackRate = rate;
       try {
         audio.currentTime = 0;
         await audio.play();
-        status.textContent = rate === 1 ? 'Reproduciendo la grabación.' : 'Reproduciendo más despacio.';
+        status.textContent = rate === 1 ? t('Reproduciendo la grabación.') : t('Reproduciendo más despacio.');
       }
-      catch (_) { status.textContent = 'No se pudo reproducir. Puedes leer la palabra como alternativa.'; }
+      catch (_) { status.textContent = t('No se pudo reproducir. Puedes leer la palabra como alternativa.'); }
     };
     normal.addEventListener('click', () => playRecording(1));
     speed.addEventListener('click', () => playRecording(.8));
-    audio.addEventListener('ended', () => { status.textContent = 'Grabación terminada. Puedes escucharla otra vez.'; });
+    audio.addEventListener('ended', () => { status.textContent = t('Grabación terminada. Puedes escucharla otra vez.'); });
     audio.addEventListener('error', () => {
-      status.textContent = 'No se pudo cargar la grabación. Puedes leer la palabra como alternativa.';
-      showFeedback(false, 'No se pudo cargar la grabación.', 'Puedes leer la palabra como alternativa y continuar.');
+      status.textContent = t('No se pudo cargar la grabación. Puedes leer la palabra como alternativa.');
+      showFeedback(false, t('No se pudo cargar la grabación.'), t('Puedes leer la palabra como alternativa y continuar.'));
     });
     controls.append(normal, speed);
     player.append(audio, controls, status);
     const transcript = document.createElement('details');
     transcript.className = 'listening-transcript';
     const summary = document.createElement('summary');
-    summary.textContent = 'Leer la palabra como alternativa al audio';
+    summary.textContent = t('Leer la palabra como alternativa al audio');
     const written = document.createElement('p');
     written.textContent = `Kichwa: ${word.kichwa}`;
     transcript.append(summary, written);
@@ -457,7 +469,7 @@
         if (wrong) {
           wrong.disabled = true;
           wrong.classList.add('is-hint-eliminated');
-          showFeedback(true, 'Pista', 'Se descartó una opción que no corresponde a la grabación.');
+          showFeedback(true, t('Pista'), t('Se descartó una opción que no corresponde a la grabación.'));
         }
       },
     });
@@ -475,7 +487,7 @@
     question.className = 'game-question';
     const direction = document.createElement('p');
     direction.className = 'game-question__direction';
-    direction.textContent = 'Español → Kichwa';
+    direction.textContent = `${word.idioma || t('Español')} → Kichwa`;
     const prompt = document.createElement('h2');
     prompt.className = 'game-question__word';
     prompt.textContent = word.espanol;
@@ -489,7 +501,7 @@
     input.className = 'game-answer-input';
     input.autocomplete = 'off';
     input.spellcheck = false;
-    input.placeholder = 'Escribe la palabra completa';
+    input.placeholder = t('Escribe la palabra completa');
     input.setAttribute('aria-label', 'Respuesta en Kichwa');
     const submit = document.createElement('button');
     submit.type = 'submit';
@@ -521,7 +533,7 @@
         apply: () => {
           revealedLetters.add(index);
           mask.textContent = maskWord(word.kichwa);
-          showFeedback(true, 'Pista', 'Se reveló una letra de la palabra en Kichwa.');
+          showFeedback(true, t('Pista'), t('Se reveló una letra de la palabra en Kichwa.'));
         },
       };
     };
@@ -530,7 +542,7 @@
 
   const renderSequential = () => {
     setProgress(current);
-    document.getElementById('game-progress-label').textContent = `Pregunta ${current + 1} de ${words.length}`;
+    document.getElementById('game-progress-label').textContent = t('Pregunta {current} de {total}', { current: current + 1, total: words.length });
     if (type === 'traduccion') renderTranslation();
     else if (type === 'escucha') renderListening();
     else renderCompletion();
@@ -559,7 +571,7 @@
       button.className = 'memory-card';
       button.dataset.wordId = String(card.id);
       button.dataset.side = card.side;
-      const closedLabel = `Carta sin revelar ${board.children.length + 1}`;
+      const closedLabel = t('Carta sin revelar {number}', { number: board.children.length + 1 });
       button.setAttribute('aria-label', closedLabel);
       const label = document.createElement('span');
       label.textContent = card.label;
@@ -568,7 +580,7 @@
         if (button.classList.contains('is-open') || button.classList.contains('is-matched') || openCards.length === 2) return;
         markSessionActive();
         button.classList.add('is-open');
-        button.setAttribute('aria-label', `${card.side === 'kichwa' ? 'Kichwa' : 'Español'}: ${card.label}`);
+        button.setAttribute('aria-label', `${card.side === 'kichwa' ? 'Kichwa' : (words.find((item) => item.id === card.id)?.idioma || t('Español'))}: ${card.label}`);
         openCards.push(button);
         if (openCards.length < 2) return;
         const [first, second] = openCards;
@@ -584,15 +596,15 @@
           } else {
             window.setTimeout(() => {
               first.classList.remove('is-open'); second.classList.remove('is-open');
-              first.setAttribute('aria-label', `Carta sin revelar ${[...board.children].indexOf(first) + 1}`);
-              second.setAttribute('aria-label', `Carta sin revelar ${[...board.children].indexOf(second) + 1}`);
+              first.setAttribute('aria-label', t('Carta sin revelar {number}', { number: [...board.children].indexOf(first) + 1 }));
+              second.setAttribute('aria-label', t('Carta sin revelar {number}', { number: [...board.children].indexOf(second) + 1 }));
               openCards = []; clearFeedback();
             }, 850);
           }
         } catch (_) {
           first.classList.remove('is-open'); second.classList.remove('is-open');
-          first.setAttribute('aria-label', `Carta sin revelar ${[...board.children].indexOf(first) + 1}`);
-          second.setAttribute('aria-label', `Carta sin revelar ${[...board.children].indexOf(second) + 1}`);
+          first.setAttribute('aria-label', t('Carta sin revelar {number}', { number: [...board.children].indexOf(first) + 1 }));
+          second.setAttribute('aria-label', t('Carta sin revelar {number}', { number: [...board.children].indexOf(second) + 1 }));
           openCards = []; handleRequestError();
         }
       });
@@ -609,7 +621,7 @@
         apply: () => {
           const pair = [...board.querySelectorAll(`[data-word-id="${pending.id}"]`)];
           pair.forEach((card) => card.classList.add('is-hint-preview'));
-          showFeedback(true, 'Pista', `Observa esta pareja: ${pending.kichwa} y ${pending.espanol}.`);
+          showFeedback(true, t('Pista'), t('Observa esta pareja: {kichwa} y {meaning}.', { kichwa: pending.kichwa, meaning: pending.espanol }));
           window.setTimeout(() => pair.forEach((card) => card.classList.remove('is-hint-preview')), 1500);
         },
       };
@@ -624,7 +636,7 @@
     const left = document.createElement('div'); left.className = 'match-column';
     const right = document.createElement('div'); right.className = 'match-column';
     const leftTitle = document.createElement('h2'); leftTitle.textContent = 'Kichwa';
-    const rightTitle = document.createElement('h2'); rightTitle.textContent = 'Español';
+    const rightTitle = document.createElement('h2'); rightTitle.textContent = words[0]?.idioma || t('Español');
     left.append(leftTitle); right.append(rightTitle);
     let selected = null;
     let matched = 0;
@@ -644,7 +656,7 @@
       button.type = 'button'; button.className = 'match-option'; button.textContent = word.espanol; button.dataset.wordId = String(word.id);
       button.addEventListener('click', async () => {
         if (!selected || button.classList.contains('is-matched')) {
-          showFeedback(false, 'Elige primero una palabra Kichwa.', 'Después selecciona su significado.'); return;
+          showFeedback(false, t('Elige primero una palabra Kichwa.'), t('Después selecciona su significado.')); return;
         }
         const question = words.find((item) => item.id === Number(selected.dataset.wordId));
         const chosenLeft = selected;
@@ -670,7 +682,7 @@
         apply: () => {
           const match = right.querySelector(`[data-word-id="${first.dataset.wordId}"]`);
           first.classList.add('is-hint-preview'); match?.classList.add('is-hint-preview');
-          showFeedback(true, 'Pista', 'Se señaló una pareja Kichwa–español pendiente.');
+          showFeedback(true, t('Pista'), t('Se señaló una pareja bilingüe pendiente.'));
           window.setTimeout(() => { first.classList.remove('is-hint-preview'); match?.classList.remove('is-hint-preview'); }, 1500);
         },
       };
@@ -730,7 +742,7 @@
     const layout = document.createElement('div'); layout.className = 'word-search-layout';
     const gridNode = document.createElement('div'); gridNode.className = 'word-grid'; gridNode.style.setProperty('--grid-size', size);
     const list = document.createElement('div'); list.className = 'word-list';
-    const title = document.createElement('h2'); title.textContent = 'Palabras del reto'; list.append(title);
+    const title = document.createElement('h2'); title.textContent = t('Palabras del reto'); list.append(title);
     placements.forEach(({ word }) => {
       const item = document.createElement('div'); item.className = 'word-list__item'; item.dataset.wordId = String(word.id);
       const kichwa = document.createElement('span'); kichwa.textContent = word.kichwa;
@@ -767,12 +779,12 @@
       clearPreview();
       gridNode.querySelectorAll('.is-start').forEach((item) => item.classList.remove('is-start'));
       if (!cellsInLine(from, to)) {
-        showFeedback(false, 'Traza una línea recta.', 'Puedes buscar en horizontal, vertical o diagonal, en ambos sentidos.');
+        showFeedback(false, t('Traza una línea recta.'), t('Puedes buscar en horizontal, vertical o diagonal, en ambos sentidos.'));
         playSound('error'); streak = 0; updateStats(); return;
       }
       const match = findMatch(from, to);
       if (!match) {
-        showFeedback(false, 'Esa línea no corresponde a una palabra pendiente.', 'Prueba con otro inicio y final.');
+        showFeedback(false, t('Esa línea no corresponde a una palabra pendiente.'), t('Prueba con otro inicio y final.'));
         playSound('error'); streak = 0; updateStats(); return;
       }
       try {
@@ -786,7 +798,7 @@
     };
     for (let row = 0; row < size; row += 1) for (let col = 0; col < size; col += 1) {
       const cell = document.createElement('button'); cell.type = 'button'; cell.className = 'word-cell'; cell.textContent = grid[row][col]; cell.dataset.row = row; cell.dataset.col = col;
-      cell.setAttribute('aria-label', `Fila ${row + 1}, columna ${col + 1}: ${grid[row][col]}`);
+      cell.setAttribute('aria-label', t('Fila {row}, columna {column}: {letter}', { row: row + 1, column: col + 1, letter: grid[row][col] }));
       cellNodes.set(`${row}:${col}`, cell); gridNode.append(cell);
       cell.addEventListener('click', () => {
         if (suppressClick) { suppressClick = false; return; }
@@ -828,7 +840,7 @@
           const [row,col] = pending.cells[0];
           const cell = cellNodes.get(`${row}:${col}`);
           cell?.classList.add('is-start');
-          showFeedback(true, 'Pista', `${pending.word.kichwa} empieza en la fila ${row + 1}, columna ${col + 1}; dirección ${pending.direction}.`);
+          showFeedback(true, t('Pista'), t('{word} empieza en la fila {row}, columna {column}; dirección {direction}.', { word: pending.word.kichwa, row: row + 1, column: col + 1, direction: pending.direction }));
           window.setTimeout(() => cell?.classList.remove('is-start'), 1500);
         },
       };
@@ -839,11 +851,11 @@
     if (hintRequestPending || questionLocked || finished) return;
     const offer = getHintOffer();
     if (!offer) {
-      showFeedback(false, 'No hay una pista aplicable ahora.', 'Termina o cierra la selección actual y prueba con otra palabra.');
+      showFeedback(false, t('No hay una pista aplicable ahora.'), t('Termina o cierra la selección actual y prueba con otra palabra.'));
       return;
     }
     if (hintedWords.has(offer.wordId)) {
-      showFeedback(false, 'Ya utilizaste la pista de esta palabra.', 'Continúa con otra palabra para usar una nueva pista.');
+      showFeedback(false, t('Ya utilizaste la pista de esta palabra.'), t('Continúa con otra palabra para usar una nueva pista.'));
       return;
     }
     hintRequestPending = true;
@@ -858,8 +870,8 @@
       if (!response.ok) {
         if (result.login_required) {
           hintNotice.hidden = false;
-          showFeedback(false, 'Pistas de partida agotadas.', 'Puedes iniciar sesión o registrarte para usar dos pistas extra una sola vez por cuenta.');
-        } else showFeedback(false, 'No hay más pistas disponibles.', result.message || 'Continúa sin pista o inicia otra partida.');
+          showFeedback(false, t('Pistas de partida agotadas.'), t('Puedes iniciar sesión o registrarte para usar dos pistas extra una sola vez por cuenta.'));
+        } else showFeedback(false, t('No hay más pistas disponibles.'), result.message || t('Continúa sin pista o inicia otra partida.'));
         return;
       }
       hintedWords.add(offer.wordId);
@@ -870,7 +882,7 @@
       offer.apply();
       playSound('select');
     } catch (_) {
-      showFeedback(false, 'No se pudo cargar la pista.', 'Revisa la conexión e inténtalo nuevamente.');
+      showFeedback(false, t('No se pudo cargar la pista.'), t('Revisa la conexión e inténtalo nuevamente.'));
     } finally {
       hintRequestPending = false;
       hintButton.disabled = false;

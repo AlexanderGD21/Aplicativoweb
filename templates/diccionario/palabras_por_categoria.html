@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ categoria.nombre }} | Diccionario Kichwa{% endblock %}
+{% block title %}{{ categoria.nombre_localizado }} | Diccionario Kichwa{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}?v=20260915-1">{% endblock %}
 
 {% block content %}
@@ -10,16 +10,16 @@
         <div class="container dictionary-shell">
             <div>
                 <p class="category-breadcrumb"><a href="{% url 'diccionario:categorias' %}">Temas</a> <i class="fas fa-chevron-right" aria-hidden="true"></i> {{ categoria.get_grupo_display }}</p>
-                <h1>{{ categoria.nombre }}</h1>
-                <p>{{ categoria.descripcion }}</p>
+                <h1>{{ categoria.nombre_localizado }}</h1>
+                <p>{{ categoria.descripcion_localizada }}</p>
             </div>
-            <a class="text-link" href="{% url 'diccionario:buscar' %}?categoria={{ categoria.pk }}"><i class="fas fa-sliders" aria-hidden="true"></i> Abrir con filtros</a>
+            <a class="text-link" href="{% url 'diccionario:buscar' %}?categoria={{ categoria.pk }}"><i class="fas fa-sliders" aria-hidden="true"></i> {% translate "Abrir con filtros" %}</a>
         </div>
     </header>
 
     <div class="container category-word-section">
         <div class="results-heading">
-            <div><h2>Palabras del tema</h2><p>{{ total_palabras }} resultado{{ total_palabras|pluralize }}</p></div>
+            <div><h2>{% translate "Palabras del tema" %}</h2><p>{% blocktranslate count total=total_palabras %}{{ total }} resultado{% plural %}{{ total }} resultados{% endblocktranslate %}</p></div>
         </div>
         {% if page_obj.object_list %}
             <div class="word-list">
@@ -27,19 +27,19 @@
                     <article class="word-row{% if palabra.imagen_vocabulario %} has-image{% endif %}">
                         {% if palabra.imagen_vocabulario %}<img class="word-row__image" src="{% static palabra.imagen_vocabulario %}" alt="{{ palabra.descripcion_imagen }}" width="768" height="768" loading="lazy">{% endif %}
                         <div class="word-main">
-                            <div class="word-kichwa-line"><h3>{{ palabra.palabra_kichwa }}</h3><span class="difficulty difficulty-{{ palabra.dificultad }}">{{ palabra.get_dificultad_display }}</span></div>
-                            <p class="word-translation"><span>Español</span> {{ palabra.traduccion_espanol }}</p>
+                            <div class="word-kichwa-line"><h3>{{ palabra.palabra_kichwa }}</h3><span class="difficulty difficulty-{{ palabra.dificultad }}">{{ palabra.dificultad_localizada }}</span></div>
+                            <p class="word-translation"><span>{{ palabra.idioma_traduccion_localizada }}</span> {{ palabra.traduccion_localizada }}</p>
                             {% if palabra.pronunciacion %}<p class="word-pronunciation"><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabra.pronunciacion }}</p>{% endif %}
                         </div>
                         <div class="word-meta">
-                            {% if palabra.proveedor_imagen == 'pexels' and palabra.fuente_imagen_url %}<a class="image-source-link" href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer" aria-label="Ver fotografía de {{ palabra.autor_imagen }} en Pexels">Foto en Pexels</a>{% endif %}
-                            <a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                            {% if palabra.proveedor_imagen == 'pexels' and palabra.fuente_imagen_url %}<a class="image-source-link" href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer" aria-label="{% blocktranslate with author=palabra.autor_imagen %}Ver fotografía de {{ author }} en Pexels{% endblocktranslate %}">{% translate "Foto en Pexels" %}</a>{% endif %}
+                            <a class="details-link" href="{% url 'diccionario:detalle_palabra' palabra.pk %}">{% translate "Ver entrada" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                         </div>
                     </article>
                 {% endfor %}
             </div>
             {% if page_obj.has_other_pages %}
-                <nav class="dictionary-pagination" aria-label="Páginas de {{ categoria.nombre }}">
+                <nav class="dictionary-pagination" aria-label="{% blocktranslate with category=categoria.nombre_localizado %}Páginas de {{ category }}{% endblocktranslate %}">
                     {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</a>{% else %}<span aria-disabled="true"><i class="fas fa-arrow-left" aria-hidden="true"></i> Anterior</span>{% endif %}
                     <p>Página <strong>{{ page_obj.number }}</strong> de {{ page_obj.paginator.num_pages }}</p>
                     {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% else %}<span aria-disabled="true">Siguiente <i class="fas fa-arrow-right" aria-hidden="true"></i></span>{% endif %}

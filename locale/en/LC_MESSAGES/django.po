@@ -1,0 +1,1714 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "%(avance)s de %(meta)s palabras"
+msgstr "%(avance)s of %(meta)s words"
+
+msgid "10 dígitos"
+msgstr "10 digits"
+
+msgid "10 puntos por cada palabra acertada por primera vez."
+msgstr "10 points for each word answered correctly for the first time."
+
+msgid "<strong>%(kichwa)s</strong> se traduce al %(idioma)s como <strong>%(traduccion)s</strong>. Esta entrada todavía no tiene una definición ampliada."
+msgstr "<strong>%(kichwa)s</strong> translates into %(idioma)s as <strong>%(traduccion)s</strong>. This entry does not have an expanded definition yet."
+
+msgid "A tu elección"
+msgstr "Your choice"
+
+msgid "Abre dos fichas. Una pareja correcta comparte el mismo significado; las fichas incorrectas vuelven a cerrarse."
+msgstr "Open two cards. A correct pair shares the same meaning; incorrect cards close again."
+
+msgid "Abre este enlace para crear una nueva contraseña:"
+msgstr "Open this link to create a new password:"
+
+msgid "Abrir con filtros"
+msgstr "Open with filters"
+
+msgid "Abrir esta entrada"
+msgstr "Open this entry"
+
+msgid "Abrir menú de navegación"
+msgstr "Open navigation menu"
+
+msgid "Abrir modalidad"
+msgstr "Open mode"
+
+msgid "Abrir opciones de tu cuenta"
+msgstr "Open your account options"
+
+msgid "Acceder a tu progreso guardado"
+msgstr "Access your saved progress"
+
+msgid "Acciones para continuar"
+msgstr "Actions to continue"
+
+msgid "Acciones y cualidades"
+msgstr "Actions and qualities"
+
+msgid "Acepto los términos y la política de privacidad"
+msgstr "I accept the terms and privacy policy"
+
+msgid "Acerca de - Diccionario Kichwa"
+msgstr "About - Kichwa Dictionary"
+
+msgid "Acerca del Diccionario Kichwa"
+msgstr "About the Kichwa Dictionary"
+
+msgid "Acertaste {correct} de {total} palabras ({accuracy}%) en {time}."
+msgstr "You answered {correct} of {total} words correctly ({accuracy}%) in {time}."
+
+msgid "Acierta cinco palabras distintas en <strong>%(modalidad)s</strong>. El reto cambia cada lunes."
+msgstr "Answer five different words correctly in <strong>%(modalidad)s</strong>. The challenge changes every Monday."
+
+msgid "Aciertos"
+msgstr "Correct"
+
+msgid "Aciertos al practicar"
+msgstr "Practice accuracy"
+
+msgid "Aciertos en juegos"
+msgstr "Correct answers in games"
+
+msgid "Activar o desactivar tu participación en el ranking"
+msgstr "Enable or disable your ranking participation"
+
+msgid "Actividad reciente"
+msgstr "Recent activity"
+
+msgid "Actualiza tu contraseña con la actual y confirma la nueva dos veces."
+msgstr "Enter your current password and confirm the new one twice."
+
+msgid "Actualizando…"
+msgstr "Updating…"
+
+msgid "Actualizar contraseña"
+msgstr "Update password"
+
+msgid "Afinar resultados"
+msgstr "Refine results"
+
+msgid "Al iniciar sesión, guardaremos el avance de cada palabra para proponerte lo que necesitas reforzar."
+msgstr "When you sign in, we save each word’s progress so you can focus on what needs practice."
+
+msgid "Anterior"
+msgstr "Previous"
+
+msgid "Apellido"
+msgstr "Last name"
+
+msgid "Aplicar filtros"
+msgstr "Apply filters"
+
+msgid "Aprende una palabra y úsala"
+msgstr "Learn a word and use it"
+
+msgid "Aprender en comunidad"
+msgstr "Learn with the community"
+
+msgid "Aprender, palabra a palabra"
+msgstr "Learn, word by word"
+
+msgid "Arrastra desde la primera hasta la última letra en horizontal, vertical o diagonal. También puedes marcar ambos extremos con dos toques o usar el teclado."
+msgstr "Drag from the first to the last letter horizontally, vertically, or diagonally. You can also tap both ends or use the keyboard."
+
+msgid "Asocia las dos columnas por selección: funciona con teclado, ratón y pantalla táctil."
+msgstr "Match the two columns by selecting items; it works with keyboard, mouse, and touch."
+
+msgid "Asociar"
+msgstr "Match"
+
+msgid "Avance de la partida"
+msgstr "Game progress"
+
+msgid "Avance hacia el nivel %(level)s"
+msgstr "Progress toward level %(level)s"
+
+msgid "Avance privado del reto semanal: %(avance)s de %(meta)s palabras"
+msgstr "Private weekly challenge progress: %(avance)s of %(meta)s words"
+
+msgid "Avanzado"
+msgstr "Advanced"
+
+msgid "Avatar"
+msgstr "Avatar"
+
+msgid "Ayuda para practicar"
+msgstr "Practice help"
+
+msgid "Aún no has jugado ninguna partida"
+msgstr "You have not played any games yet"
+
+msgid "Aún no hay participantes en el ranking. La práctica puede comenzar hoy."
+msgstr "There are no ranking participants yet. Practice can start today."
+
+msgid "Beneficios de la cuenta"
+msgstr "Account benefits"
+
+msgid "Bienvenido al Diccionario Kichwa"
+msgstr "Welcome to the Kichwa Dictionary"
+
+msgid "Biografía"
+msgstr "Biography"
+
+msgid "Busca en Kichwa, español o inglés"
+msgstr "Search in Kichwa, Spanish, or English"
+
+msgid "Busca su significado, escucha la pronunciación y llévala a uno de los juegos."
+msgstr "Look up its meaning, listen to its pronunciation, and practice it in a game."
+
+msgid "Buscar"
+msgstr "Search"
+
+msgid "Buscar en Kichwa, español e inglés"
+msgstr "Search in Kichwa, Spanish, and English"
+
+msgid "Buscar en Kichwa, español e inglés | Diccionario Kichwa"
+msgstr "Search Kichwa, Spanish, and English | Kichwa Dictionary"
+
+msgid "Buscar otra palabra"
+msgstr "Search another word"
+
+msgid "Buscar palabras"
+msgstr "Search words"
+
+msgid "Buscaste “%(term)s”"
+msgstr "You searched for “%(term)s”"
+
+msgid "Búsqueda"
+msgstr "Search"
+
+msgid "Búsquedas"
+msgstr "Searches"
+
+msgid "Cambiar contraseña"
+msgstr "Change password"
+
+msgid "Cambiar contraseña · Diccionario Kichwa"
+msgstr "Change password · Kichwa Dictionary"
+
+msgid "Cambiar preferencias"
+msgstr "Change preferences"
+
+msgid "Cancelar"
+msgstr "Cancel"
+
+msgid "Características"
+msgstr "Features"
+
+msgid "Carta sin revelar {number}"
+msgstr "Hidden card {number}"
+
+msgid "Categorización por temas"
+msgstr "Organization by topic"
+
+msgid "Cerrar"
+msgstr "Close"
+
+msgid "Cerrar mensaje"
+msgstr "Close message"
+
+msgid "Cerrar sesión"
+msgstr "Sign out"
+
+msgid "Ciudad"
+msgstr "City"
+
+msgid "Combina al menos 8 caracteres y evita claves comunes"
+msgstr "Use at least 8 characters and avoid common passwords"
+
+msgid "Comenzar a explorar"
+msgstr "Start exploring"
+
+msgid "Comienza a jugar para ver tus estadísticas."
+msgstr "Start playing to see your statistics."
+
+msgid "Completa solo los datos que quieras compartir. Tu correo, teléfono y fecha de nacimiento no se muestran en el perfil público."
+msgstr "Only complete the details you want to share. Your email, phone number, and birth date are not shown on your public profile."
+
+msgid "Completadas {total} palabras"
+msgstr "{total} words completed"
+
+msgid "Completar en Kichwa"
+msgstr "Complete in Kichwa"
+
+msgid "Completar palabras"
+msgstr "Complete words"
+
+msgid "Comprobando…"
+msgstr "Checking…"
+
+msgid "Comprobar tus datos y abrir la cuenta"
+msgstr "Check your details and open the account"
+
+msgid "Compromisos del registro"
+msgstr "Registration commitments"
+
+msgid "Comunidad activa"
+msgstr "Active community"
+
+msgid "Conectar significados"
+msgstr "Match meanings"
+
+msgid "Conectar traducciones"
+msgstr "Match translations"
+
+msgid "Configurar esta práctica"
+msgstr "Configure this practice"
+
+msgid "Confirma tu contraseña"
+msgstr "Confirm your password"
+
+msgid "Confirma tu contraseña actual"
+msgstr "Confirm your current password"
+
+msgid "Confirma tu contraseña actual para cambiar el correo."
+msgstr "Confirm your current password to change your email."
+
+msgid "Confirmar contraseña"
+msgstr "Confirm password"
+
+msgid "Confirmar contraseña nueva"
+msgstr "Confirm new password"
+
+msgid "Conserva tu progreso en los juegos."
+msgstr "Keep your game progress."
+
+msgid "Conservar mi cuenta"
+msgstr "Keep my account"
+
+msgid "Consulta equivalencias, pronunciación y contexto en un corpus de %(total_palabras)s entradas organizado por temas reales."
+msgstr "Browse meanings, pronunciation, and context in a corpus of %(total_palabras)s entries organized by practical topics."
+
+msgid "Consulta un corpus bilingüe Kichwa, escucha pronunciaciones disponibles y guarda palabras para continuar aprendiendo."
+msgstr "Browse a bilingual Kichwa corpus, listen to available pronunciations, and save words to keep learning."
+
+msgid "Consultas"
+msgstr "Views"
+
+msgid "Consultas exactas de los últimos siete días; aquí solo mostramos conteos."
+msgstr "Exact searches from the last seven days; only totals are shown here."
+
+msgid "Contacto"
+msgstr "Contact"
+
+msgid "Contacto - Diccionario Kichwa"
+msgstr "Contact - Kichwa Dictionary"
+
+msgid "Contenido de la entrada"
+msgstr "Entry content"
+
+msgid "Contenido del perfil"
+msgstr "Profile content"
+
+msgid "Continuar jugando"
+msgstr "Keep playing"
+
+msgid "Continuar practicando"
+msgstr "Continue practicing"
+
+msgid "Continúa aprendiendo"
+msgstr "Keep learning"
+
+msgid "Continúa con otra palabra para usar una nueva pista."
+msgstr "Continue with another word to use a new hint."
+
+msgid "Continúa sin pista o inicia otra partida."
+msgstr "Continue without a hint or start another game."
+
+msgid "Contraseña"
+msgstr "Password"
+
+msgid "Contraseña actual"
+msgstr "Current password"
+
+msgid "Contraseña actualizada"
+msgstr "Password updated"
+
+msgid "Contraseña actualizada | Diccionario Kichwa"
+msgstr "Password updated | Kichwa Dictionary"
+
+msgid "Contraseña nueva"
+msgstr "New password"
+
+msgid "Contribuciones"
+msgstr "Contributions"
+
+msgid "Corpus en curación continua"
+msgstr "Corpus under continuous review"
+
+msgid "Correctas"
+msgstr "Correct"
+
+msgid "Correo"
+msgstr "Email"
+
+msgid "Correo electrónico"
+msgstr "Email address"
+
+msgid "Cotejado con la fuente citada"
+msgstr "Checked against the cited source"
+
+msgid "Crea tu espacio de aprendizaje."
+msgstr "Create your learning space."
+
+msgid "Crea una contraseña"
+msgstr "Create a password"
+
+msgid "Crea una contraseña nueva"
+msgstr "Create a new password"
+
+msgid "Crea una cuenta para sumar puntos"
+msgstr "Create an account to earn points"
+
+msgid "Creando cuenta…"
+msgstr "Creating account…"
+
+msgid "Crear cuenta"
+msgstr "Create account"
+
+msgid "Crear mi cuenta"
+msgstr "Create my account"
+
+msgid "Crear una comunidad de hablantes y estudiantes del Kichwa"
+msgstr "Build a community of Kichwa speakers and learners"
+
+msgid "Crear una cuenta"
+msgstr "Create an account"
+
+msgid "Crear una cuenta de aprendizaje"
+msgstr "Create a learning account"
+
+msgid "Crear una cuenta | Diccionario Kichwa"
+msgstr "Create an account | Kichwa Dictionary"
+
+msgid "Cualquier dificultad"
+msgstr "Any difficulty"
+
+msgid "Cuéntanos sobre ti..."
+msgstr "Tell us about yourself..."
+
+msgid "Cómo se practica"
+msgstr "How to practice"
+
+msgid "Datos de la sesión"
+msgstr "Session details"
+
+msgid "Datos y acciones de la entrada"
+msgstr "Entry details and actions"
+
+msgid "De más reciente a más antiguo"
+msgstr "Most recent first"
+
+msgid "Debes aceptar los términos y la política de privacidad."
+msgstr "You must accept the terms and privacy policy."
+
+msgid "Definición"
+msgstr "Definition"
+
+msgid "Del %(start)s al %(end)s"
+msgstr "From %(start)s to %(end)s"
+
+msgid "Descubre el progreso compartido y las entradas que más curiosidad despiertan esta semana."
+msgstr "Discover shared progress and the entries attracting the most interest this week."
+
+msgid "Después selecciona su significado."
+msgstr "Then select its meaning."
+
+msgid "Diccionario"
+msgstr "Dictionary"
+
+msgid "Diccionario Kichwa | Busca, comprende y aprende"
+msgstr "Kichwa Dictionary | Search, understand, and learn"
+
+msgid "Diccionario Kichwa-Español en curación continua"
+msgstr "Kichwa-Spanish dictionary under continuous review"
+
+msgid "Dificultad"
+msgstr "Difficulty"
+
+msgid "Dificultad de pronunciación"
+msgstr "Pronunciation difficulty"
+
+msgid "Difícil"
+msgstr "Hard"
+
+msgid "Dirección"
+msgstr "Address"
+
+msgid "Editar datos"
+msgstr "Edit details"
+
+msgid "Editar perfil"
+msgstr "Edit profile"
+
+msgid "Editar perfil | Diccionario Kichwa"
+msgstr "Edit profile | Kichwa Dictionary"
+
+msgid "Efectos activados"
+msgstr "Sound effects on"
+
+msgid "Efectos silenciados"
+msgstr "Sound effects muted"
+
+msgid "Ejemplo: wasi, casa, yaku o water"
+msgstr "Example: wasi, casa, yaku, or water"
+
+msgid "El Diccionario Kichwa es una plataforma digital dedicada a preservar, promover y facilitar el aprendizaje del idioma Kichwa, una de las lenguas indígenas más importantes de América del Sur."
+msgstr "The Kichwa Dictionary is a digital platform dedicated to preserving, promoting, and supporting the learning of Kichwa, one of the most important Indigenous languages in South America."
+
+msgid "El avance ya respondido se conserva, pero esta sesión quedará incompleta."
+msgstr "Answered progress is saved, but this session will remain incomplete."
+
+msgid "El avatar admite hasta 2 MB."
+msgstr "The avatar can be up to 2 MB."
+
+msgid "El cambio se aplica a tu cuenta sin borrar tus palabras favoritas, partidas ni progreso."
+msgstr "The change applies to your account without deleting your favorite words, games, or progress."
+
+msgid "El enlace de recuperación es temporal y solo puede utilizarse para establecer una contraseña nueva."
+msgstr "The recovery link is temporary and can only be used to set a new password."
+
+msgid "El enlace ya fue usado, ha caducado o no corresponde a una solicitud válida."
+msgstr "The link has already been used, has expired, or does not match a valid request."
+
+msgid "El teléfono debe tener exactamente 10 dígitos numéricos."
+msgstr "The phone number must contain exactly 10 digits."
+
+msgid "Elegir otra modalidad"
+msgstr "Choose another mode"
+
+msgid "Elige el nombre con el que iniciarás sesión"
+msgstr "Choose the username you will use to sign in"
+
+msgid "Elige el significado más preciso."
+msgstr "Choose the most precise meaning."
+
+msgid "Elige la forma correspondiente en Kichwa."
+msgstr "Choose the corresponding Kichwa form."
+
+msgid "Elige primero una palabra Kichwa y después su significado. No necesitas arrastrar ni dibujar líneas."
+msgstr "Choose a Kichwa word first, then its meaning. You do not need to drag or draw lines."
+
+msgid "Elige primero una palabra Kichwa."
+msgstr "Choose a Kichwa word first."
+
+msgid "Elige un nombre de usuario"
+msgstr "Choose a username"
+
+msgid "Elige una contraseña nueva."
+msgstr "Choose a new password."
+
+msgid "Eliminando…"
+msgstr "Deleting…"
+
+msgid "Eliminar cuenta | Diccionario Kichwa"
+msgstr "Delete account | Kichwa Dictionary"
+
+msgid "Eliminar definitivamente"
+msgstr "Delete permanently"
+
+msgid "Eliminar mi cuenta"
+msgstr "Delete my account"
+
+msgid "Empezar a reconocer"
+msgstr "Start recognizing"
+
+msgid "Empezar reto"
+msgstr "Start challenge"
+
+msgid "Empieza por reconocer y continúa cuando quieras. No necesitas completar una modalidad para abrir la siguiente."
+msgstr "Start with recognition and continue whenever you like. You do not need to complete one mode to open the next."
+
+msgid "Empieza por un campo cotidiano y continúa descubriendo vocabulario relacionado."
+msgstr "Start with an everyday topic and continue discovering related vocabulary."
+
+msgid "En contexto"
+msgstr "In context"
+
+msgid "Encuentra cada pareja bilingüe y refuerza el recuerdo visual."
+msgstr "Find each bilingual pair and strengthen visual recall."
+
+msgid "Encuentra una palabra en Kichwa, español o inglés"
+msgstr "Find a word in Kichwa, Spanish, or English"
+
+msgid "English"
+msgstr "English"
+
+msgid "Enlace no válido"
+msgstr "Invalid link"
+
+msgid "Enlaces rápidos"
+msgstr "Quick links"
+
+msgid "Entorno natural"
+msgstr "Natural environment"
+
+msgid "Entrada ya no disponible"
+msgstr "Entry no longer available"
+
+msgid "Entradas vistas"
+msgstr "Entries viewed"
+
+msgid "Entrar a mi cuenta"
+msgstr "Open my account"
+
+msgid "Enviando…"
+msgstr "Sending…"
+
+msgid "Enviar enlace"
+msgstr "Send link"
+
+msgid "Enviar enlace seguro"
+msgstr "Send secure link"
+
+msgid "Equipo del Diccionario Kichwa"
+msgstr "Kichwa Dictionary Team"
+
+msgid "Esa línea no corresponde a una palabra pendiente."
+msgstr "That line does not match an unfound word."
+
+msgid "Escribe el correo asociado a la cuenta. La respuesta será la misma exista o no una coincidencia."
+msgstr "Enter the email linked to the account. The response will be the same whether or not a match exists."
+
+msgid "Escribe la contraseña actual y repite la nueva para evitar errores."
+msgstr "Enter your current password and repeat the new one to avoid mistakes."
+
+msgid "Escribe la palabra completa"
+msgstr "Write the complete word"
+
+msgid "Escribe la palabra completa a partir de su significado y una pista gradual."
+msgstr "Write the complete word from its meaning and a gradual hint."
+
+msgid "Escribe la palabra completa. Puedes pedir una letra adicional; tildes editoriales y mayúsculas no cambian la validación."
+msgstr "Write the complete word. You can request another letter; editorial accent marks and capitalization do not change validation."
+
+msgid "Escribe una palabra completa o una parte, en Kichwa o español"
+msgstr "Enter a full word or part of one, in Kichwa or Spanish"
+
+msgid "Escribe una palabra en cualquiera de los idiomas disponibles. Puedes combinar la búsqueda con un tema y la dificultad de pronunciación."
+msgstr "Enter a word in any available language. You can combine the search with a topic and pronunciation difficulty."
+
+msgid "Escucha grabaciones del corpus y reconoce su significado."
+msgstr "Listen to corpus recordings and recognize their meaning."
+
+msgid "Escucha la palabra"
+msgstr "Listen to the word"
+
+msgid "Escucha una grabación de Kichwa y elige su significado."
+msgstr "Listen to a Kichwa recording and choose its meaning."
+
+msgid "Escucha y reconoce"
+msgstr "Listen and recognize"
+
+msgid "Escuchar"
+msgstr "Listen"
+
+msgid "Escuchar despacio"
+msgstr "Listen slowly"
+
+msgid "Escuchar la palabra en Kichwa"
+msgstr "Listen to the Kichwa word"
+
+msgid "Ese nombre de usuario ya está en uso."
+msgstr "That username is already in use."
+
+msgid "Español"
+msgstr "Spanish"
+
+msgid "Esta cuenta no está disponible."
+msgstr "This account is unavailable."
+
+msgid "Esta partida funciona sin cuenta."
+msgstr "This game works without an account."
+
+msgid "Explora el diccionario y busca palabras en Kichwa, español o inglés."
+msgstr "Explore the dictionary and search for words in Kichwa, Spanish, or English."
+
+msgid "Explora por tema"
+msgstr "Explore by topic"
+
+msgid "Explorar"
+msgstr "Explore"
+
+msgid "Explorar %(total)s palabras de %(category)s"
+msgstr "Explore %(total)s words in %(category)s"
+
+msgid "Explorar el corpus"
+msgstr "Explore the corpus"
+
+msgid "Explorar los 20 temas"
+msgstr "Explore the 20 topics"
+
+msgid "Explorar palabras"
+msgstr "Explore words"
+
+msgid "Facilitar el aprendizaje del idioma a través de herramientas interactivas"
+msgstr "Support language learning through interactive tools"
+
+msgid "Fecha"
+msgstr "Date"
+
+msgid "Fecha de nacimiento"
+msgstr "Birth date"
+
+msgid "Femenino"
+msgstr "Female"
+
+msgid "Ficha rápida"
+msgstr "Quick facts"
+
+msgid "Fila {row}, columna {column}: {letter}"
+msgstr "Row {row}, column {column}: {letter}"
+
+msgid "Filtra por complejidad de pronunciación"
+msgstr "Filter by pronunciation complexity"
+
+msgid "Filtra según la complejidad de pronunciación"
+msgstr "Filter by pronunciation complexity"
+
+msgid "Filtrar historial"
+msgstr "Filter history"
+
+msgid "Filtros activos"
+msgstr "Active filters"
+
+msgid "Foto en Pexels"
+msgstr "Photo on Pexels"
+
+msgid "Fotografía de"
+msgstr "Photograph by"
+
+msgid "Fuente"
+msgstr "Source"
+
+msgid "Fácil"
+msgstr "Easy"
+
+msgid "Gestionar mi participación"
+msgstr "Manage my participation"
+
+msgid "Grabaciones de pronunciación y ejemplos de uso cuando estén revisados"
+msgstr "Pronunciation recordings and usage examples when reviewed"
+
+msgid "Grabación terminada. Puedes escucharla otra vez."
+msgstr "Recording finished. You can listen again."
+
+msgid "Guarda las palabras que más te interesen."
+msgstr "Save the words that interest you most."
+
+msgid "Guarda palabras para volver a ellas."
+msgstr "Save words to revisit them."
+
+msgid "Guarda tus palabras favoritas"
+msgstr "Save your favorite words"
+
+msgid "Guardada en favoritas"
+msgstr "Saved to favorites"
+
+msgid "Guardando…"
+msgstr "Saving…"
+
+msgid "Guardar cambios"
+msgstr "Save changes"
+
+msgid "Guardar contraseña"
+msgstr "Save password"
+
+msgid "Guardar en favoritas"
+msgstr "Save to favorites"
+
+msgid "Género"
+msgstr "Gender"
+
+msgid "Has solicitado restablecer la contraseña de tu cuenta en Diccionario Kichwa."
+msgstr "You requested a password reset for your Kichwa Dictionary account."
+
+msgid "He leído y acepto los"
+msgstr "I have read and accept the"
+
+msgid "Hecho con amor"
+msgstr "Made with care"
+
+msgid "Herramientas de tu cuenta"
+msgstr "Your account tools"
+
+msgid "Historial"
+msgstr "History"
+
+msgid "Hola %(name)s,"
+msgstr "Hello %(name)s,"
+
+msgid "Idioma de entrada"
+msgstr "Entry language"
+
+msgid "Idioma de la interfaz"
+msgstr "Interface language"
+
+msgid "Incorrectas"
+msgstr "Incorrect"
+
+msgid "Información"
+msgstr "Information"
+
+msgid "Inicia sesión"
+msgstr "Sign in"
+
+msgid "Inicia sesión o crea una cuenta. Son dos pistas extra por cuenta, disponibles una sola vez entre todos los juegos. Al acceder, esta partida anónima comenzará de nuevo."
+msgstr "Sign in or create an account. Each account gets two extra hints, available once across all games. After signing in, this anonymous game will restart."
+
+msgid "Inicia sesión para conservar tus favoritas y consultar tu progreso desde una cuenta personal."
+msgstr "Sign in to keep your favorites and view your progress from your personal account."
+
+msgid "Iniciar sesión"
+msgstr "Sign in"
+
+msgid "Iniciar sesión | Diccionario Kichwa"
+msgstr "Sign in | Kichwa Dictionary"
+
+msgid "Inicio"
+msgstr "Home"
+
+msgid "Intentar con otro correo"
+msgstr "Try another email"
+
+msgid "Intermedio"
+msgstr "Intermediate"
+
+msgid "Ir a juegos"
+msgstr "Go to games"
+
+msgid "Ir a la portada"
+msgstr "Go to the home page"
+
+msgid "Ir a los juegos"
+msgstr "Go to games"
+
+msgid "Ir al buscador"
+msgstr "Go to search"
+
+msgid "Juega sin cuenta."
+msgstr "Play without an account."
+
+msgid "Juego"
+msgstr "Game"
+
+msgid "Juego de memoria"
+msgstr "Memory game"
+
+msgid "Juegos"
+msgstr "Games"
+
+msgid "Juegos interactivos para el aprendizaje"
+msgstr "Interactive learning games"
+
+msgid "Jugaste %(game)s"
+msgstr "You played %(game)s"
+
+msgid "La aceptación es necesaria para crear la cuenta."
+msgstr "Acceptance is required to create the account."
+
+msgid "La búsqueda reconoce mayúsculas y palabras con o sin tilde."
+msgstr "Search ignores letter case and recognizes words with or without accent marks."
+
+msgid "La contraseña anterior ya no sirve para iniciar sesión."
+msgstr "Your previous password can no longer be used to sign in."
+
+msgid "La contraseña distingue mayúsculas y minúsculas"
+msgstr "Passwords are case-sensitive"
+
+msgid "La cuenta, el perfil y las relaciones guardadas en la base principal dejarán de estar disponibles."
+msgstr "The account, profile, and related records stored in the main database will no longer be available."
+
+msgid "La edad aparecerá al elegir tu fecha de nacimiento."
+msgstr "Your age will appear after you choose your birth date."
+
+msgid "La fecha de nacimiento no puede ser futura."
+msgstr "The birth date cannot be in the future."
+
+msgid "La imagen debe pesar 2 MB o menos."
+msgstr "The image must be 2 MB or smaller."
+
+msgid "La imagen no puede superar 4096 × 4096 píxeles."
+msgstr "The image cannot exceed 4096 × 4096 pixels."
+
+msgid "La palabra está escrita debajo."
+msgstr "The word is written below."
+
+msgid "La respuesta esperada era “{answer}”."
+msgstr "The expected answer was “{answer}”."
+
+msgid "La respuesta no confirma si una dirección está registrada; así protegemos la privacidad de las cuentas."
+msgstr "The response does not confirm whether an address is registered; this protects account privacy."
+
+msgid "La traducción inglesa de esta entrada sigue pendiente de revisión; se muestra la equivalencia en español."
+msgstr "The English translation for this entry is still under review; the Spanish equivalent is shown."
+
+msgid "La validación final utiliza las reglas de seguridad configuradas en el servidor."
+msgstr "Final validation uses the security rules configured on the server."
+
+msgid "Las categorías reúnen palabras por su significado: animales con animales, alimentos con alimentos y acciones con acciones."
+msgstr "Categories group words by meaning: animals with animals, foods with foods, and actions with actions."
+
+msgid "Lee la palabra y elige su equivalencia. La dirección cambia para practicar ambos idiomas."
+msgstr "Read the word and choose its equivalent. The direction changes so you practice both languages."
+
+msgid "Leer la palabra como alternativa al audio"
+msgstr "Read the word as an alternative to audio"
+
+msgid "Lengua, tiempo y pensamiento"
+msgstr "Language, time, and thought"
+
+msgid "Limita los resultados a un tema del diccionario"
+msgstr "Limit results to one dictionary topic"
+
+msgid "Limpiar"
+msgstr "Clear"
+
+msgid "Localiza vocabulario Kichwa y relaciona cada forma escrita con su significado."
+msgstr "Find Kichwa vocabulary and connect each written form with its meaning."
+
+msgid "Localiza vocabulario en horizontal, vertical y diagonal, también en sentido inverso."
+msgstr "Find vocabulary horizontally, vertically, and diagonally, including backwards."
+
+msgid "Los datos obligatorios permiten identificar tu cuenta y recuperarla. La información del perfil puede completarse después."
+msgstr "Required information identifies your account and lets you recover it. You can complete profile information later."
+
+msgid "Masculino"
+msgstr "Male"
+
+msgid "Media"
+msgstr "Medium"
+
+msgid "Memoria bilingüe"
+msgstr "Bilingual memory"
+
+msgid "Mi actividad"
+msgstr "My activity"
+
+msgid "Mi perfil"
+msgstr "My profile"
+
+msgid "Minutos de juego"
+msgstr "Minutes played"
+
+msgid "Mis estadísticas"
+msgstr "My statistics"
+
+msgid "Mis estadísticas - Diccionario Kichwa"
+msgstr "My statistics - Kichwa Dictionary"
+
+msgid "Mis favoritas"
+msgstr "My favorites"
+
+msgid "Misiones de práctica"
+msgstr "Practice missions"
+
+msgid "Mostrar contraseña"
+msgstr "Show password"
+
+msgid "Mostrar mi perfil públicamente"
+msgstr "Show my profile publicly"
+
+msgid "Mostrar mi usuario y puntos en el ranking público"
+msgstr "Show my username and points in the public ranking"
+
+msgid "Mostrar u ocultar la confirmación"
+msgstr "Show or hide the confirmation"
+
+msgid "Mostrar u ocultar la contraseña"
+msgstr "Show or hide the password"
+
+msgid "Mostrar u ocultar la contraseña escrita"
+msgstr "Show or hide the entered password"
+
+msgid "Muestra solo palabras del tema seleccionado"
+msgstr "Show only words from the selected topic"
+
+msgid "Más buscadas de la semana"
+msgstr "Most searched this week"
+
+msgid "Nativo"
+msgstr "Native"
+
+msgid "Navegación principal"
+msgstr "Main navigation"
+
+msgid "Necesaria para cambiar el correo"
+msgstr "Required to change your email"
+
+msgid "Necesitamos tu contraseña actual para confirmar el cambio."
+msgstr "We need your current password to confirm the change."
+
+msgid "Nivel de Kichwa"
+msgstr "Kichwa level"
+
+msgid "No encontramos una coincidencia"
+msgstr "No match found"
+
+msgid "No hay más pistas disponibles."
+msgstr "No more hints are available."
+
+msgid "No hay temas disponibles todavía."
+msgstr "No topics are available yet."
+
+msgid "No hay una pista aplicable ahora."
+msgstr "No hint is available right now."
+
+msgid "No pudimos comprobar la respuesta."
+msgstr "We could not check the answer."
+
+msgid "No pudimos iniciar sesión con esos datos. Revisa el usuario o correo y la contraseña."
+msgstr "We could not sign you in with those details. Check your username or email and password."
+
+msgid "No se pudo cargar la grabación."
+msgstr "The recording could not be loaded."
+
+msgid "No se pudo cargar la grabación. Puedes leer la palabra como alternativa."
+msgstr "The recording could not be loaded. You can read the word instead."
+
+msgid "No se pudo cargar la pista."
+msgstr "The hint could not be loaded."
+
+msgid "No se pudo reproducir. Puedes leer la palabra como alternativa."
+msgstr "Playback failed. You can read the word instead."
+
+msgid "No se pudo validar la respuesta."
+msgstr "The answer could not be checked."
+
+msgid "Nombre"
+msgstr "First name"
+
+msgid "Nombre de usuario"
+msgstr "Username"
+
+msgid "Nos alegra tenerte en nuestra comunidad. Has dado el primer paso para explorar y aprender uno de los idiomas más ricos y antiguos de América."
+msgstr "We are glad to welcome you to our community. You have taken the first step toward exploring and learning one of the richest and oldest languages in the Americas."
+
+msgid "Nos encantaría escucharte. Si tienes preguntas sobre el diccionario, sugerencias para mejorarlo o quieres contribuir con nuevas palabras, no dudes en contactarnos."
+msgstr "We would love to hear from you. Contact us with questions about the dictionary, suggestions, or new word contributions."
+
+msgid "Nuestra misión"
+msgstr "Our mission"
+
+msgid "Nuestro diccionario es un puente hacia la comprensión de una cultura milenaria. Cada palabra que aprendes te acerca a la sabiduría de los pueblos Kichwa."
+msgstr "Our dictionary is a bridge to understanding an ancient culture. Every word you learn brings you closer to the knowledge of Kichwa peoples."
+
+msgid "Nueva contraseña"
+msgstr "New password"
+
+msgid "Nueva contraseña | Diccionario Kichwa"
+msgstr "New password | Kichwa Dictionary"
+
+msgid "Objetivos"
+msgstr "Goals"
+
+msgid "Observa esta pareja: {kichwa} y {meaning}."
+msgstr "Look at this pair: {kichwa} and {meaning}."
+
+msgid "Omitir palabra"
+msgstr "Skip word"
+
+msgid "Opcional y privado. Escribe exactamente 10 dígitos, sin espacios ni símbolos."
+msgstr "Optional and private. Enter exactly 10 digits without spaces or symbols."
+
+msgid "Opcional. Puedes dejar de aparecer desmarcando esta opción cuando quieras."
+msgstr "Optional. You can leave the ranking at any time by clearing this option."
+
+msgid "Otro"
+msgstr "Other"
+
+msgid "Palabra consultada"
+msgstr "Entry viewed"
+
+msgid "Palabra en Kichwa, español o inglés"
+msgstr "Word in Kichwa, Spanish, or English"
+
+msgid "Palabras del reto"
+msgstr "Challenge words"
+
+msgid "Palabras del tema"
+msgstr "Words in this topic"
+
+msgid "Palabras dominadas"
+msgstr "Words mastered"
+
+msgid "Palabras favoritas"
+msgstr "Favorite words"
+
+msgid "Palabras filtradas"
+msgstr "Filtered words"
+
+msgid "Palabras para seguir aprendiendo"
+msgstr "Words to keep learning"
+
+msgid "Palabras practicadas"
+msgstr "Words practiced"
+
+msgid "Palabras que guardaste"
+msgstr "Words you saved"
+
+msgid "Palabras relacionadas"
+msgstr "Related words"
+
+msgid "Para guardar palabras necesitas iniciar sesión o crear una cuenta."
+msgstr "To save words, sign in or create an account."
+
+msgid "Partida terminada"
+msgstr "Game completed"
+
+msgid "Partidas jugadas"
+msgstr "Games played"
+
+msgid "Partidas terminadas"
+msgstr "Games completed"
+
+msgid "País"
+msgstr "Country"
+
+msgid "Perfil de la comunidad"
+msgstr "Community profile"
+
+msgid "Perfil público y ranking son opciones independientes."
+msgstr "Public profile and ranking are independent options."
+
+msgid "Personas y comunidad"
+msgstr "People and community"
+
+msgid "Pista"
+msgstr "Hint"
+
+msgid "Pistas de partida agotadas."
+msgstr "Game hints used up."
+
+msgid "Pistas disponibles"
+msgstr "Available hints"
+
+msgid "Pistas extra"
+msgstr "Extra hints"
+
+msgid "Política de privacidad"
+msgstr "Privacy policy"
+
+msgid "Practica con nuestros juegos educativos."
+msgstr "Practice with our educational games."
+
+msgid "Practica en seis modalidades o vuelve a una palabra guardada para repasarla."
+msgstr "Practice in six modes or revisit a saved word for review."
+
+msgid "Practica palabras con un propósito"
+msgstr "Practice words with a purpose"
+
+msgid "Practica sin cuenta."
+msgstr "Practice without an account."
+
+msgid "Practicar Kichwa"
+msgstr "Practice Kichwa"
+
+msgid "Practicar Kichwa - Diccionario Kichwa"
+msgstr "Practice Kichwa - Kichwa Dictionary"
+
+msgid "Practicar en juegos"
+msgstr "Practice in games"
+
+msgid "Practicar otra vez"
+msgstr "Practice again"
+
+msgid "Practicar vocabulario con juegos"
+msgstr "Practice vocabulary with games"
+
+msgid "Preferencias para empezar"
+msgstr "Starting preferences"
+
+msgid "Pregunta 1 de %(total_palabras)s"
+msgstr "Question 1 of %(total_palabras)s"
+
+msgid "Pregunta {current} de {total}"
+msgstr "Question {current} of {total}"
+
+msgid "Preservando y compartiendo la riqueza cultural del idioma Kichwa"
+msgstr "Preserving and sharing the cultural richness of the Kichwa language"
+
+msgid "Preservando y promoviendo la lengua Kichwa"
+msgstr "Preserving and promoting the Kichwa language"
+
+msgid "Preservar el vocabulario y la riqueza lingüística del Kichwa"
+msgstr "Preserve Kichwa vocabulary and linguistic richness"
+
+msgid "Principiante"
+msgstr "Beginner"
+
+msgid "Privacidad y cuenta"
+msgstr "Privacy and account"
+
+msgid "Producir"
+msgstr "Produce"
+
+msgid "Promover la cultura y tradiciones asociadas al idioma Kichwa"
+msgstr "Promote the culture and traditions associated with Kichwa"
+
+msgid "Pronunciación"
+msgstr "Pronunciation"
+
+msgid "Pronunciación: {value}"
+msgstr "Pronunciation: {value}"
+
+msgid "Prueba con la palabra en otro idioma, revisa la escritura o elimina alguno de los filtros."
+msgstr "Try the word in another language, check its spelling, or remove a filter."
+
+msgid "Prueba con otro inicio y final."
+msgstr "Try a different start and end."
+
+msgid "Prueba con wasi, casa, water o yaku"
+msgstr "Try wasi, casa, water, or yaku"
+
+msgid "Puedes buscar en horizontal, vertical o diagonal, en ambos sentidos."
+msgstr "You can search horizontally, vertically, or diagonally, in either direction."
+
+msgid "Puedes continuar con la siguiente."
+msgstr "You can continue to the next one."
+
+msgid "Puedes iniciar sesión o registrarte para usar dos pistas extra una sola vez por cuenta."
+msgstr "You can sign in or register to use two extra hints once per account."
+
+msgid "Puedes leer la palabra como alternativa y continuar."
+msgstr "You can read the word instead and continue."
+
+msgid "Puedes usar tu nombre de usuario o el correo asociado"
+msgstr "You can use your username or linked email"
+
+msgid "Puedes usar tu nombre de usuario o el correo asociado a la cuenta."
+msgstr "You can use your username or the email linked to your account."
+
+msgid "Pulsa Escuchar y elige el significado. Puedes escuchar más despacio o abrir la transcripción si necesitas leerla."
+msgstr "Press Listen and choose the meaning. You can slow the audio down or open the transcript if you need to read it."
+
+msgid "Pulsa escuchar para reproducir la grabación."
+msgstr "Press listen to play the recording."
+
+msgid "Puntos ganados"
+msgstr "Points earned"
+
+msgid "Puntos totales"
+msgstr "Total points"
+
+msgid "Puntuación"
+msgstr "Score"
+
+msgid "Página <strong>%(actual)s</strong> de %(total)s"
+msgstr "Page <strong>%(actual)s</strong> of %(total)s"
+
+msgid "Páginas de %(category)s"
+msgstr "%(category)s pages"
+
+msgid "Páginas de favoritas"
+msgstr "Favorite pages"
+
+msgid "Páginas de resultados"
+msgstr "Result pages"
+
+msgid "Páginas del historial"
+msgstr "History pages"
+
+msgid "Quiero recibir novedades educativas por correo"
+msgstr "I want to receive educational updates by email"
+
+msgid "Quiero recibir novedades educativas por correo. Puedo cambiar esta preferencia desde mi perfil."
+msgstr "I want to receive educational updates by email. I can change this preference in my profile."
+
+msgid "Quitar"
+msgstr "Remove"
+
+msgid "Quitar %(word)s de favoritas"
+msgstr "Remove %(word)s from favorites"
+
+msgid "Racha"
+msgstr "Streak"
+
+msgid "Ranking de aprendizaje"
+msgstr "Learning ranking"
+
+msgid "Recibir novedades educativas por correo"
+msgstr "Receive educational updates by email"
+
+msgid "Reconoce equivalencias en Kichwa y el idioma seleccionado con opciones del mismo conjunto temático."
+msgstr "Recognize equivalent words in Kichwa and the selected language using options from the same topic."
+
+msgid "Reconoce equivalencias en ambos sentidos y aprende a distinguir significados cercanos."
+msgstr "Recognize equivalent words in both directions and learn to distinguish similar meanings."
+
+msgid "Reconoce, escucha y produce vocabulario en Kichwa. Cada partida respeta el tema y la dificultad que elijas."
+msgstr "Recognize, listen to, and produce Kichwa vocabulary. Every game follows your chosen topic and difficulty."
+
+msgid "Reconocer"
+msgstr "Recognize"
+
+msgid "Recordar"
+msgstr "Remember"
+
+msgid "Recupera el acceso con calma."
+msgstr "Recover access with confidence."
+
+msgid "Recupera la escritura Kichwa a partir del significado y de letras visibles."
+msgstr "Recall the Kichwa spelling from its meaning and visible letters."
+
+msgid "Recupera parejas del mismo tema y fortalece el recuerdo visual del vocabulario."
+msgstr "Find pairs from the same topic and strengthen your visual memory of vocabulary."
+
+msgid "Recuperar acceso | Diccionario Kichwa"
+msgstr "Recover access | Kichwa Dictionary"
+
+msgid "Registrarse"
+msgstr "Register"
+
+msgid "Registro privado"
+msgstr "Private record"
+
+msgid "Repite exactamente la contraseña anterior"
+msgstr "Repeat the previous password exactly"
+
+msgid "Repite la contraseña"
+msgstr "Repeat the password"
+
+msgid "Repite la contraseña nueva"
+msgstr "Repeat the new password"
+
+msgid "Reproduce la grabación y elige su significado."
+msgstr "Play the recording and choose its meaning."
+
+msgid "Reproduciendo la grabación."
+msgstr "Playing the recording."
+
+msgid "Reproduciendo más despacio."
+msgstr "Playing more slowly."
+
+msgid "Responde y revisa la explicación antes de continuar."
+msgstr "Answer and review the explanation before continuing."
+
+msgid "Respuesta correcta."
+msgstr "Correct answer."
+
+msgid "Restablece tu contraseña de Diccionario Kichwa"
+msgstr "Reset your Kichwa Dictionary password"
+
+msgid "Resultados para “%(query)s”"
+msgstr "Results for “%(query)s”"
+
+msgid "Resumen de aprendizaje"
+msgstr "Learning summary"
+
+msgid "Resumen de tu uso, no de otras personas."
+msgstr "A summary of your use, not anyone else’s."
+
+msgid "Resumen del diccionario"
+msgstr "Dictionary summary"
+
+msgid "Reto completado"
+msgstr "Challenge completed"
+
+msgid "Reto de esta semana"
+msgstr "This week's challenge"
+
+msgid "Revisa antes de eliminar."
+msgstr "Review before deleting."
+
+msgid "Revisa la conexión e inténtalo nuevamente."
+msgstr "Check your connection and try again."
+
+msgid "Revisa tu correo | Diccionario Kichwa"
+msgstr "Check your email | Kichwa Dictionary"
+
+msgid "Revisa tu correo."
+msgstr "Check your email."
+
+msgid "Ruta de navegación"
+msgstr "Breadcrumb"
+
+msgid "Ruta de práctica"
+msgstr "Practice path"
+
+msgid "Salir de la partida"
+msgstr "Leave game"
+
+msgid "Saltar al contenido principal"
+msgstr "Skip to main content"
+
+msgid "Se descartó una opción que no corresponde a esta palabra."
+msgstr "One option that does not match this word was removed."
+
+msgid "Se descartó una opción que no corresponde a la grabación."
+msgstr "One option that does not match the recording was removed."
+
+msgid "Se eliminarán el perfil, favoritas y estadísticas vinculadas. Las copias de seguridad dependen de la política del operador."
+msgstr "The linked profile, favorites, and statistics will be deleted. Backups depend on the operator policy."
+
+msgid "Se reveló una letra de la palabra en Kichwa."
+msgstr "One letter of the Kichwa word was revealed."
+
+msgid "Se señaló una pareja bilingüe pendiente."
+msgstr "An unmatched bilingual pair was highlighted."
+
+msgid "Seguridad de la cuenta"
+msgstr "Account security"
+
+msgid "Sesión terminada"
+msgstr "Session complete"
+
+msgid "Si compartes el dispositivo, cierra la sesión al terminar. Nunca envíes tu contraseña por correo."
+msgstr "If you share this device, sign out when you finish. Never send your password by email."
+
+msgid "Si eres hablante de Kichwa o tienes conocimientos del idioma, tu contribución es muy valiosa para enriquecer nuestro diccionario."
+msgstr "If you speak Kichwa or know the language, your contribution is very valuable for enriching our dictionary."
+
+msgid "Si existe una cuenta activa con ese correo, recibirás un enlace temporal. Revisa también la carpeta de correo no deseado."
+msgstr "If an active account uses that email, you will receive a temporary link. Check your spam folder as well."
+
+msgid "Si no solicitaste este cambio, puedes ignorar este correo."
+msgstr "If you did not request this change, you can ignore this email."
+
+msgid "Si tienes alguna pregunta, no dudes en contactarnos."
+msgstr "If you have any questions, please contact us."
+
+msgid "Sigue explorando el Kichwa"
+msgstr "Keep exploring Kichwa"
+
+msgid "Sigue objetivos concretos mientras practicas. Los puntos se ganan al acertar una palabra por primera vez."
+msgstr "Follow concrete goals as you practice. Points are earned when you answer a word correctly for the first time."
+
+msgid "Sigue tu progreso de aprendizaje."
+msgstr "Track your learning progress."
+
+msgid "Siguiente"
+msgstr "Next"
+
+msgid "Siguiente paso"
+msgstr "Next step"
+
+msgid "Sistema de favoritos personalizado"
+msgstr "Personal favorite words"
+
+msgid "Solicitar otro enlace"
+msgstr "Request another link"
+
+msgid "Solicitud recibida"
+msgstr "Request received"
+
+msgid "Solo 10 números; este dato es privado."
+msgstr "Exactly 10 digits; this information is private."
+
+msgid "Sopa de letras"
+msgstr "Word search"
+
+msgid "Sopa de palabras"
+msgstr "Word search"
+
+msgid "Sugerencias basadas en relaciones editoriales, significado y contexto; no se completan al azar."
+msgstr "Suggestions based on editorial relationships, meaning, and context; they are not filled at random."
+
+msgid "Teléfono"
+msgstr "Phone"
+
+msgid "Tema"
+msgstr "Topic"
+
+msgid "Tema: {value}."
+msgstr "Topic: {value}."
+
+msgid "Termina o cierra la selección actual y prueba con otra palabra."
+msgstr "Finish or close the current selection and try another word."
+
+msgid "Tiempo"
+msgstr "Time"
+
+msgid "Todas las palabras"
+msgstr "All words"
+
+msgid "Todavía no hay búsquedas exactas esta semana. Prueba con una palabra en Kichwa, español o inglés."
+msgstr "There are no exact searches this week yet. Try a word in Kichwa, Spanish, or English."
+
+msgid "Todavía no."
+msgstr "Not yet."
+
+msgid "Todos los campos de esta sección son obligatorios, excepto las novedades educativas."
+msgstr "All fields in this section are required except educational updates."
+
+msgid "Todos los temas"
+msgstr "All topics"
+
+msgid "Traducción"
+msgstr "Translation"
+
+msgid "Traducción guiada"
+msgstr "Guided translation"
+
+msgid "Traza una línea recta."
+msgstr "Draw a straight line."
+
+msgid "Tu acceso está listo."
+msgstr "Your access is ready."
+
+msgid "Tu actividad es privada. Solo tú y el personal administrador autorizado pueden verla."
+msgstr "Your activity is private. Only you and authorized administrators can view it."
+
+msgid "Tu apellido"
+msgstr "Your last name"
+
+msgid "Tu aprendizaje continúa aquí."
+msgstr "Your learning continues here."
+
+msgid "Tu avance es privado y se reinicia cada lunes."
+msgstr "Your progress is private and resets every Monday."
+
+msgid "Tu avance quedó guardado. Esta palabra ya sumó puntos antes."
+msgstr "Your progress was saved. This word earned points earlier."
+
+msgid "Tu colección"
+msgstr "Your collection"
+
+msgid "Tu colección privada para volver a escuchar, leer y practicar Kichwa."
+msgstr "Your private collection for listening, reading, and practicing Kichwa again."
+
+msgid "Tu contraseña"
+msgstr "Your password"
+
+msgid "Tu diccionario digital."
+msgstr "Your digital dictionary."
+
+msgid "Tu espacio personal"
+msgstr "Your personal space"
+
+msgid "Tu información de contacto permanece privada. Para cambiar el correo, confirma tu contraseña actual."
+msgstr "Your contact information remains private. To change your email, confirm your current password."
+
+msgid "Tu navegador no admite la reproducción de audio."
+msgstr "Your browser does not support audio playback."
+
+msgid "Tu nombre"
+msgstr "Your first name"
+
+msgid "Tu perfil, bajo tu control."
+msgstr "Your profile, under your control."
+
+msgid "Tu recorrido"
+msgstr "Your journey"
+
+msgid "Tu usuario o correo"
+msgstr "Your username or email"
+
+msgid "Términos de uso"
+msgstr "Terms of use"
+
+msgid "Una clave segura para seguir aprendiendo."
+msgstr "A secure password for continued learning."
+
+msgid "Una entrada para comenzar"
+msgstr "An entry to get started"
+
+msgid "Una ruta, seis habilidades"
+msgstr "One path, six skills"
+
+msgid "Una selección variada y estable de distintas áreas del diccionario."
+msgstr "A varied, stable selection from different areas of the dictionary."
+
+msgid "Une cada palabra Kichwa con su significado mediante selecciones claras."
+msgstr "Match each Kichwa word with its meaning through clear selections."
+
+msgid "Unirme al ranking"
+msgstr "Join the ranking"
+
+msgid "Usa al menos 8 caracteres y evita contraseñas comunes."
+msgstr "Use at least 8 characters and avoid common passwords."
+
+msgid "Usa solo letras y espacios."
+msgstr "Use letters and spaces only."
+
+msgid "Usa solo letras y espacios; puedes incluir tildes"
+msgstr "Use letters and spaces only; accented letters are allowed"
+
+msgid "Usa una contraseña única y difícil de adivinar."
+msgstr "Use a unique password that is difficult to guess."
+
+msgid "Usa una frase única que no compartas con otros servicios."
+msgstr "Use a unique phrase that you do not share with other services."
+
+msgid "Usar pista"
+msgstr "Use hint"
+
+msgid "Usaremos este correo para recuperar el acceso a tu cuenta"
+msgstr "We will use this email to recover access to your account"
+
+msgid "Usuario o correo electrónico"
+msgstr "Username or email"
+
+msgid "Validar los datos y crear tu cuenta"
+msgstr "Validate the details and create your account"
+
+msgid "Ver actividad y estadísticas"
+msgstr "View activity and statistics"
+
+msgid "Ver entrada"
+msgstr "View entry"
+
+msgid "Ver entrada de %(word)s"
+msgstr "View entry for %(word)s"
+
+msgid "Ver este tema"
+msgstr "View this topic"
+
+msgid "Ver fotografía de %(author)s en Pexels"
+msgstr "View photograph by %(author)s on Pexels"
+
+msgid "Ver historial completo"
+msgstr "View full history"
+
+msgid "Ver los %(total_categorias)s temas"
+msgstr "View all %(total_categorias)s topics"
+
+msgid "Ver mis favoritas"
+msgstr "View my favorites"
+
+msgid "Ver todo el diccionario"
+msgstr "View the full dictionary"
+
+msgid "Ver todos los temas y cuántas palabras contienen"
+msgstr "View all topics and their word counts"
+
+msgid "Vida cotidiana"
+msgstr "Everyday life"
+
+msgid "Viste %(word)s"
+msgstr "You viewed %(word)s"
+
+msgid "Vocabulario organizado por temas"
+msgstr "Vocabulary organized by topic"
+
+msgid "Volver a iniciar sesión"
+msgstr "Return to sign in"
+
+msgid "Volver a la entrada"
+msgstr "Return to entry"
+
+msgid "Volver a practicar"
+msgstr "Practice again"
+
+msgid "Volver al inicio del diccionario"
+msgstr "Return to the dictionary home page"
+
+msgid "Volver al inicio sin acceder a una cuenta"
+msgstr "Return home without signing in"
+
+msgid "Volver al perfil"
+msgstr "Return to profile"
+
+msgid "Ya existe una cuenta registrada con este correo."
+msgstr "An account is already registered with this email."
+
+msgid "Ya puedes volver al diccionario usando tu nueva contraseña."
+msgstr "You can now return to the dictionary using your new password."
+
+msgid "Ya utilizaste la pista de esta palabra."
+msgstr "You already used the hint for this word."
+
+msgid "de partida"
+msgstr "for this game"
+
+msgid "dominadas"
+msgstr "mastered"
+
+msgid "en"
+msgstr "on"
+
+msgid "entradas del corpus"
+msgstr "corpus entries"
+
+msgid "extra de cuenta"
+msgstr "account extras"
+
+msgid "juegos de práctica"
+msgstr "practice games"
+
+msgid "palabras practicadas"
+msgstr "words practiced"
+
+msgid "para conservar el progreso de cada palabra."
+msgstr "to save progress for each word."
+
+msgid "para guardar tu avance."
+msgstr "to save your progress."
+
+msgid "precisión acumulada"
+msgstr "overall accuracy"
+
+msgid "temas para explorar"
+msgstr "topics to explore"
+
+msgid "y la"
+msgstr "and the"
+
+msgid "{done} de {total} completadas"
+msgstr "{done} of {total} completed"
+
+msgid "{word} empieza en la fila {row}, columna {column}; dirección {direction}."
+msgstr "{word} starts at row {row}, column {column}; direction {direction}."
+
+msgid "¡Bienvenido al Diccionario Kichwa!"
+msgstr "Welcome to the Kichwa Dictionary!"
+
+msgid "¡Sumaste {points} puntos por aprender esta palabra!"
+msgstr "You earned {points} points for learning this word!"
+
+msgid "¿Aún no tienes una cuenta?"
+msgstr "Do not have an account yet?"
+
+msgid "¿La olvidaste?"
+msgstr "Forgot it?"
+
+msgid "¿Necesitas dos pistas más?"
+msgstr "Need two more hints?"
+
+msgid "¿Quieres salir de la partida?"
+msgstr "Do you want to leave the game?"
+
+msgid "¿Qué palabra buscas?"
+msgstr "Which word are you looking for?"
+
+msgid "¿Qué palabra quieres comprender?"
+msgstr "Which word would you like to understand?"
+
+msgid "¿Qué puedes hacer ahora?"
+msgstr "What can you do now?"
+
+msgid "¿Tienes preguntas o sugerencias?"
+msgstr "Do you have questions or suggestions?"
+
+msgid "¿Ya tienes una cuenta?"
+msgstr "Already have an account?"
+
+msgid "Últimas partidas"
+msgstr "Recent games"
+
+msgid "Últimos 30 días"
+msgstr "Last 30 days"
+
+msgid "%(total)s consulta"
+msgid_plural "%(total)s consultas"
+msgstr[0] "%(total)s search"
+msgstr[1] "%(total)s searches"
+
+msgid "%(total)s palabra"
+msgid_plural "%(total)s palabras"
+msgstr[0] "%(total)s word"
+msgstr[1] "%(total)s words"
+
+msgid "%(total)s resultado"
+msgid_plural "%(total)s resultados"
+msgstr[0] "%(total)s result"
+msgstr[1] "%(total)s results"
+
+msgid "Edad actual: %(edad_actual)s año"
+msgid_plural "Edad actual: %(edad_actual)s años"
+msgstr[0] "Current age: %(edad_actual)s year"
+msgstr[1] "Current age: %(edad_actual)s years"

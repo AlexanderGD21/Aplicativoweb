@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const english = document.documentElement.lang.toLowerCase().startsWith('en')
+  const copy = english ? {
+    chooseBirthDate: 'Your age will appear after you choose your birth date.',
+    invalidBirthDate: 'Choose a valid birth date.',
+    currentAge: (age) => `Current age: ${age} ${age === 1 ? 'year' : 'years'}`,
+  } : {
+    chooseBirthDate: 'La edad aparecerá al elegir tu fecha de nacimiento.',
+    invalidBirthDate: 'Selecciona una fecha de nacimiento válida.',
+    currentAge: (age) => `Edad actual: ${age} ${age === 1 ? 'año' : 'años'}`,
+  }
   const phone = document.getElementById('id_telefono')
   if (phone) {
     phone.addEventListener('beforeinput', (event) => {
@@ -25,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const updateAge = () => {
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate.value)
     if (!match) {
-      agePreview.textContent = 'La edad aparecerá al elegir tu fecha de nacimiento.'
+      agePreview.textContent = copy.chooseBirthDate
       return
     }
     const year = Number(match[1])
@@ -34,11 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const validDate = new Date(Date.UTC(year, month - 1, day))
     const today = new Date()
     if (validDate.getUTCFullYear() !== year || validDate.getUTCMonth() + 1 !== month || validDate.getUTCDate() !== day || validDate > today) {
-      agePreview.textContent = 'Selecciona una fecha de nacimiento válida.'
+      agePreview.textContent = copy.invalidBirthDate
       return
     }
     const age = today.getFullYear() - year - (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day) ? 1 : 0)
-    agePreview.textContent = `Edad actual: ${age} ${age === 1 ? 'año' : 'años'}`
+    agePreview.textContent = copy.currentAge(age)
   }
   birthDate.addEventListener('input', updateAge)
   birthDate.addEventListener('change', updateAge)

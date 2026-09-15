@@ -13,6 +13,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.utils import timezone
+from django.utils.translation import get_language, gettext as _, gettext_lazy
 from django.views.decorators.http import require_http_methods
 from .models import (
     ActividadUsuario,
@@ -43,6 +44,53 @@ from apps.usuarios.models import PerfilUsuario
 logger = logging.getLogger(__name__)
 LIMITE_SUGERENCIAS = 8
 PISTAS_BASE_DIFICULTAD = {'facil': 3, 'medio': 2, 'dificil': 1}
+TEXTOS_JUEGO = (
+    'Efectos activados', 'Efectos silenciados', 'de partida', 'extra de cuenta',
+    'Completadas {total} palabras', '{done} de {total} completadas',
+    'No se pudo validar la respuesta.', 'Respuesta correcta.',
+    '¡Sumaste {points} puntos por aprender esta palabra!',
+    'Tu avance quedó guardado. Esta palabra ya sumó puntos antes.',
+    'Puedes continuar con la siguiente.', 'Todavía no.',
+    'La respuesta esperada era “{answer}”.', 'No pudimos comprobar la respuesta.',
+    'Revisa la conexión e inténtalo nuevamente.', 'La palabra está escrita debajo.',
+    'Acertaste {correct} de {total} palabras ({accuracy}%) en {time}.',
+    'Español', 'English', 'Elige la forma correspondiente en Kichwa.',
+    'Elige el significado más preciso.', 'Pista',
+    'Se descartó una opción que no corresponde a esta palabra.',
+    'Pronunciación: {value}', 'Tema: {value}.', 'Escucha la palabra',
+    'Reproduce la grabación y elige su significado.', 'Escuchar',
+    'Escuchar la palabra en Kichwa', 'Escuchar despacio',
+    'Pulsa escuchar para reproducir la grabación.', 'Reproduciendo la grabación.',
+    'Reproduciendo más despacio.',
+    'No se pudo reproducir. Puedes leer la palabra como alternativa.',
+    'Grabación terminada. Puedes escucharla otra vez.',
+    'No se pudo cargar la grabación. Puedes leer la palabra como alternativa.',
+    'No se pudo cargar la grabación.', 'Puedes leer la palabra como alternativa y continuar.',
+    'Leer la palabra como alternativa al audio',
+    'Se descartó una opción que no corresponde a la grabación.',
+    'Escribe la palabra completa', 'Se reveló una letra de la palabra en Kichwa.',
+    'Pregunta {current} de {total}', 'Carta sin revelar {number}',
+    'Observa esta pareja: {kichwa} y {meaning}.',
+    'Elige primero una palabra Kichwa.', 'Después selecciona su significado.',
+    'Se señaló una pareja bilingüe pendiente.', 'Palabras del reto',
+    'Traza una línea recta.',
+    'Puedes buscar en horizontal, vertical o diagonal, en ambos sentidos.',
+    'Esa línea no corresponde a una palabra pendiente.', 'Prueba con otro inicio y final.',
+    'Fila {row}, columna {column}: {letter}',
+    '{word} empieza en la fila {row}, columna {column}; dirección {direction}.',
+    'No hay una pista aplicable ahora.',
+    'Termina o cierra la selección actual y prueba con otra palabra.',
+    'Ya utilizaste la pista de esta palabra.',
+    'Continúa con otra palabra para usar una nueva pista.',
+    'Pistas de partida agotadas.',
+    'Puedes iniciar sesión o registrarte para usar dos pistas extra una sola vez por cuenta.',
+    'No hay más pistas disponibles.', 'Continúa sin pista o inicia otra partida.',
+    'No se pudo cargar la pista.',
+)
+
+
+def _textos_juego():
+    return {texto: _(texto) for texto in TEXTOS_JUEGO}
 
 
 def _normalizar_palabra_tablero(texto):
@@ -53,6 +101,8 @@ def _normalizar_palabra_tablero(texto):
 
 def _pista_de_traduccion(palabra):
     """Devuelve solo una pista que no sea una copia de la respuesta esperada."""
+    if get_language() == 'en':
+        return (palabra.definicion_ingles or '').strip()
     pista = (palabra.descripcion_juego_espanol or '').strip()
     if _normalizar_palabra_tablero(pista) == _normalizar_palabra_tablero(palabra.traduccion_espanol):
         return ''
@@ -69,6 +119,10 @@ def _palabras_busqueda(termino='', incluir_campos_ampliados=False):
     coincidencias = (
         Q(busqueda_kichwa__icontains=termino_normalizado)
         | Q(busqueda_espanol__icontains=termino_normalizado)
+        | Q(
+            busqueda_ingles__icontains=termino_normalizado,
+            estado_revision_ingles='validada',
+        )
     )
     if incluir_campos_ampliados:
         coincidencias |= Q(busqueda_contenido__icontains=termino_normalizado)
@@ -77,9 +131,11 @@ def _palabras_busqueda(termino='', incluir_campos_ampliados=False):
         relevancia=Case(
             When(busqueda_kichwa=termino_normalizado, then=Value(1)),
             When(busqueda_espanol=termino_normalizado, then=Value(2)),
-            When(busqueda_kichwa__startswith=termino_normalizado, then=Value(3)),
-            When(busqueda_espanol__startswith=termino_normalizado, then=Value(4)),
-            default=Value(5),
+            When(busqueda_ingles=termino_normalizado, estado_revision_ingles='validada', then=Value(3)),
+            When(busqueda_kichwa__startswith=termino_normalizado, then=Value(4)),
+            When(busqueda_espanol__startswith=termino_normalizado, then=Value(5)),
+            When(busqueda_ingles__startswith=termino_normalizado, estado_revision_ingles='validada', then=Value(6)),
+            default=Value(7),
             output_field=IntegerField(),
         )
     )
@@ -93,7 +149,13 @@ def _filtro_categoria_efectiva(categoria):
 def _agrupar_categorias(categorias):
     grupos = []
     por_clave = {}
-    etiquetas = dict(Categoria.GRUPO_CHOICES)
+    etiquetas = {
+        'entorno': _('Entorno natural'),
+        'personas': _('Personas y comunidad'),
+        'cotidiano': _('Vida cotidiana'),
+        'lengua': _('Lengua, tiempo y pensamiento'),
+        'acciones': _('Acciones y cualidades'),
+    }
     for categoria in categorias:
         grupo = por_clave.get(categoria.grupo)
         if grupo is None:
@@ -125,9 +187,12 @@ def _ordenar_categorias(queryset):
 
 def _seleccionar_palabras_destacadas(limite=6):
     """Elige entradas útiles y variadas de forma estable, sin azar."""
-    candidatas = list(Palabra.objects.select_related('categoria').filter(
-        activa=True,
-    ).order_by('-veces_vista', '-frecuencia_uso', 'palabra_kichwa', 'pk')[:80])
+    filtro = Q(activa=True)
+    if get_language() == 'en':
+        filtro &= Q(estado_revision_ingles='validada') & ~Q(traduccion_ingles='')
+    candidatas = list(Palabra.objects.select_related('categoria').filter(filtro).order_by(
+        '-veces_vista', '-frecuencia_uso', 'palabra_kichwa', 'pk',
+    )[:80])
     seleccionadas = []
     categorias_usadas = set()
     for palabra in candidatas:
@@ -160,9 +225,12 @@ def home(request):
             participa_ranking=True, puntos_totales__gt=0, usuario__is_active=True,
         ).order_by('-puntos_totales', 'usuario__username')[:5]
         inicio_semana = timezone.localdate() - timedelta(days=6)
-        conteos_populares = list(BusquedaPopularDiaria.objects.filter(
-            fecha__gte=inicio_semana, palabra__activa=True,
-        ).values('palabra_id').annotate(total=Sum('consultas')).order_by(
+        filtros_tendencias = Q(fecha__gte=inicio_semana, palabra__activa=True)
+        if get_language() == 'en':
+            filtros_tendencias &= Q(palabra__estado_revision_ingles='validada') & ~Q(palabra__traduccion_ingles='')
+        conteos_populares = list(BusquedaPopularDiaria.objects.filter(filtros_tendencias).values(
+            'palabra_id',
+        ).annotate(total=Sum('consultas')).order_by(
             '-total', 'palabra__palabra_kichwa', 'palabra_id',
         )[:5])
         palabras_populares = Palabra.objects.in_bulk(
@@ -257,11 +325,13 @@ def buscar(request):
             )
         termino_exacto = normalizar_texto_busqueda(termino)
         coincidencias_exactas = list(palabras.filter(
-            Q(busqueda_kichwa=termino_exacto) | Q(busqueda_espanol=termino_exacto)
+            Q(busqueda_kichwa=termino_exacto)
+            | Q(busqueda_espanol=termino_exacto)
+            | Q(busqueda_ingles=termino_exacto, estado_revision_ingles='validada')
         ).order_by().values_list('pk', flat=True)[:2])
         if len(coincidencias_exactas) == 1:
             with transaction.atomic():
-                conteo, _ = BusquedaPopularDiaria.objects.get_or_create(
+                conteo, _creado = BusquedaPopularDiaria.objects.get_or_create(
                     palabra_id=coincidencias_exactas[0], fecha=timezone.localdate(),
                 )
                 BusquedaPopularDiaria.objects.filter(pk=conteo.pk).update(consultas=F('consultas') + 1)
@@ -273,7 +343,9 @@ def buscar(request):
         'query': termino,
         'categoria_activa': categoria,
         'dificultad_activa': dificultad,
-        'dificultad_activa_label': dict(Palabra.DIFICULTAD_CHOICES).get(dificultad, ''),
+        'dificultad_activa_label': {
+            'facil': _('Fácil'), 'medio': _('Media'), 'dificil': _('Difícil'),
+        }.get(dificultad, ''),
         'categorias_agrupadas': _agrupar_categorias(categorias),
         'parametros_pagina': parametros_pagina.urlencode(),
         'filtros_activos': filtros_activos,
@@ -300,10 +372,11 @@ def buscar_palabras_ajax(request):
                 'id': palabra.pk,
                 'url': palabra.get_absolute_url(),
                 'palabra_kichwa': palabra.palabra_kichwa,
-                'traduccion_espanol': palabra.traduccion_espanol,
+                'traduccion_espanol': palabra.traduccion_localizada,
+                'idioma_traduccion': palabra.idioma_traduccion_localizada,
                 'pronunciacion': getattr(palabra, 'pronunciacion', '') or '',
-                'categoria': palabra.categoria.nombre if palabra.categoria else '',
-                'dificultad': palabra.get_dificultad_display() if hasattr(palabra, 'get_dificultad_display') else 'Medio',
+                'categoria': palabra.categoria.nombre_localizado if palabra.categoria else '',
+                'dificultad': palabra.dificultad_localizada if hasattr(palabra, 'dificultad_localizada') else _('Media'),
             })
         
         return JsonResponse({
@@ -334,9 +407,10 @@ def obtener_sugerencias_ajax(request):
                 'id': palabra.pk,
                 'url': palabra.get_absolute_url(),
                 'palabra_kichwa': palabra.palabra_kichwa,
-                'traduccion_espanol': palabra.traduccion_espanol,
+                'traduccion_espanol': palabra.traduccion_localizada,
+                'idioma_traduccion': palabra.idioma_traduccion_localizada,
                 'pronunciacion': getattr(palabra, 'pronunciacion', '') or '',
-                'categoria': palabra.categoria.nombre if palabra.categoria else '',
+                'categoria': palabra.categoria.nombre_localizado if palabra.categoria else '',
             })
         
         return JsonResponse({
@@ -425,34 +499,34 @@ def contacto(request):
 
 JUEGOS_DISPONIBLES = [
     {
-        'tipo': 'traduccion', 'etapa': 'Reconocer', 'nombre': 'Traducción guiada',
-        'descripcion': 'Reconoce equivalencias en ambos sentidos y aprende a distinguir significados cercanos.',
-        'url': 'diccionario:juego_traduccion', 'icono': 'fa-language', 'duracion': '3–5 min',
+        'tipo': 'traduccion', 'etapa': gettext_lazy('Reconocer'), 'nombre': gettext_lazy('Traducción guiada'),
+        'descripcion': gettext_lazy('Reconoce equivalencias en ambos sentidos y aprende a distinguir significados cercanos.'),
+        'url': 'diccionario:juego_traduccion', 'icono': 'fa-language', 'duracion': gettext_lazy('3–5 min'),
     },
     {
-        'tipo': 'escucha', 'etapa': 'Escuchar', 'nombre': 'Escucha y reconoce',
-        'descripcion': 'Escucha una grabación de Kichwa y elige su significado en español.',
-        'url': 'diccionario:juego_escucha', 'icono': 'fa-headphones', 'duracion': '3–5 min',
+        'tipo': 'escucha', 'etapa': gettext_lazy('Escuchar'), 'nombre': gettext_lazy('Escucha y reconoce'),
+        'descripcion': gettext_lazy('Escucha una grabación de Kichwa y elige su significado.'),
+        'url': 'diccionario:juego_escucha', 'icono': 'fa-headphones', 'duracion': gettext_lazy('3–5 min'),
     },
     {
-        'tipo': 'conectar', 'etapa': 'Asociar', 'nombre': 'Conectar significados',
-        'descripcion': 'Une cada palabra Kichwa con su significado en español mediante selecciones claras.',
-        'url': 'diccionario:juego_conexion', 'icono': 'fa-link', 'duracion': '3–4 min',
+        'tipo': 'conectar', 'etapa': gettext_lazy('Asociar'), 'nombre': gettext_lazy('Conectar significados'),
+        'descripcion': gettext_lazy('Une cada palabra Kichwa con su significado mediante selecciones claras.'),
+        'url': 'diccionario:juego_conexion', 'icono': 'fa-link', 'duracion': gettext_lazy('3–4 min'),
     },
     {
-        'tipo': 'memoria', 'etapa': 'Recordar', 'nombre': 'Memoria bilingüe',
-        'descripcion': 'Recupera parejas del mismo tema y fortalece el recuerdo visual del vocabulario.',
-        'url': 'diccionario:juego_memoria', 'icono': 'fa-clone', 'duracion': '4–6 min',
+        'tipo': 'memoria', 'etapa': gettext_lazy('Recordar'), 'nombre': gettext_lazy('Memoria bilingüe'),
+        'descripcion': gettext_lazy('Recupera parejas del mismo tema y fortalece el recuerdo visual del vocabulario.'),
+        'url': 'diccionario:juego_memoria', 'icono': 'fa-clone', 'duracion': gettext_lazy('4–6 min'),
     },
     {
-        'tipo': 'completar', 'etapa': 'Producir', 'nombre': 'Completar en Kichwa',
-        'descripcion': 'Escribe la palabra completa a partir de su significado y una pista gradual.',
-        'url': 'diccionario:juego_completar', 'icono': 'fa-pen', 'duracion': '4–6 min',
+        'tipo': 'completar', 'etapa': gettext_lazy('Producir'), 'nombre': gettext_lazy('Completar en Kichwa'),
+        'descripcion': gettext_lazy('Escribe la palabra completa a partir de su significado y una pista gradual.'),
+        'url': 'diccionario:juego_completar', 'icono': 'fa-pen', 'duracion': gettext_lazy('4–6 min'),
     },
     {
-        'tipo': 'sopa_letras', 'etapa': 'Explorar', 'nombre': 'Sopa de palabras',
-        'descripcion': 'Localiza vocabulario en horizontal, vertical y diagonal, también en sentido inverso.',
-        'url': 'diccionario:juego_sopa_letras', 'icono': 'fa-border-all', 'duracion': '5–7 min',
+        'tipo': 'sopa_letras', 'etapa': gettext_lazy('Explorar'), 'nombre': gettext_lazy('Sopa de palabras'),
+        'descripcion': gettext_lazy('Localiza vocabulario en horizontal, vertical y diagonal, también en sentido inverso.'),
+        'url': 'diccionario:juego_sopa_letras', 'icono': 'fa-border-all', 'duracion': gettext_lazy('5–7 min'),
     },
 ]
 
@@ -566,11 +640,12 @@ def _datos_palabras_juego(palabras):
         {
             'id': palabra.id,
             'kichwa': palabra.palabra_kichwa,
-            'espanol': palabra.traduccion_espanol,
+            'espanol': palabra.traduccion_localizada,
+            'idioma': palabra.idioma_traduccion_localizada,
             'pronunciacion': palabra.pronunciacion or '',
             'pista': _pista_de_traduccion(palabra),
             'tablero': getattr(palabra, 'palabra_tablero', ''),
-            'categoria': palabra.categoria.nombre,
+            'categoria': palabra.categoria.nombre_localizado,
             'audio': palabra.audio.url if palabra.audio else '',
         }
         for palabra in palabras
@@ -578,6 +653,8 @@ def _datos_palabras_juego(palabras):
 
 
 def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=None, requiere_audio=False):
+    if get_language() == 'en' and 'dificultad' not in request.GET:
+        dificultad_predeterminada = 'facil'
     dificultad, categoria = filtros_juego(request, dificultad_predeterminada)
     palabras = seleccionar_palabras_juego(
         request.user, dificultad, categoria, limite=limite, filtro=filtro, requiere_audio=requiere_audio,
@@ -623,6 +700,7 @@ def _contexto_juego(request, tipo, dificultad_predeterminada, limite, filtro=Non
             PerfilUsuario.objects.filter(usuario=request.user).values_list('pistas_extra_disponibles', flat=True).first() or 0
             if request.user.is_authenticated else 0
         ),
+        'textos_juego': _textos_juego(),
     }
 
 def juego_traduccion(request):
@@ -881,7 +959,7 @@ def registrar_respuesta_juego(request):
     if tipo == 'completar' or data.get('direccion') == 'espanol_kichwa':
         respuesta_correcta = palabra.palabra_kichwa
     else:
-        respuesta_correcta = palabra.traduccion_espanol
+        respuesta_correcta = palabra.traduccion_localizada
 
     return JsonResponse({
         'success': True,

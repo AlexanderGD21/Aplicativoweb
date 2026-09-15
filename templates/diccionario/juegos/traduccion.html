@@ -1,5 +1,6 @@
 {% extends 'diccionario/juegos/base_juego.html' %}
-{% block game_title %}Traducción guiada{% endblock %}
-{% block game_heading %}Traducción guiada{% endblock %}
-{% block game_lead %}Reconoce equivalencias en Kichwa y español con opciones del mismo conjunto temático.{% endblock %}
-{% block game_instruction %}Lee la palabra y elige su equivalencia. La dirección cambia para practicar ambos idiomas.{% endblock %}
+{% load i18n %}
+{% block game_title %}{% translate "Traducción guiada" %}{% endblock %}
+{% block game_heading %}{% translate "Traducción guiada" %}{% endblock %}
+{% block game_lead %}{% translate "Reconoce equivalencias en Kichwa y el idioma seleccionado con opciones del mismo conjunto temático." %}{% endblock %}
+{% block game_instruction %}{% translate "Lee la palabra y elige su equivalencia. La dirección cambia para practicar ambos idiomas." %}{% endblock %}

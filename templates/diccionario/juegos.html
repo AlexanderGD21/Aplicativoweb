@@ -1,36 +1,37 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %}Practicar Kichwa - Diccionario Kichwa{% endblock %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}{% translate "Practicar Kichwa - Diccionario Kichwa" %}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/games-learning.css' %}?v=20260913-6">{% endblock %}
 {% block content %}
 <div class="learning-hub">
   <section class="learning-hero" aria-labelledby="learning-title">
     <div class="learning-wrap learning-hero__grid">
       <div class="learning-hero__copy">
-        <h1 id="learning-title">Practica palabras con un propósito</h1>
-        <p>Reconoce, escucha y produce vocabulario en Kichwa. Cada partida respeta el tema y la dificultad que elijas.</p>
+        <h1 id="learning-title">{% translate "Practica palabras con un propósito" %}</h1>
+        <p>{% translate "Reconoce, escucha y produce vocabulario en Kichwa. Cada partida respeta el tema y la dificultad que elijas." %}</p>
       </div>
-      <div class="learning-progress" aria-label="Resumen de aprendizaje">
+      <div class="learning-progress" aria-label="{% translate 'Resumen de aprendizaje' %}">
         {% if user.is_authenticated %}
-          <div><strong>{{ progreso.practicadas }}</strong><span>palabras practicadas</span></div>
-          <div><strong>{{ progreso.dominadas }}</strong><span>dominadas</span></div>
-          <div><strong>{{ progreso.precision }}%</strong><span>precisión acumulada</span></div>
+          <div><strong>{{ progreso.practicadas }}</strong><span>{% translate "palabras practicadas" %}</span></div>
+          <div><strong>{{ progreso.dominadas }}</strong><span>{% translate "dominadas" %}</span></div>
+          <div><strong>{{ progreso.precision }}%</strong><span>{% translate "precisión acumulada" %}</span></div>
         {% else %}
-          <p><strong>Practica sin cuenta.</strong> Al iniciar sesión, guardaremos el avance de cada palabra para proponerte lo que necesitas reforzar.</p>
-          <a href="{% url 'usuarios:login' %}?next={% url 'diccionario:juegos' %}">Iniciar sesión</a>
+          <p><strong>{% translate "Practica sin cuenta." %}</strong> {% translate "Al iniciar sesión, guardaremos el avance de cada palabra para proponerte lo que necesitas reforzar." %}</p>
+          <a href="{% url 'usuarios:login' %}?next={% url 'diccionario:juegos' %}">{% translate "Iniciar sesión" %}</a>
         {% endif %}
       </div>
     </div>
   </section>
   <section class="learning-wrap learning-route" aria-labelledby="route-title">
     <div class="learning-route__intro">
-      <h2 id="route-title">Una ruta, seis habilidades</h2>
-      <p>Empieza por reconocer y continúa cuando quieras. No necesitas completar una modalidad para abrir la siguiente.</p>
+      <h2 id="route-title">{% translate "Una ruta, seis habilidades" %}</h2>
+      <p>{% translate "Empieza por reconocer y continúa cuando quieras. No necesitas completar una modalidad para abrir la siguiente." %}</p>
     </div>
-    <div class="learning-filter" aria-label="Preferencias para empezar">
-      <div class="learning-field"><label for="hub-category"><i class="fas fa-layer-group" aria-hidden="true"></i><span>Tema</span></label><select id="hub-category" data-tooltip="Limita la partida a palabras de un mismo tema"><option value="">Todos los temas</option>{% for categoria in categorias_jugables %}<option value="{{ categoria.slug }}">{{ categoria.nombre }}</option>{% endfor %}</select></div>
-      <div class="learning-field"><label for="hub-difficulty"><i class="fas fa-wave-square" aria-hidden="true"></i><span>Dificultad de pronunciación</span></label><select id="hub-difficulty" data-tooltip="Ajusta la complejidad de las palabras que practicarás"><option value="facil">Fácil</option><option value="medio" selected>Media</option><option value="dificil">Difícil</option></select></div>
-      <a class="learning-primary" id="start-learning" data-tooltip="Comienza con equivalencias Kichwa y español" href="{% url 'diccionario:juego_traduccion' %}">Empezar a reconocer <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+    <div class="learning-filter" aria-label="{% translate 'Preferencias para empezar' %}">
+      <div class="learning-field"><label for="hub-category"><i class="fas fa-layer-group" aria-hidden="true"></i><span>{% translate "Tema" %}</span></label><select id="hub-category"><option value="">{% translate "Todos los temas" %}</option>{% for categoria in categorias_jugables %}<option value="{{ categoria.slug }}">{{ categoria.nombre_localizado }}</option>{% endfor %}</select></div>
+      <div class="learning-field"><label for="hub-difficulty"><i class="fas fa-wave-square" aria-hidden="true"></i><span>{% translate "Dificultad de pronunciación" %}</span></label><select id="hub-difficulty"><option value="facil"{% if LANGUAGE_CODE == 'en' %} selected{% endif %}>{% translate "Fácil" %}</option><option value="medio"{% if LANGUAGE_CODE != 'en' %} selected{% endif %}>{% translate "Media" %}</option><option value="dificil">{% translate "Difícil" %}</option></select></div>
+      <a class="learning-primary" id="start-learning" href="{% url 'diccionario:juego_traduccion' %}">{% translate "Empezar a reconocer" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
     </div>
     <ol class="learning-path">
       {% for juego in juegos_disponibles %}
@@ -39,7 +40,7 @@
         <div class="learning-path__body">
           <div class="learning-path__meta"><span>{{ juego.etapa }}</span><span>{{ juego.duracion }}</span></div>
           <h3>{{ juego.nombre }}</h3><p>{{ juego.descripcion }}</p>
-          <a class="learning-game-link" data-game-url="{% url juego.url %}" data-tooltip="Practicar {{ juego.etapa|lower }} con {{ juego.nombre|lower }}" href="{% url juego.url %}">Abrir modalidad <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          <a class="learning-game-link" data-game-url="{% url juego.url %}" href="{% url juego.url %}">{% translate "Abrir modalidad" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
       </li>
       {% endfor %}

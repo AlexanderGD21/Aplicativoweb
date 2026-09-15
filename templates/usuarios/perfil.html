@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{% if es_propio %}Mi espacio de aprendizaje{% else %}Perfil de {{ usuario.username }}{% endif %} · Diccionario Kichwa{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/profile.css' %}?v=20260913-4">{% endblock %}
@@ -8,7 +8,7 @@
 <div class="learning-profile">
     <header class="profile-masthead">
         <div class="profile-shell">
-            <a class="profile-back" href="{% url 'diccionario:home' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Inicio</a>
+            <a class="profile-back" href="{% url 'diccionario:home' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% translate "Inicio" %}</a>
             <div class="profile-identity">
                 {% if perfil.avatar %}
                     <img class="profile-avatar" src="{{ perfil.avatar.url }}" alt="Foto de {{ usuario.username }}">
@@ -16,29 +16,29 @@
                     <span class="profile-avatar profile-avatar--initial" aria-hidden="true">{{ usuario.username|first|upper }}</span>
                 {% endif %}
                 <div class="profile-identity-copy">
-                    <p class="profile-eyebrow">{% if es_propio %}Tu espacio personal{% else %}Perfil de la comunidad{% endif %}</p>
+                    <p class="profile-eyebrow">{% if es_propio %}{% translate "Tu espacio personal" %}{% else %}{% translate "Perfil de la comunidad" %}{% endif %}</p>
                     <h1>{{ usuario.get_full_name|default:usuario.username }}</h1>
-                    <p class="profile-handle">@{{ usuario.username }} <span aria-hidden="true">·</span> {{ perfil.get_nivel_kichwa_display }}</p>
+                    <p class="profile-handle">@{{ usuario.username }} <span aria-hidden="true">·</span> {{ perfil.nivel_kichwa_localizado }}</p>
                     {% if perfil.biografia %}<p class="profile-bio">{{ perfil.biografia }}</p>{% endif %}
                 </div>
-                {% if es_propio %}<a class="profile-edit" href="{% url 'usuarios:editar_perfil' %}"><i class="fas fa-pen" aria-hidden="true"></i> Editar perfil</a>{% endif %}
+                {% if es_propio %}<a class="profile-edit" href="{% url 'usuarios:editar_perfil' %}"><i class="fas fa-pen" aria-hidden="true"></i> {% translate "Editar perfil" %}</a>{% endif %}
             </div>
             <p class="profile-masthead-meta">Miembro desde {{ usuario.date_joined|date:"F Y" }}{% if perfil.ciudad or perfil.pais %} <span aria-hidden="true">·</span> {% if perfil.ciudad %}{{ perfil.ciudad }}{% endif %}{% if perfil.ciudad and perfil.pais %}, {% endif %}{% if perfil.pais %}{{ perfil.pais }}{% endif %}{% endif %}</p>
         </div>
     </header>
 
-    <div class="profile-shell profile-main" aria-label="Contenido del perfil">
+    <div class="profile-shell profile-main" aria-label="{% translate 'Contenido del perfil' %}">
         {% if es_propio %}
             <section class="profile-overview" aria-labelledby="profile-overview-title">
                 <div class="profile-section-heading">
-                    <div><p class="profile-kicker">Tu recorrido</p><h2 id="profile-overview-title">Aprender, palabra a palabra</h2></div>
-                    <a href="{% url 'diccionario:juegos' %}">Continuar practicando <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <div><p class="profile-kicker">{% translate "Tu recorrido" %}</p><h2 id="profile-overview-title">{% translate "Aprender, palabra a palabra" %}</h2></div>
+                    <a href="{% url 'diccionario:juegos' %}">{% translate "Continuar practicando" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </div>
                 <div class="profile-metrics">
-                    <div class="profile-metric"><span class="profile-metric-number">{{ perfil.puntos_totales }}</span><span class="profile-metric-label">Puntos ganados</span></div>
-                    <div class="profile-metric"><span class="profile-metric-number">{{ progreso.practicadas }}</span><span class="profile-metric-label">Palabras practicadas</span></div>
-                    <div class="profile-metric"><span class="profile-metric-number">{{ progreso.dominadas }}</span><span class="profile-metric-label">Palabras dominadas</span></div>
-                    <div class="profile-metric"><span class="profile-metric-number">{{ progreso.precision }}%</span><span class="profile-metric-label">Aciertos al practicar</span></div>
+                    <div class="profile-metric"><span class="profile-metric-number">{{ perfil.puntos_totales }}</span><span class="profile-metric-label">{% translate "Puntos ganados" %}</span></div>
+                    <div class="profile-metric"><span class="profile-metric-number">{{ progreso.practicadas }}</span><span class="profile-metric-label">{% translate "Palabras practicadas" %}</span></div>
+                    <div class="profile-metric"><span class="profile-metric-number">{{ progreso.dominadas }}</span><span class="profile-metric-label">{% translate "Palabras dominadas" %}</span></div>
+                    <div class="profile-metric"><span class="profile-metric-number">{{ progreso.precision }}%</span><span class="profile-metric-label">{% translate "Aciertos al practicar" %}</span></div>
                 </div>
                 <div class="profile-level" aria-labelledby="profile-level-title">
                     <div class="profile-level-copy">
@@ -47,7 +47,7 @@
                     </div>
                     <div class="profile-level-track">
                         <strong>{{ nivel_practica.puntos_en_nivel }} de {{ nivel_practica.meta }} puntos</strong>
-                        <progress value="{{ nivel_practica.puntos_en_nivel }}" max="{{ nivel_practica.meta }}" aria-label="Avance hacia el nivel {{ nivel_practica.proximo_numero }}"></progress>
+                        <progress value="{{ nivel_practica.puntos_en_nivel }}" max="{{ nivel_practica.meta }}" aria-label="{% blocktranslate with level=nivel_practica.proximo_numero %}Avance hacia el nivel {{ level }}{% endblocktranslate %}"></progress>
                         <span>Faltan {{ nivel_practica.faltantes }} puntos para el nivel {{ nivel_practica.proximo_numero }}</span>
                     </div>
                 </div>
@@ -57,10 +57,10 @@
                 <div class="profile-primary">
                     <section class="profile-missions" aria-labelledby="profile-missions-title">
                         <div class="profile-section-heading profile-section-heading--compact">
-                            <h2 id="profile-missions-title">Misiones de práctica</h2>
+                            <h2 id="profile-missions-title">{% translate "Misiones de práctica" %}</h2>
                             <span>{{ misiones_completadas }} de {{ misiones|length }} completas</span>
                         </div>
-                        <p class="profile-missions-intro">Sigue objetivos concretos mientras practicas. Los puntos se ganan al acertar una palabra por primera vez.</p>
+                        <p class="profile-missions-intro">{% translate "Sigue objetivos concretos mientras practicas. Los puntos se ganan al acertar una palabra por primera vez." %}</p>
                         <ol class="profile-mission-list">
                             {% for mision in misiones %}
                                 <li>
@@ -72,21 +72,21 @@
                         </ol>
                     </section>
                     <section class="profile-panel" aria-labelledby="profile-next-title">
-                        <p class="profile-kicker">Siguiente paso</p>
-                        <h2 id="profile-next-title">Sigue explorando el Kichwa</h2>
-                        <p>Practica en seis modalidades o vuelve a una palabra guardada para repasarla.</p>
+                        <p class="profile-kicker">{% translate "Siguiente paso" %}</p>
+                        <h2 id="profile-next-title">{% translate "Sigue explorando el Kichwa" %}</h2>
+                        <p>{% translate "Practica en seis modalidades o vuelve a una palabra guardada para repasarla." %}</p>
                         <div class="profile-next-actions">
-                            <a class="profile-button profile-button--primary" href="{% url 'diccionario:juegos' %}"><i class="fas fa-gamepad" aria-hidden="true"></i> Ir a los juegos</a>
-                            <a class="profile-button profile-button--quiet" href="{% url 'diccionario:buscar' %}"><i class="fas fa-search" aria-hidden="true"></i> Buscar palabras</a>
+                            <a class="profile-button profile-button--primary" href="{% url 'diccionario:juegos' %}"><i class="fas fa-gamepad" aria-hidden="true"></i> {% translate "Ir a los juegos" %}</a>
+                            <a class="profile-button profile-button--quiet" href="{% url 'diccionario:buscar' %}"><i class="fas fa-search" aria-hidden="true"></i> {% translate "Buscar palabras" %}</a>
                         </div>
                     </section>
 
                     <section class="profile-history" aria-labelledby="profile-history-title">
-                        <div class="profile-section-heading profile-section-heading--compact"><div><h2 id="profile-history-title">Actividad reciente</h2></div><a href="{% url 'usuarios:mi_actividad' %}">Ver historial completo <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+                        <div class="profile-section-heading profile-section-heading--compact"><div><h2 id="profile-history-title">{% translate "Actividad reciente" %}</h2></div><a href="{% url 'usuarios:mi_actividad' %}">{% translate "Ver historial completo" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
                         {% if actividad_reciente %}
                             <ol class="profile-session-list">
                                 {% for evento in actividad_reciente %}
-                                    <li><span class="profile-session-icon" aria-hidden="true"><i class="fas {% if evento.tipo == 'busqueda' %}fa-search{% elif evento.tipo == 'palabra' %}fa-book-open{% else %}fa-gamepad{% endif %}"></i></span><span class="profile-session-copy"><strong>{% if evento.tipo == 'busqueda' %}Buscaste “{{ evento.busqueda.termino_buscado }}”{% elif evento.tipo == 'palabra' %}Viste {{ evento.palabra.palabra_kichwa|default:'una entrada' }}{% else %}Jugaste {{ evento.estadistica.get_tipo_juego_display }}{% endif %}</strong><small>{{ evento.fecha|date:"d/m/Y · H:i" }}</small></span><span class="profile-session-score">{{ evento.get_tipo_display }}</span></li>
+                                    <li><span class="profile-session-icon" aria-hidden="true"><i class="fas {% if evento.tipo == 'busqueda' %}fa-search{% elif evento.tipo == 'palabra' %}fa-book-open{% else %}fa-gamepad{% endif %}"></i></span><span class="profile-session-copy"><strong>{% if evento.tipo == 'busqueda' %}{% blocktranslate with term=evento.busqueda.termino_buscado %}Buscaste “{{ term }}”{% endblocktranslate %}{% elif evento.tipo == 'palabra' %}{% blocktranslate with word=evento.palabra.palabra_kichwa|default:'una entrada' %}Viste {{ word }}{% endblocktranslate %}{% else %}{% blocktranslate with game=evento.estadistica.tipo_juego_localizado %}Jugaste {{ game }}{% endblocktranslate %}{% endif %}</strong><small>{{ evento.fecha|date:"d/m/Y · H:i" }}</small></span><span class="profile-session-score">{{ evento.tipo_localizado }}</span></li>
                                 {% endfor %}
                             </ol>
                         {% else %}
@@ -95,24 +95,24 @@
                     </section>
                 </div>
 
-                <aside class="profile-secondary" aria-label="Herramientas de tu cuenta">
+                <aside class="profile-secondary" aria-label="{% translate 'Herramientas de tu cuenta' %}">
                     <section class="profile-side-panel profile-side-panel--hints" aria-labelledby="profile-hints-title">
-                        <p class="profile-kicker">Ayuda para practicar</p>
-                        <h2 id="profile-hints-title">Pistas extra</h2>
+                        <p class="profile-kicker">{% translate "Ayuda para practicar" %}</p>
+                        <h2 id="profile-hints-title">{% translate "Pistas extra" %}</h2>
                         <p class="profile-hint-balance"><strong>{{ perfil.pistas_extra_disponibles }}</strong> de 2 disponibles</p>
                         <p>Son dos pistas adicionales por cuenta, compartidas entre todos los juegos. No se recargan al cerrar sesión.</p>
                     </section>
                     <section class="profile-side-panel" aria-labelledby="profile-library-title">
-                        <p class="profile-kicker">Tu colección</p><h2 id="profile-library-title">Palabras favoritas</h2>
+                        <p class="profile-kicker">{% translate "Tu colección" %}</p><h2 id="profile-library-title">{% translate "Palabras favoritas" %}</h2>
                         <p><strong>{{ total_favoritas }}</strong> palabra{{ total_favoritas|pluralize }} guardada{{ total_favoritas|pluralize }} para volver a consultar.</p>
-                        <a class="profile-text-link" href="{% url 'diccionario:mis_favoritas' %}">Ver mis favoritas <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="profile-text-link" href="{% url 'diccionario:mis_favoritas' %}">{% translate "Ver mis favoritas" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                     </section>
                     <section class="profile-side-panel" aria-labelledby="profile-privacy-title">
-                        <p class="profile-kicker">A tu elección</p><h2 id="profile-privacy-title">Privacidad y cuenta</h2>
+                        <p class="profile-kicker">{% translate "A tu elección" %}</p><h2 id="profile-privacy-title">{% translate "Privacidad y cuenta" %}</h2>
                         <p>{% if perfil.participa_ranking %}Participas en el ranking público.{% else %}Tus puntos no aparecen en el ranking público.{% endif %} {% if perfil.perfil_publico %}Tu perfil es visible para la comunidad.{% else %}Tu perfil es privado.{% endif %}</p>
-                        <a class="profile-text-link" href="{% url 'usuarios:editar_perfil' %}">Cambiar preferencias <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-                        <a class="profile-text-link" href="{% url 'usuarios:cambiar_contrasena' %}">Cambiar contraseña <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-                        <a class="profile-text-link" href="{% url 'usuarios:mi_actividad' %}">Ver actividad y estadísticas <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="profile-text-link" href="{% url 'usuarios:editar_perfil' %}">{% translate "Cambiar preferencias" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="profile-text-link" href="{% url 'usuarios:cambiar_contrasena' %}">{% translate "Cambiar contraseña" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                        <a class="profile-text-link" href="{% url 'usuarios:mi_actividad' %}">{% translate "Ver actividad y estadísticas" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                         <a class="profile-text-link profile-text-link--muted" href="{% url 'usuarios:eliminar_cuenta' %}">Gestionar eliminación de cuenta</a>
                     </section>
                 </aside>

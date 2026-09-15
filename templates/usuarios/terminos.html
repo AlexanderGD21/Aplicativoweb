@@ -1,10 +1,34 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
-{% block title %}Términos de uso | Diccionario Kichwa{% endblock %}
+{% block title %}{% if LANGUAGE_CODE == 'en' %}Terms of use | Kichwa Dictionary{% else %}Términos de uso | Diccionario Kichwa{% endif %}{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/legal.css' %}?v=20260910">{% endblock %}
 
 {% block content %}
+{% if LANGUAGE_CODE == 'en' %}
+<article class="legal-page">
+  <header class="legal-masthead"><div class="legal-masthead-inner">
+    <nav class="legal-breadcrumb" aria-label="Breadcrumb"><a href="{% url 'diccionario:home' %}">Home</a><i class="fas fa-chevron-right" aria-hidden="true"></i><span>Terms of use</span></nav>
+    <h1>Terms of use</h1><p>These terms describe the actual rules for browsing the corpus, creating an account, and using the Kichwa Dictionary's educational features.</p>
+    <div class="legal-meta"><span>Version {{ version_legal }}</span><span>Effective September 10, 2026</span></div>
+  </div></header>
+  <div class="legal-layout">
+    <aside class="legal-index"><strong>On this page</strong><nav data-legal-index aria-label="Terms index"><a href="#alcance">Scope</a><a href="#cuenta">Your account</a><a href="#contenido">Content</a><a href="#uso">Permitted use</a><a href="#disponibilidad">Availability</a><a href="#cierre">Closure and changes</a><a href="#contacto">Contact</a></nav></aside>
+    <div class="legal-document">
+      <p class="legal-summary">Summary: you can browse the dictionary without an account. By registering, you agree to protect your credentials, use the platform for lawful purposes, and recognize that the corpus is continuously curated.</p>
+      <section class="legal-section" id="alcance"><h2>1. Scope of the service</h2><p>Kichwa Dictionary is an educational tool for finding equivalents between Kichwa and Spanish, listening to pronunciations when audio is available, and practicing with activities on the platform.</p><p>Access and registration imply acceptance of these terms and the <a href="{% url 'usuarios:privacidad' %}">Privacy policy</a>. If you disagree, you may use only public features that do not require an account.</p></section>
+      <section class="legal-section" id="cuenta"><h2>2. Your account</h2><ul><li>You must provide your own information and keep it current.</li><li>You are responsible for protecting your password and signing out on shared devices.</li><li>You must not share, sell, or use another person's account.</li><li>The linked email is used for access recovery and for educational communications only when you choose to receive them.</li></ul><p>We may temporarily limit repeated sign-in or recovery attempts to protect accounts and service availability.</p></section>
+      <section class="legal-section" id="contenido"><h2>3. Corpus and educational content</h2><p>Translations, categories, definitions, and pronunciations are provided for educational reference. The corpus is continuously reviewed and may contain regional variants, incomplete information, or errors.</p><p>Automated classification is not presented as a linguistic certification and does not replace the judgment of teachers, speakers, or specialist researchers.</p></section>
+      <section class="legal-section" id="uso"><h2>4. Permitted use</h2><p>You may use the platform for learning, teaching, and personal or academic research while respecting applicable law and the rights of others.</p><h3>Prohibited uses</h3><ul><li>Attempting to access accounts, data, or administrative areas without authorization.</li><li>Interfering with the service, automating abusive requests, or bypassing security limits.</li><li>Uploading malicious files, impersonating others, or using the platform to harass people.</li><li>Presenting the content as official linguistic validation when it is not.</li></ul></section>
+      <section class="legal-section" id="disponibilidad"><h2>5. Availability and corpus changes</h2><p>The project may correct words, change categories, remove features, or temporarily interrupt the service for maintenance or security. It does not promise uninterrupted availability, universal synchronization, artificial-intelligence features, or services that are not visible in the application.</p></section>
+      <section class="legal-section" id="cierre"><h2>6. Account closure and changes</h2><p>You can delete your account from profile options after confirming your password. We may also restrict an account in response to abuse, security risks, or a breach of these terms.</p><p>If these terms change materially, a new version and effective date will be published. Any future acceptance must be linked to the applicable version.</p></section>
+      <section class="legal-section" id="contacto"><h2>7. Questions and incidents</h2><p>Technical issues can be reported in the project's <a href="https://github.com/AlexanderGD21/Aplicativoweb" target="_blank" rel="noopener">public repository<span class="visually-hidden"> (opens in a new tab)</span></a>. Do not publish passwords, emails, documents, or other personal data in a public issue.</p><div class="legal-callout">Before operating the service for an institution or the general public, the responsible entity must identify the operator, provide a private contact channel, and review these terms with applicable legal advice.</div></section>
+      <div class="legal-switch"><span>You may also want to know how data is handled.</span><a href="{% url 'usuarios:privacidad' %}">Read the privacy policy <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+    </div>
+  </div>
+</article>
+{% else %}
 <article class="legal-page">
   <header class="legal-masthead">
     <div class="legal-masthead-inner">
@@ -39,5 +63,6 @@
     </div>
   </div>
 </article>
+{% endif %}
 {% endblock %}
 {% block extra_js %}<script src="{% static 'js/legal.js' %}?v=20260910"></script>{% endblock %}

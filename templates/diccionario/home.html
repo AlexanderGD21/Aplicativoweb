@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Diccionario Kichwa | Busca, comprende y aprende{% endblock %}
+{% block title %}{% translate "Diccionario Kichwa | Busca, comprende y aprende" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}">
@@ -21,33 +21,33 @@
 
         <div class="container home-hero-grid">
             <div class="home-intro">
-                <h1 id="home-title">Encuentra una palabra en Kichwa o español</h1>
-                <p>Consulta equivalencias, pronunciación y contexto en un corpus de {{ total_palabras }} entradas organizado por temas reales.</p>
+                <h1 id="home-title">{% translate "Encuentra una palabra en Kichwa, español o inglés" %}</h1>
+                <p>{% blocktranslate %}Consulta equivalencias, pronunciación y contexto en un corpus de {{ total_palabras }} entradas organizado por temas reales.{% endblocktranslate %}</p>
 
                 <form class="home-search" method="get" action="{% url 'diccionario:buscar' %}">
-                    <label for="id_termino">¿Qué palabra quieres comprender?</label>
+                    <label for="id_termino">{% translate "¿Qué palabra quieres comprender?" %}</label>
                     <div class="search-control" data-suggestions-url="{% url 'diccionario:obtener_sugerencias_ajax' %}">
                         <i class="fas fa-search" aria-hidden="true"></i>
-                        <input id="id_termino" name="termino" type="search" placeholder="Prueba con wasi, casa, yaku o agua" autocomplete="off" aria-autocomplete="list" aria-controls="search-suggestions" aria-expanded="false" data-tooltip="Escribe una palabra completa o una parte, en Kichwa o español">
-                        <button type="submit" data-tooltip="Buscar esta palabra en todo el diccionario">Buscar</button>
+                        <input id="id_termino" name="termino" type="search" placeholder="{% translate 'Prueba con wasi, casa, water o yaku' %}" autocomplete="off" aria-autocomplete="list" aria-controls="search-suggestions" aria-expanded="false" data-tooltip="{% translate 'Escribe una palabra completa o una parte, en Kichwa o español' %}">
+                        <button type="submit">{% translate "Buscar" %}</button>
                         <div id="search-suggestions" class="search-suggestions" role="listbox" hidden></div>
                     </div>
                     <p id="search-suggestions-status" class="visually-hidden" role="status" aria-live="polite"></p>
                     <div class="home-filter-row">
                         <label>
-                            <span>Tema</span>
-                            <select name="categoria" data-tooltip="Muestra sólo palabras del tema seleccionado">
-                                <option value="">Todos los temas</option>
-                                {% for categoria in categorias %}<option value="{{ categoria.pk }}">{{ categoria.nombre }}</option>{% endfor %}
+                            <span>{% translate "Tema" %}</span>
+                            <select name="categoria" data-tooltip="{% translate 'Muestra solo palabras del tema seleccionado' %}">
+                                <option value="">{% translate "Todos los temas" %}</option>
+                                {% for categoria in categorias %}<option value="{{ categoria.pk }}">{{ categoria.nombre_localizado }}</option>{% endfor %}
                             </select>
                         </label>
                         <label>
-                            <span>Pronunciación</span>
-                            <select name="dificultad" data-tooltip="Filtra según la complejidad de pronunciación">
-                                <option value="">Cualquier dificultad</option>
-                                <option value="facil">Fácil</option>
-                                <option value="medio">Media</option>
-                                <option value="dificil">Difícil</option>
+                            <span>{% translate "Pronunciación" %}</span>
+                            <select name="dificultad" data-tooltip="{% translate 'Filtra según la complejidad de pronunciación' %}">
+                                <option value="">{% translate "Cualquier dificultad" %}</option>
+                                <option value="facil">{% translate "Fácil" %}</option>
+                                <option value="medio">{% translate "Media" %}</option>
+                                <option value="dificil">{% translate "Difícil" %}</option>
                             </select>
                         </label>
                     </div>
@@ -55,28 +55,28 @@
             </div>
 
             {% if palabras_destacadas.0 %}
-            <aside class="open-entry" aria-label="Una entrada para comenzar">
+            <aside class="open-entry" aria-label="{% translate 'Una entrada para comenzar' %}">
                 <div class="open-entry-word">
                     <h2>{{ palabras_destacadas.0.palabra_kichwa }}</h2>
                     <span>Kichwa</span>
                 </div>
                 <div class="open-entry-translation">
-                    <span>Español</span>
-                    <p>{{ palabras_destacadas.0.traduccion_espanol }}</p>
+                    <span>{{ palabras_destacadas.0.idioma_traduccion_localizada }}</span>
+                    <p>{{ palabras_destacadas.0.traduccion_localizada }}</p>
                 </div>
                 {% if palabras_destacadas.0.pronunciacion %}<p class="open-entry-pronunciation"><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabras_destacadas.0.pronunciacion }}</p>{% endif %}
-                <a href="{{ palabras_destacadas.0.get_absolute_url }}" data-tooltip="Consultar significado, pronunciación y palabras relacionadas">Abrir esta entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <a href="{{ palabras_destacadas.0.get_absolute_url }}">{% translate "Abrir esta entrada" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </aside>
             {% endif %}
         </div>
     </section>
 
-    <section class="corpus-strip" aria-label="Resumen del diccionario">
+    <section class="corpus-strip" aria-label="{% translate 'Resumen del diccionario' %}">
         <div class="container corpus-facts">
-            <p><strong>{{ total_palabras }}</strong><span>equivalencias bilingües</span></p>
-            <p><strong>{{ total_categorias }}</strong><span>temas para explorar</span></p>
-            <p><strong>6</strong><span>juegos de práctica</span></p>
-            <a href="{% url 'diccionario:buscar' %}" data-tooltip="Abrir las {{ total_palabras }} entradas del diccionario">Explorar el corpus <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            <p><strong>{{ total_palabras }}</strong><span>{% translate "entradas del corpus" %}</span></p>
+            <p><strong>{{ total_categorias }}</strong><span>{% translate "temas para explorar" %}</span></p>
+            <p><strong>6</strong><span>{% translate "juegos de práctica" %}</span></p>
+            <a href="{% url 'diccionario:buscar' %}">{% translate "Explorar el corpus" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
         </div>
     </section>
 
@@ -84,21 +84,21 @@
     <section class="weekly-challenge" aria-labelledby="weekly-challenge-title">
         <div class="container weekly-challenge-inner">
             <div>
-                <p class="weekly-challenge-kicker">Del {{ reto_semana.inicio|date:'j M' }} al {{ reto_semana.fin|date:'j M' }}</p>
-                <h2 id="weekly-challenge-title">Reto de esta semana</h2>
-                <p>Acierta cinco palabras distintas en <strong>{{ reto_semana.modalidad }}</strong>. El reto cambia cada lunes.</p>
+                <p class="weekly-challenge-kicker">{% blocktranslate with start=reto_semana.inicio|date:'j M' end=reto_semana.fin|date:'j M' %}Del {{ start }} al {{ end }}{% endblocktranslate %}</p>
+                <h2 id="weekly-challenge-title">{% translate "Reto de esta semana" %}</h2>
+                <p>{% blocktranslate with modalidad=reto_semana.modalidad %}Acierta cinco palabras distintas en <strong>{{ modalidad }}</strong>. El reto cambia cada lunes.{% endblocktranslate %}</p>
             </div>
             <div class="weekly-challenge-action">
                 {% if user.is_authenticated %}
                 <div class="weekly-challenge-progress">
-                    <strong>{% if reto_semana.completado %}Reto completado{% else %}{{ reto_semana.avance }} de {{ reto_semana.meta }} palabras{% endif %}</strong>
-                    <progress value="{{ reto_semana.avance }}" max="{{ reto_semana.meta }}" aria-label="Avance privado del reto semanal: {{ reto_semana.avance }} de {{ reto_semana.meta }} palabras"></progress>
-                    <span>Tu avance es privado y se reinicia cada lunes.</span>
+                    <strong>{% if reto_semana.completado %}{% translate "Reto completado" %}{% else %}{% blocktranslate with avance=reto_semana.avance meta=reto_semana.meta %}{{ avance }} de {{ meta }} palabras{% endblocktranslate %}{% endif %}</strong>
+                    <progress value="{{ reto_semana.avance }}" max="{{ reto_semana.meta }}" aria-label="{% blocktranslate with avance=reto_semana.avance meta=reto_semana.meta %}Avance privado del reto semanal: {{ avance }} de {{ meta }} palabras{% endblocktranslate %}"></progress>
+                    <span>{% translate "Tu avance es privado y se reinicia cada lunes." %}</span>
                 </div>
                 {% else %}
-                <p>Juega sin cuenta. <a href="{% url 'usuarios:login' %}">Inicia sesión</a> para guardar tu avance.</p>
+                <p>{% translate "Juega sin cuenta." %} <a href="{% url 'usuarios:login' %}">{% translate "Inicia sesión" %}</a> {% translate "para guardar tu avance." %}</p>
                 {% endif %}
-                <a class="weekly-challenge-link" href="{% url reto_semana.url %}">{% if reto_semana.completado %}Volver a practicar{% else %}Empezar reto{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <a class="weekly-challenge-link" href="{% url reto_semana.url %}">{% if reto_semana.completado %}{% translate "Volver a practicar" %}{% else %}{% translate "Empezar reto" %}{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
         </div>
     </section>
@@ -108,20 +108,20 @@
         <div class="container">
             <div class="home-section-heading">
                 <div>
-                    <h2 id="topics-title">Explora por tema</h2>
-                    <p>Empieza por un campo cotidiano y continúa descubriendo vocabulario relacionado.</p>
+                    <h2 id="topics-title">{% translate "Explora por tema" %}</h2>
+                    <p>{% translate "Empieza por un campo cotidiano y continúa descubriendo vocabulario relacionado." %}</p>
                 </div>
-                <a href="{% url 'diccionario:categorias' %}" data-tooltip="Consultar la organización temática completa">Ver los {{ total_categorias }} temas</a>
+                <a href="{% url 'diccionario:categorias' %}">{% blocktranslate %}Ver los {{ total_categorias }} temas{% endblocktranslate %}</a>
             </div>
             <div class="topic-list">
                 {% for categoria in categorias_destacadas %}
-                <a class="topic-row" style="--topic-color: {{ categoria.color|default:'#61736c' }}" href="{% url 'diccionario:palabras_por_categoria' categoria.pk %}" data-tooltip="Explorar {{ categoria.total_palabras }} palabras de {{ categoria.nombre }}">
+                <a class="topic-row" style="--topic-color: {{ categoria.color|default:'#61736c' }}" href="{% url 'diccionario:palabras_por_categoria' categoria.pk %}" data-tooltip="{% blocktranslate with total=categoria.total_palabras category=categoria.nombre_localizado %}Explorar {{ total }} palabras de {{ category }}{% endblocktranslate %}">
                     <span class="topic-marker" aria-hidden="true"></span>
-                    <span><strong>{{ categoria.nombre }}</strong>{% if categoria.descripcion %}<small>{{ categoria.descripcion|truncatechars:88 }}</small>{% endif %}</span>
-                    <span class="topic-count">{{ categoria.total_palabras }} palabras</span>
+                    <span><strong>{{ categoria.nombre_localizado }}</strong>{% if categoria.descripcion_localizada %}<small>{{ categoria.descripcion_localizada|truncatechars:88 }}</small>{% endif %}</span>
+                    <span class="topic-count">{% blocktranslate count total=categoria.total_palabras %}{{ total }} palabra{% plural %}{{ total }} palabras{% endblocktranslate %}</span>
                     <i class="fas fa-arrow-right" aria-hidden="true"></i>
                 </a>
-                {% empty %}<p>No hay temas disponibles todavía.</p>{% endfor %}
+                {% empty %}<p>{% translate "No hay temas disponibles todavía." %}</p>{% endfor %}
             </div>
         </div>
     </section>
@@ -130,15 +130,15 @@
         <div class="container">
             <div class="home-section-heading">
                 <div>
-                    <h2 id="community-title">Aprender en comunidad</h2>
-                    <p>Descubre el progreso compartido y las entradas que más curiosidad despiertan esta semana.</p>
+                    <h2 id="community-title">{% translate "Aprender en comunidad" %}</h2>
+                    <p>{% translate "Descubre el progreso compartido y las entradas que más curiosidad despiertan esta semana." %}</p>
                 </div>
             </div>
             <div class="community-grid">
                 <div class="community-list" aria-labelledby="ranking-title">
                     <div class="community-list-heading">
-                        <h3 id="ranking-title">Ranking de aprendizaje</h3>
-                        <p>10 puntos por cada palabra acertada por primera vez.</p>
+                        <h3 id="ranking-title">{% translate "Ranking de aprendizaje" %}</h3>
+                        <p>{% translate "10 puntos por cada palabra acertada por primera vez." %}</p>
                     </div>
                     {% if ranking %}
                     <ol class="community-rows">
@@ -146,26 +146,26 @@
                         <li><span class="community-position">{{ forloop.counter }}</span><span class="community-name">{{ perfil.usuario.username }}</span><strong>{{ perfil.puntos_totales }} pts</strong></li>
                         {% endfor %}
                     </ol>
-                    {% else %}<p class="community-empty">Aún no hay participantes en el ranking. La práctica puede comenzar hoy.</p>{% endif %}
+                    {% else %}<p class="community-empty">{% translate "Aún no hay participantes en el ranking. La práctica puede comenzar hoy." %}</p>{% endif %}
                     {% if user.is_authenticated %}
-                    <a class="community-action" href="{% url 'usuarios:editar_perfil' %}" data-tooltip="Activar o desactivar tu participación en el ranking">{% if user.perfil.participa_ranking %}Gestionar mi participación{% else %}Unirme al ranking{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <a class="community-action" href="{% url 'usuarios:editar_perfil' %}" data-tooltip="{% translate 'Activar o desactivar tu participación en el ranking' %}">{% if user.perfil.participa_ranking %}{% translate "Gestionar mi participación" %}{% else %}{% translate "Unirme al ranking" %}{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                     {% else %}
-                    <a class="community-action" href="{% url 'usuarios:registro' %}" data-tooltip="Crear una cuenta para guardar puntos de práctica">Crea una cuenta para sumar puntos <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <a class="community-action" href="{% url 'usuarios:registro' %}">{% translate "Crea una cuenta para sumar puntos" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                     {% endif %}
                 </div>
                 <div class="community-list" aria-labelledby="trending-title">
                     <div class="community-list-heading">
-                        <h3 id="trending-title">Más buscadas de la semana</h3>
-                        <p>Consultas exactas de los últimos siete días; aquí solo mostramos conteos.</p>
+                        <h3 id="trending-title">{% translate "Más buscadas de la semana" %}</h3>
+                        <p>{% translate "Consultas exactas de los últimos siete días; aquí solo mostramos conteos." %}</p>
                     </div>
                     {% if tendencias %}
                     <ol class="community-rows">
                         {% for tendencia in tendencias %}
-                        <li><span class="community-position">{{ forloop.counter }}</span><a class="community-name" href="{{ tendencia.palabra.get_absolute_url }}" data-tooltip="Abrir la entrada de {{ tendencia.palabra.palabra_kichwa }}"><strong>{{ tendencia.palabra.palabra_kichwa }}</strong><small>{{ tendencia.palabra.traduccion_espanol|truncatechars:46 }}</small></a><span class="community-count">{{ tendencia.consultas }} {% if tendencia.consultas == 1 %}consulta{% else %}consultas{% endif %}</span></li>
+                        <li><span class="community-position">{{ forloop.counter }}</span><a class="community-name" href="{{ tendencia.palabra.get_absolute_url }}"><strong>{{ tendencia.palabra.palabra_kichwa }}</strong><small>{{ tendencia.palabra.traduccion_localizada|truncatechars:46 }}</small></a><span class="community-count">{% blocktranslate count total=tendencia.consultas %}{{ total }} consulta{% plural %}{{ total }} consultas{% endblocktranslate %}</span></li>
                         {% endfor %}
                     </ol>
-                    {% else %}<p class="community-empty">Todavía no hay búsquedas exactas esta semana. Prueba con una palabra en Kichwa o español.</p>{% endif %}
-                    <a class="community-action" href="{% url 'diccionario:buscar' %}" data-tooltip="Explorar palabras en Kichwa o español">Explorar palabras <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    {% else %}<p class="community-empty">{% translate "Todavía no hay búsquedas exactas esta semana. Prueba con una palabra en Kichwa, español o inglés." %}</p>{% endif %}
+                    <a class="community-action" href="{% url 'diccionario:buscar' %}">{% translate "Explorar palabras" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </div>
             </div>
         </div>
@@ -175,21 +175,21 @@
         <div class="container">
             <div class="home-section-heading">
                 <div>
-                    <h2 id="featured-title">Palabras para seguir aprendiendo</h2>
-                    <p>Una selección variada y estable de distintas áreas del diccionario.</p>
+                    <h2 id="featured-title">{% translate "Palabras para seguir aprendiendo" %}</h2>
+                    <p>{% translate "Una selección variada y estable de distintas áreas del diccionario." %}</p>
                 </div>
             </div>
             <div class="featured-entries">
                 {% for palabra in palabras_destacadas %}
                 <article class="featured-entry" style="--entry-color: {{ palabra.categoria.color|default:'#61736c' }}">
                     <div class="featured-entry-meta">
-                        <a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}">{{ palabra.categoria.nombre }}</a>
-                        <span class="difficulty difficulty-{{ palabra.dificultad }}">{{ palabra.get_dificultad_display }}</span>
+                        <a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}">{{ palabra.categoria.nombre_localizado }}</a>
+                        <span class="difficulty difficulty-{{ palabra.dificultad }}">{{ palabra.dificultad_localizada }}</span>
                     </div>
                     <h3>{{ palabra.palabra_kichwa }}</h3>
-                    <p><span>Español</span>{{ palabra.traduccion_espanol }}</p>
+                    <p><span>{{ palabra.idioma_traduccion_localizada }}</span>{{ palabra.traduccion_localizada }}</p>
                     {% if palabra.pronunciacion %}<small><i class="fas fa-volume-low" aria-hidden="true"></i> {{ palabra.pronunciacion }}</small>{% endif %}
-                    <a class="featured-entry-link" href="{{ palabra.get_absolute_url }}" aria-label="Ver entrada de {{ palabra.palabra_kichwa }}" data-tooltip="Consultar la entrada de {{ palabra.palabra_kichwa }}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <a class="featured-entry-link" href="{{ palabra.get_absolute_url }}">{% translate "Ver entrada" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </article>
                 {% empty %}<p>Aún no hay palabras destacadas disponibles.</p>{% endfor %}
             </div>
@@ -199,12 +199,12 @@
     <section class="home-close">
         <div class="container home-close-inner">
             <div>
-                <h2>Aprende una palabra y úsala</h2>
-                <p>Busca su significado, escucha la pronunciación y llévala a uno de los juegos.</p>
+                <h2>{% translate "Aprende una palabra y úsala" %}</h2>
+                <p>{% translate "Busca su significado, escucha la pronunciación y llévala a uno de los juegos." %}</p>
             </div>
             <div class="home-close-actions">
-                <a class="home-primary-action" href="{% url 'diccionario:buscar' %}" data-tooltip="Buscar por texto, tema o pronunciación">Buscar palabras</a>
-                <a href="{% url 'diccionario:juegos' %}" data-tooltip="Practicar vocabulario en seis modalidades">Ir a los juegos</a>
+                <a class="home-primary-action" href="{% url 'diccionario:buscar' %}">{% translate "Buscar palabras" %}</a>
+                <a href="{% url 'diccionario:juegos' %}">{% translate "Ir a los juegos" %}</a>
             </div>
         </div>
     </section>

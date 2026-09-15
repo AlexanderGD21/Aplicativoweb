@@ -1,6 +1,7 @@
-{% load static %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -212,36 +213,38 @@
                max-width: none;
            }
        }
+       .language-switch { display: flex; align-items: center; margin-left: .35rem; }
+       .language-switch select { min-height: 44px; border: 1px solid rgba(255,255,255,.35); border-radius: .55rem; background: #fff; color: #151f38; padding: 0 .65rem; font-weight: 600; }
    </style>
 </head>
 <body>
-   <a class="skip-link" href="#contenido-principal">Saltar al contenido principal</a>
+   <a class="skip-link" href="#contenido-principal">{% translate "Saltar al contenido principal" %}</a>
    <!-- Navegación -->
-   <nav class="navbar navbar-expand-lg" aria-label="Navegación principal">
+   <nav class="navbar navbar-expand-lg" aria-label="{% translate 'Navegación principal' %}">
        <div class="container">
-           <a class="navbar-brand" data-tooltip="Volver al inicio del diccionario" href="{% url 'diccionario:home' %}">
+           <a class="navbar-brand" data-tooltip="{% translate 'Volver al inicio del diccionario' %}" href="{% url 'diccionario:home' %}">
                <i class="fas fa-book"></i> Diccionario <span style="color: #ffc107;">Kichwa</span>
            </a>
            
-           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir menú de navegación">
+           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="{% translate 'Abrir menú de navegación' %}">
                <span class="navbar-toggler-icon"></span>
            </button>
            
            <div class="collapse navbar-collapse" id="navbarNav">
                <ul class="navbar-nav me-auto">
                    <li class="nav-item">
-                       <a class="nav-link" data-tooltip="Ir a la portada" href="{% url 'diccionario:home' %}">
-                           <i class="fas fa-home"></i> Inicio
+                       <a class="nav-link" data-tooltip="{% translate 'Ir a la portada' %}" href="{% url 'diccionario:home' %}">
+                           <i class="fas fa-home"></i> {% translate "Inicio" %}
                        </a>
                    </li>
                    <li class="nav-item">
-                       <a class="nav-link" data-tooltip="Buscar en Kichwa y español" href="{% url 'diccionario:buscar' %}">
-                           <i class="fas fa-search"></i> Buscar
+                       <a class="nav-link" data-tooltip="{% translate 'Buscar en Kichwa, español e inglés' %}" href="{% url 'diccionario:buscar' %}">
+                           <i class="fas fa-search"></i> {% translate "Buscar" %}
                        </a>
                    </li>
                    <li class="nav-item">
-                       <a class="nav-link" data-tooltip="Practicar vocabulario con juegos" href="{% url 'diccionario:juegos' %}">
-                           <i class="fas fa-gamepad"></i> Juegos
+                       <a class="nav-link" data-tooltip="{% translate 'Practicar vocabulario con juegos' %}" href="{% url 'diccionario:juegos' %}">
+                           <i class="fas fa-gamepad"></i> {% translate "Juegos" %}
                        </a>
                    </li>
                </ul>
@@ -249,33 +252,44 @@
                <ul class="navbar-nav">
                    {% if user.is_authenticated %}
                        <li class="nav-item dropdown">
-                           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" data-tooltip="Abrir opciones de tu cuenta">
+                           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" data-tooltip="{% translate 'Abrir opciones de tu cuenta' %}">
                                <i class="fas fa-user"></i> {{ user.username }}
                            </a>
                            <ul class="dropdown-menu">
-                               <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi Perfil</a></li>
-                               <li><a class="dropdown-item" href="{% url 'diccionario:mis_favoritas' %}">Mis Favoritas</a></li>
+                               <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">{% translate "Mi perfil" %}</a></li>
+                               <li><a class="dropdown-item" href="{% url 'diccionario:mis_favoritas' %}">{% translate "Mis favoritas" %}</a></li>
                                <li><hr class="dropdown-divider"></li>
                                <li>
                                    <form method="post" action="{% url 'usuarios:logout' %}">
                                        {% csrf_token %}
-                                       <button class="dropdown-item" type="submit">Cerrar Sesión</button>
+                                       <button class="dropdown-item" type="submit">{% translate "Cerrar sesión" %}</button>
                                    </form>
                                </li>
                            </ul>
                        </li>
                    {% else %}
                        <li class="nav-item">
-                           <a class="nav-link{% if request.resolver_match.url_name == 'login' %} active{% endif %}" data-tooltip="Acceder a tu progreso guardado" href="{% url 'usuarios:login' %}"{% if request.resolver_match.url_name == 'login' %} aria-current="page"{% endif %}>
-                               <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                           <a class="nav-link{% if request.resolver_match.url_name == 'login' %} active{% endif %}" data-tooltip="{% translate 'Acceder a tu progreso guardado' %}" href="{% url 'usuarios:login' %}"{% if request.resolver_match.url_name == 'login' %} aria-current="page"{% endif %}>
+                               <i class="fas fa-sign-in-alt"></i> {% translate "Iniciar sesión" %}
                            </a>
                        </li>
                        <li class="nav-item">
-                           <a class="nav-link{% if request.resolver_match.url_name == 'registro' %} active{% endif %}" data-tooltip="Crear una cuenta de aprendizaje" href="{% url 'usuarios:registro' %}"{% if request.resolver_match.url_name == 'registro' %} aria-current="page"{% endif %}>
-                               <i class="fas fa-user-plus"></i> Registrarse
+                           <a class="nav-link{% if request.resolver_match.url_name == 'registro' %} active{% endif %}" data-tooltip="{% translate 'Crear una cuenta de aprendizaje' %}" href="{% url 'usuarios:registro' %}"{% if request.resolver_match.url_name == 'registro' %} aria-current="page"{% endif %}>
+                               <i class="fas fa-user-plus"></i> {% translate "Registrarse" %}
                            </a>
                        </li>
                    {% endif %}
+                   <li class="nav-item language-switch">
+                       <form action="{% url 'set_language' %}" method="post">
+                           {% csrf_token %}
+                           <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                           <label class="visually-hidden" for="language-select">{% translate "Idioma de la interfaz" %}</label>
+                           <select id="language-select" name="language" aria-label="{% translate 'Idioma de la interfaz' %}" onchange="this.form.submit()">
+                               <option value="es"{% if LANGUAGE_CODE == 'es' %} selected{% endif %}>Español</option>
+                               <option value="en"{% if LANGUAGE_CODE == 'en' %} selected{% endif %}>English</option>
+                           </select>
+                       </form>
+                   </li>
                </ul>
            </div>
        </div>
@@ -287,7 +301,7 @@
            {% for message in messages %}
                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                    {{ message }}
-                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar mensaje"></button>
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% translate 'Cerrar mensaje' %}"></button>
                </div>
            {% endfor %}
        </div>
@@ -304,13 +318,13 @@
        <div class="modal-dialog modal-dialog-centered">
            <div class="modal-content">
                <div class="modal-header">
-                   <h2 class="modal-title fs-5" id="loginModalTitle">Guarda tus palabras favoritas</h2>
-                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                   <h2 class="modal-title fs-5" id="loginModalTitle">{% translate "Guarda tus palabras favoritas" %}</h2>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Cerrar' %}"></button>
                </div>
-               <div class="modal-body">Para guardar palabras necesitas iniciar sesión o crear una cuenta.</div>
+               <div class="modal-body">{% translate "Para guardar palabras necesitas iniciar sesión o crear una cuenta." %}</div>
                <div class="modal-footer">
-                   <a href="{% url 'usuarios:login' %}" class="btn btn-primary">Iniciar sesión</a>
-                   <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-primary">Registrarse</a>
+                   <a href="{% url 'usuarios:login' %}" class="btn btn-primary">{% translate "Iniciar sesión" %}</a>
+                   <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-primary">{% translate "Registrarse" %}</a>
                </div>
            </div>
        </div>
@@ -325,29 +339,26 @@
                    <h2 class="text-warning mb-3 h5">
                        <i class="fas fa-book"></i> Diccionario Kichwa
                    </h2>
-                   <p class="mb-3">
-                       Consulta un corpus bilingüe Kichwa–español, escucha pronunciaciones disponibles
-                       y guarda palabras para continuar aprendiendo.
-                   </p>
+                   <p class="mb-3">{% translate "Consulta un corpus bilingüe Kichwa, escucha pronunciaciones disponibles y guarda palabras para continuar aprendiendo." %}</p>
                </div>
                
                <!-- Enlaces Rápidos -->
                <div class="col-md-4 mb-4">
-                   <h2 class="text-warning mb-3 h6">Enlaces Rápidos</h2>
+                   <h2 class="text-warning mb-3 h6">{% translate "Enlaces rápidos" %}</h2>
                    <ul class="list-unstyled">
                        <li class="mb-2">
                            <a href="{% url 'diccionario:home' %}" class="text-light text-decoration-none">
-                               <i class="fas fa-home fa-sm me-2"></i>Inicio
+                               <i class="fas fa-home fa-sm me-2"></i>{% translate "Inicio" %}
                            </a>
                        </li>
                        <li class="mb-2">
                            <a href="{% url 'diccionario:buscar' %}" class="text-light text-decoration-none">
-                               <i class="fas fa-search fa-sm me-2"></i>Buscar Palabras
+                               <i class="fas fa-search fa-sm me-2"></i>{% translate "Buscar palabras" %}
                            </a>
                        </li>
                        <li class="mb-2">
                            <a href="{% url 'diccionario:juegos' %}" class="text-light text-decoration-none">
-                               <i class="fas fa-gamepad fa-sm me-2"></i>Juegos
+                               <i class="fas fa-gamepad fa-sm me-2"></i>{% translate "Juegos" %}
                            </a>
                        </li>
                    </ul>
@@ -355,16 +366,16 @@
                
                <!-- Información Legal -->
                <div class="col-md-3 mb-4">
-                   <h2 class="text-warning mb-3 h6">Información</h2>
+                   <h2 class="text-warning mb-3 h6">{% translate "Información" %}</h2>
                    <ul class="list-unstyled">
                        <li class="mb-2">
                            <a href="{% url 'usuarios:terminos' %}" class="text-light text-decoration-none">
-                               <i class="fas fa-file-contract fa-sm me-2"></i>Términos de uso
+                               <i class="fas fa-file-contract fa-sm me-2"></i>{% translate "Términos de uso" %}
                            </a>
                        </li>
                        <li class="mb-2">
                            <a href="{% url 'usuarios:privacidad' %}" class="text-light text-decoration-none">
-                               <i class="fas fa-shield-alt fa-sm me-2"></i>Política de Privacidad
+                               <i class="fas fa-shield-alt fa-sm me-2"></i>{% translate "Política de privacidad" %}
                            </a>
                        </li>
                    </ul>
@@ -376,16 +387,16 @@
            <!-- Copyright y estadísticas -->
            <div class="row align-items-center">
                <div class="col-md-6">
-                   <p class="mb-0">&copy; 2026 Diccionario Kichwa. Tu diccionario digital.</p>
-                   <small class="text-muted">Preservando y promoviendo la lengua Kichwa</small>
+                   <p class="mb-0">&copy; 2026 Diccionario Kichwa. {% translate "Tu diccionario digital." %}</p>
+                   <small class="text-muted">{% translate "Preservando y promoviendo la lengua Kichwa" %}</small>
                </div>
                <div class="col-md-6 text-md-end">
                    <small class="text-light">
-                       <i class="fas fa-database me-1"></i>Corpus en curación continua
+                       <i class="fas fa-database me-1"></i>{% translate "Corpus en curación continua" %}
                        <span class="mx-2">|</span>
-                       <i class="fas fa-users me-1"></i>Comunidad activa
+                       <i class="fas fa-users me-1"></i>{% translate "Comunidad activa" %}
                        <span class="mx-2">|</span>
-                       <i class="fas fa-heart me-1 text-danger"></i>Hecho con amor
+                       <i class="fas fa-heart me-1 text-danger"></i>{% translate "Hecho con amor" %}
                    </small>
                </div>
            </div>

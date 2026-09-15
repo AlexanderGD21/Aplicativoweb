@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ palabra.palabra_kichwa }} — {{ palabra.traduccion_espanol }} | Diccionario Kichwa{% endblock %}
+{% block title %}{{ palabra.palabra_kichwa }} — {{ palabra.traduccion_localizada }} | Diccionario Kichwa{% endblock %}
 
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/word-detail.css' %}?v=20260915-1">{% endblock %}
 
@@ -9,21 +9,22 @@
 <article class="entry-surface" style="--entry-accent: {{ palabra.categoria.color|default:'#17684d' }}">
     <header class="entry-masthead">
         <div class="container">
-            <nav class="entry-breadcrumb" aria-label="Ruta de navegación">
-                <a href="{% url 'diccionario:buscar' %}">Diccionario</a>
+            <nav class="entry-breadcrumb" aria-label="{% translate 'Ruta de navegación' %}">
+                <a href="{% url 'diccionario:buscar' %}">{% translate "Diccionario" %}</a>
                 <i class="fas fa-chevron-right" aria-hidden="true"></i>
-                {% if palabra.categoria %}<a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}">{{ palabra.categoria.nombre }}</a><i class="fas fa-chevron-right" aria-hidden="true"></i>{% endif %}
+                {% if palabra.categoria %}<a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}">{{ palabra.categoria.nombre_localizado }}</a><i class="fas fa-chevron-right" aria-hidden="true"></i>{% endif %}
                 <span aria-current="page">{{ palabra.palabra_kichwa }}</span>
             </nav>
 
             <div class="entry-heading">
                 <div class="entry-title-block">
                     <div class="entry-labels">
-                        {% if palabra.categoria %}<a class="entry-category" href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}">{{ palabra.categoria.nombre }}</a>{% endif %}
-                        <span class="entry-difficulty difficulty-{{ palabra.dificultad }}">Pronunciación {{ palabra.get_dificultad_display|lower }}</span>
+                        {% if palabra.categoria %}<a class="entry-category" href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}">{{ palabra.categoria.nombre_localizado }}</a>{% endif %}
+                        <span class="entry-difficulty difficulty-{{ palabra.dificultad }}">{% translate "Pronunciación" %} {{ palabra.dificultad_localizada|lower }}</span>
                     </div>
                     <h1>{{ palabra.palabra_kichwa }}</h1>
-                    <p class="entry-translation"><span>Español</span>{{ palabra.traduccion_espanol }}</p>
+                    <p class="entry-translation"><span>{{ palabra.idioma_traduccion_localizada }}</span>{{ palabra.traduccion_localizada }}</p>
+                    {% get_current_language as LANGUAGE_CODE %}{% if LANGUAGE_CODE == 'en' and not palabra.tiene_ingles_validado %}<small class="text-light">{% translate "La traducción inglesa de esta entrada sigue pendiente de revisión; se muestra la equivalencia en español." %}</small>{% endif %}
                 </div>
 
                 <div class="entry-tools">
@@ -31,14 +32,14 @@
                     {% if palabra.audio %}
                     <audio class="entry-audio" controls preload="metadata">
                         <source src="{{ palabra.audio.url }}">
-                        Tu navegador no admite la reproducción de audio.
+                        {% translate "Tu navegador no admite la reproducción de audio." %}
                     </audio>
                     {% endif %}
                     <form class="favorite-form">
                         {% csrf_token %}
                         <button id="favorite-button" class="favorite-button{% if es_favorita %} is-favorite{% endif %}" type="button" data-toggle-url="{% url 'diccionario:toggle_favorita_ajax' palabra.pk %}" aria-pressed="{{ es_favorita|yesno:'true,false' }}">
                             <i id="heart-icon" class="{% if es_favorita %}fas{% else %}far{% endif %} fa-heart" aria-hidden="true"></i>
-                            <span>{% if es_favorita %}Guardada en favoritas{% else %}Guardar en favoritas{% endif %}</span>
+                            <span>{% if es_favorita %}{% translate "Guardada en favoritas" %}{% else %}{% translate "Guardar en favoritas" %}{% endif %}</span>
                         </button>
                     </form>
                 </div>
@@ -48,33 +49,33 @@
 
     <div class="container entry-workspace">
         <div class="entry-layout">
-            <div class="entry-reading" aria-label="Contenido de la entrada">
+            <div class="entry-reading" aria-label="{% translate 'Contenido de la entrada' %}">
                 {% if palabra.imagen_vocabulario %}
                 <figure class="entry-vocabulary-image">
                     <img src="{% static palabra.imagen_vocabulario %}" alt="{{ palabra.descripcion_imagen }}" width="768" height="768">
                     {% if palabra.proveedor_imagen == 'pexels' and palabra.fuente_imagen_url %}
-                    <figcaption>Fotografía de {% if palabra.autor_imagen_url %}<a href="{{ palabra.autor_imagen_url }}" target="_blank" rel="noopener noreferrer">{{ palabra.autor_imagen }}</a>{% else %}{{ palabra.autor_imagen }}{% endif %} en <a href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer">Pexels</a>.</figcaption>
+                    <figcaption>{% translate "Fotografía de" %} {% if palabra.autor_imagen_url %}<a href="{{ palabra.autor_imagen_url }}" target="_blank" rel="noopener noreferrer">{{ palabra.autor_imagen }}</a>{% else %}{{ palabra.autor_imagen }}{% endif %} {% translate "en" %} <a href="{{ palabra.fuente_imagen_url }}" target="_blank" rel="noopener noreferrer">Pexels</a>.</figcaption>
                     {% elif palabra.credito_imagen %}<figcaption>{{ palabra.credito_imagen }}</figcaption>{% endif %}
                 </figure>
                 {% endif %}
                 <section class="meaning-section" aria-labelledby="meaning-title">
-                    <h2 id="meaning-title">Definición</h2>
-                    {% if palabra.definicion %}
-                    <p>{{ palabra.definicion }}</p>
+                    <h2 id="meaning-title">{% translate "Definición" %}</h2>
+                    {% if palabra.definicion_localizada %}
+                    <p>{{ palabra.definicion_localizada }}</p>
                     {% else %}
-                    <p><strong>{{ palabra.palabra_kichwa }}</strong> se traduce al español como <strong>{{ palabra.traduccion_espanol }}</strong>. Esta entrada todavía no tiene una definición ampliada.</p>
+                    <p>{% blocktranslate with kichwa=palabra.palabra_kichwa traduccion=palabra.traduccion_localizada idioma=palabra.idioma_traduccion_localizada %}<strong>{{ kichwa }}</strong> se traduce al {{ idioma }} como <strong>{{ traduccion }}</strong>. Esta entrada todavía no tiene una definición ampliada.{% endblocktranslate %}</p>
                     {% endif %}
                 </section>
 
                 {% if ejemplos_uso %}
                 <section class="usage-example" aria-labelledby="example-title">
-                    <h2 id="example-title"><i class="fas fa-quote-left" aria-hidden="true"></i> En contexto</h2>
+                    <h2 id="example-title"><i class="fas fa-quote-left" aria-hidden="true"></i> {% translate "En contexto" %}</h2>
                     {% for ejemplo in ejemplos_uso %}
                     <figure class="usage-example__item">
                         <blockquote>{{ ejemplo.oracion_kichwa }}</blockquote>
                         <figcaption><span>Español</span> {{ ejemplo.traduccion_espanol }}</figcaption>
-                        <p class="usage-example__source">Fuente: {{ ejemplo.fuente }}</p>
-                        {% if ejemplo.tipo_revision == 'documental' %}<p class="usage-example__review"><i class="fas fa-book-open" aria-hidden="true"></i> Cotejado con la fuente citada</p>{% endif %}
+                        <p class="usage-example__source">{% translate "Fuente" %}: {{ ejemplo.fuente }}</p>
+                        {% if ejemplo.tipo_revision == 'documental' %}<p class="usage-example__review"><i class="fas fa-book-open" aria-hidden="true"></i> {% translate "Cotejado con la fuente citada" %}</p>{% endif %}
                     </figure>
                     {% endfor %}
                 </section>
@@ -104,21 +105,21 @@
                 {% endif %}
             </div>
 
-            <aside class="entry-rail" aria-label="Datos y acciones de la entrada">
+            <aside class="entry-rail" aria-label="{% translate 'Datos y acciones de la entrada' %}">
                 <section class="entry-facts">
-                    <h2>Ficha rápida</h2>
+                    <h2>{% translate "Ficha rápida" %}</h2>
                     <dl>
-                        <div><dt>Idioma de entrada</dt><dd>Kichwa</dd></div>
-                        <div><dt>Tema</dt><dd>{{ palabra.categoria.nombre|default:'General' }}</dd></div>
-                        <div><dt>Pronunciación</dt><dd>{{ palabra.get_dificultad_display }}</dd></div>
-                        <div><dt>Consultas</dt><dd>{{ palabra.veces_vista }}</dd></div>
+                        <div><dt>{% translate "Idioma de entrada" %}</dt><dd>Kichwa</dd></div>
+                        <div><dt>{% translate "Tema" %}</dt><dd>{{ palabra.categoria.nombre_localizado|default:'General' }}</dd></div>
+                        <div><dt>{% translate "Pronunciación" %}</dt><dd>{{ palabra.dificultad_localizada }}</dd></div>
+                        <div><dt>{% translate "Consultas" %}</dt><dd>{{ palabra.veces_vista }}</dd></div>
                     </dl>
                 </section>
-                <nav class="entry-actions" aria-label="Acciones para continuar">
-                    <h2>Continúa aprendiendo</h2>
-                    <a class="entry-action-primary" href="{% url 'diccionario:juegos' %}"><i class="fas fa-gamepad" aria-hidden="true"></i> Practicar en juegos</a>
-                    <a href="{% url 'diccionario:buscar' %}"><i class="fas fa-search" aria-hidden="true"></i> Buscar otra palabra</a>
-                    {% if palabra.categoria %}<a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}"><i class="fas fa-layer-group" aria-hidden="true"></i> Ver este tema</a>{% endif %}
+                <nav class="entry-actions" aria-label="{% translate 'Acciones para continuar' %}">
+                    <h2>{% translate "Continúa aprendiendo" %}</h2>
+                    <a class="entry-action-primary" href="{% url 'diccionario:juegos' %}"><i class="fas fa-gamepad" aria-hidden="true"></i> {% translate "Practicar en juegos" %}</a>
+                    <a href="{% url 'diccionario:buscar' %}"><i class="fas fa-search" aria-hidden="true"></i> {% translate "Buscar otra palabra" %}</a>
+                    {% if palabra.categoria %}<a href="{% url 'diccionario:palabras_por_categoria' palabra.categoria.pk %}"><i class="fas fa-layer-group" aria-hidden="true"></i> {% translate "Ver este tema" %}</a>{% endif %}
                 </nav>
             </aside>
         </div>
@@ -126,8 +127,8 @@
         <section class="related-entries" aria-labelledby="related-title">
             <div class="related-heading">
                 <div>
-                    <h2 id="related-title">Palabras relacionadas</h2>
-                    <p>Sugerencias basadas en relaciones editoriales, significado y contexto; no se completan al azar.</p>
+                    <h2 id="related-title">{% translate "Palabras relacionadas" %}</h2>
+                    <p>{% translate "Sugerencias basadas en relaciones editoriales, significado y contexto; no se completan al azar." %}</p>
                 </div>
             </div>
             {% if palabras_relacionadas %}
@@ -137,8 +138,8 @@
                 <article class="related-entry" style="--related-color: {{ palabra_rel.categoria.color|default:'#61736c' }}">
                     <span class="relation-reason">{{ relacion.motivo }}</span>
                     <h3>{{ palabra_rel.palabra_kichwa }}</h3>
-                    <p><span>Español</span>{{ palabra_rel.traduccion_espanol }}</p>
-                    <a href="{{ palabra_rel.get_absolute_url }}" aria-label="Ver entrada de {{ palabra_rel.palabra_kichwa }}">Ver entrada <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <p><span>{{ palabra_rel.idioma_traduccion_localizada }}</span>{{ palabra_rel.traduccion_localizada }}</p>
+                    <a href="{{ palabra_rel.get_absolute_url }}">{% translate "Ver entrada" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
                 </article>
                 {% endwith %}
                 {% endfor %}
