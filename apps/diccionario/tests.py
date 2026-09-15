@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.contrib.staticfiles import finders
 from django.db import connection
 from django.db.models.deletion import ProtectedError
 from django.test import Client, TestCase, override_settings
@@ -246,6 +247,7 @@ class DiccionarioTests(TestCase):
         self.assertEqual(respuesta.status_code, 302)
         ejemplo.refresh_from_db()
         self.assertEqual(ejemplo.estado, 'publicado')
+        self.assertEqual(ejemplo.tipo_revision, 'humana')
         self.assertEqual(ejemplo.revisado_por, revisor)
         self.assertIsNotNone(ejemplo.fecha_revision)
         self.client.logout()
@@ -274,6 +276,7 @@ class DiccionarioTests(TestCase):
         self.assertEqual(ejemplo.estado, 'borrador')
         self.assertIsNone(ejemplo.revisado_por)
         self.assertIsNone(ejemplo.fecha_revision)
+        self.assertEqual(ejemplo.tipo_revision, '')
         self.assertNotContains(self.client.get(self.palabra.get_absolute_url()), 'Yaku chiri kan.')
 
     def test_ejemplo_rechaza_equivalencia_automatica_y_fuente_vacia(self):
@@ -313,7 +316,7 @@ class DiccionarioTests(TestCase):
         self.assertIsNone(self.palabra.ejemplo_uso)
         self.assertEqual(self.misi.ejemplo_uso, 'Texto heredado distinto para revisar.')
 
-    def test_modulo_autorizado_prepara_borradores_sin_publicarlos_ni_duplicarlos(self):
+    def test_modulo_autorizado_prepara_y_publica_cotejo_documental_sin_duplicar(self):
         from .management.commands.preparar_ejemplos_modulo_2023 import EJEMPLOS
 
         for kichwa, significado in {(fila[0], fila[1]) for fila in EJEMPLOS}:
@@ -322,13 +325,42 @@ class DiccionarioTests(TestCase):
             )
         salida = StringIO()
         call_command('preparar_ejemplos_modulo_2023', stdout=salida)
-        self.assertEqual(EjemploUso.objects.count(), 9)
+        self.assertEqual(EjemploUso.objects.count(), len(EJEMPLOS))
         self.assertEqual(EjemploUso.objects.filter(estado='publicado').count(), 0)
         self.assertTrue(EjemploUso.objects.filter(fuente__contains='página PDF 29').exists())
-        call_command('preparar_ejemplos_modulo_2023', stdout=salida)
-        self.assertEqual(EjemploUso.objects.count(), 9)
+        call_command('preparar_ejemplos_modulo_2023', '--publicar-cotejados', stdout=salida)
+        self.assertEqual(EjemploUso.objects.count(), len(EJEMPLOS))
+        self.assertEqual(EjemploUso.objects.filter(
+            estado='publicado', tipo_revision='documental', revisado_por__isnull=True,
+        ).count(), len(EJEMPLOS))
+        primera_fecha = EjemploUso.objects.order_by('pk').values_list('fecha_revision', flat=True).first()
+        call_command('preparar_ejemplos_modulo_2023', '--publicar-cotejados', stdout=salida)
+        self.assertEqual(
+            EjemploUso.objects.order_by('pk').values_list('fecha_revision', flat=True).first(),
+            primera_fecha,
+        )
         shamuna = Palabra.objects.get(palabra_kichwa='shamuna')
-        self.assertNotContains(self.client.get(shamuna.get_absolute_url()), 'Kayman shamuy.')
+        detalle = self.client.get(shamuna.get_absolute_url())
+        self.assertContains(detalle, 'Kayman shamuy.')
+        self.assertContains(detalle, 'Cotejado con la fuente citada')
+
+    def test_imagen_original_se_asocia_a_la_acepcion_exacta(self):
+        palabra = Palabra.objects.create(
+            palabra_kichwa='yaku', traduccion_espanol='agua', categoria=self.categoria,
+        )
+        otra_acepcion = Palabra.objects.create(
+            palabra_kichwa='yaku', traduccion_espanol='octubre', categoria=self.categoria,
+        )
+        migracion = import_module('apps.diccionario.migrations.0027_imagenes_y_revision_documental')
+        migracion.asociar_imagenes(apps, SimpleNamespace(connection=connection))
+        palabra.refresh_from_db()
+        otra_acepcion.refresh_from_db()
+        self.assertEqual(palabra.imagen_vocabulario, 'img/vocabulario/yaku-agua.webp')
+        self.assertEqual(otra_acepcion.imagen_vocabulario, '')
+        self.assertTrue(finders.find(palabra.imagen_vocabulario))
+        detalle = self.client.get(palabra.get_absolute_url())
+        self.assertContains(detalle, palabra.imagen_vocabulario)
+        self.assertContains(detalle, palabra.descripcion_imagen)
 
     def test_detalle_indica_favorita_del_usuario_actual(self):
         usuario = User.objects.create_user('killa', password='contrasena-segura-123')

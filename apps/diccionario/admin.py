@@ -31,7 +31,10 @@ class PalabraAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Información Básica', {
-            'fields': ('palabra_kichwa', 'traduccion_espanol', 'definicion', 'pronunciacion', 'audio', 'categoria')
+            'fields': (
+                'palabra_kichwa', 'traduccion_espanol', 'definicion', 'pronunciacion',
+                'audio', 'imagen_vocabulario', 'descripcion_imagen', 'credito_imagen', 'categoria',
+            )
         }),
         ('Clasificación', {
             'fields': (
@@ -78,14 +81,18 @@ class PalabraAdmin(admin.ModelAdmin):
 
 @admin.register(EjemploUso)
 class EjemploUsoAdmin(admin.ModelAdmin):
-    list_display = ['palabra', 'oracion_corta', 'estado', 'fuente', 'revisado_por', 'fecha_revision']
-    list_filter = ['estado', 'palabra__categoria', 'fecha_revision']
+    list_display = ['palabra', 'oracion_corta', 'estado', 'tipo_revision', 'fuente', 'revisado_por', 'fecha_revision']
+    list_filter = ['estado', 'tipo_revision', 'palabra__categoria', 'fecha_revision']
     search_fields = ['palabra__palabra_kichwa', 'palabra__traduccion_espanol', 'oracion_kichwa', 'fuente']
     autocomplete_fields = ['palabra']
-    readonly_fields = ['estado', 'revisado_por', 'fecha_revision', 'fecha_creacion', 'fecha_actualizacion']
+    readonly_fields = [
+        'estado', 'tipo_revision', 'nota_revision', 'revisado_por', 'fecha_revision',
+        'fecha_creacion', 'fecha_actualizacion',
+    ]
     fields = [
         'palabra', 'oracion_kichwa', 'traduccion_espanol', 'fuente',
-        'estado', 'revisado_por', 'fecha_revision', 'fecha_creacion', 'fecha_actualizacion',
+        'estado', 'tipo_revision', 'nota_revision', 'revisado_por', 'fecha_revision',
+        'fecha_creacion', 'fecha_actualizacion',
     ]
     actions = ['publicar_revisados', 'retirar_publicacion']
 
@@ -101,8 +108,13 @@ class EjemploUsoAdmin(admin.ModelAdmin):
             ejemplo.estado = 'publicado'
             ejemplo.revisado_por = request.user
             ejemplo.fecha_revision = timezone.now()
+            ejemplo.tipo_revision = 'humana'
+            ejemplo.nota_revision = 'Aprobado desde Django Admin.'
             try:
-                ejemplo.save(update_fields=['estado', 'revisado_por', 'fecha_revision', 'fecha_actualizacion'])
+                ejemplo.save(update_fields=[
+                    'estado', 'tipo_revision', 'nota_revision', 'revisado_por',
+                    'fecha_revision', 'fecha_actualizacion',
+                ])
             except ValidationError:
                 invalidos += 1
             else:
@@ -112,7 +124,7 @@ class EjemploUsoAdmin(admin.ModelAdmin):
     @admin.action(description='Retirar publicación y devolver a borrador')
     def retirar_publicacion(self, request, queryset):
         retirados = queryset.filter(estado='publicado').update(
-            estado='borrador', revisado_por=None, fecha_revision=None,
+            estado='borrador', tipo_revision='', nota_revision='', revisado_por=None, fecha_revision=None,
             fecha_actualizacion=timezone.now(),
         )
         self.message_user(request, f'{retirados} ejemplos retirados.')

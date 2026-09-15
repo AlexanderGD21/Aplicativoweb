@@ -1,11 +1,13 @@
 # Vocabulario inicial para imágenes
 
-Selección preparatoria de la fase 6. El Módulo Kichwa 2023 del Centro de Idiomas
+Implementación de la fase 6. El Módulo Kichwa 2023 del Centro de Idiomas
 del IST Tena, autorizado por el propietario del proyecto, confirma estos
 significados. Las páginas indicadas son páginas del PDF (desde 1), no la
 numeración interna que se reinicia por eje. Las entradas existen en PostgreSQL
 y son aptas para juegos; la imagen deberá ligarse a la **acepción completa**,
-no solo a la forma Kichwa.
+no solo a la forma Kichwa. Las once ilustraciones se generaron como obras
+originales para este proyecto, con estilo infantil educativo y sin reutilizar
+archivos visuales del módulo.
 
 | Prioridad | Entrada Kichwa → español | Página PDF | Motivo visual |
 | --- | --- | --- | --- |
@@ -29,5 +31,6 @@ ilustrar.
 El módulo incluye dibujos y fotografías, pero algunas páginas atribuyen las
 imágenes a terceros (por ejemplo, Wiñay Kawsay Digital en la página PDF 48).
 La autorización del módulo permite usarlo como referencia de vocabulario; para
-la aplicación se producirán ilustraciones originales o se documentará una
-licencia específica de cada imagen antes de publicar archivos visuales.
+la aplicación se produjeron ilustraciones originales en WebP. Cada entrada guarda
+la ruta estática, una descripción accesible y el crédito. Las imágenes aparecen
+en los resultados, las páginas por tema y el detalle de la acepción.

@@ -3,7 +3,7 @@
 
 {% block title %}{{ palabra.palabra_kichwa }} — {{ palabra.traduccion_espanol }} | Diccionario Kichwa{% endblock %}
 
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/word-detail.css' %}?v=20260914-1">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/word-detail.css' %}?v=20260915-1">{% endblock %}
 
 {% block content %}
 <article class="entry-surface" style="--entry-accent: {{ palabra.categoria.color|default:'#17684d' }}">
@@ -49,6 +49,12 @@
     <div class="container entry-workspace">
         <div class="entry-layout">
             <div class="entry-reading" aria-label="Contenido de la entrada">
+                {% if palabra.imagen_vocabulario %}
+                <figure class="entry-vocabulary-image">
+                    <img src="{% static palabra.imagen_vocabulario %}" alt="{{ palabra.descripcion_imagen }}" width="768" height="768">
+                    {% if palabra.credito_imagen %}<figcaption>{{ palabra.credito_imagen }}</figcaption>{% endif %}
+                </figure>
+                {% endif %}
                 <section class="meaning-section" aria-labelledby="meaning-title">
                     <h2 id="meaning-title">Definición</h2>
                     {% if palabra.definicion %}
@@ -66,6 +72,7 @@
                         <blockquote>{{ ejemplo.oracion_kichwa }}</blockquote>
                         <figcaption><span>Español</span> {{ ejemplo.traduccion_espanol }}</figcaption>
                         <p class="usage-example__source">Fuente: {{ ejemplo.fuente }}</p>
+                        {% if ejemplo.tipo_revision == 'documental' %}<p class="usage-example__review"><i class="fas fa-book-open" aria-hidden="true"></i> Cotejado con la fuente citada</p>{% endif %}
                     </figure>
                     {% endfor %}
                 </section>

@@ -361,7 +361,8 @@ def detalle_palabra(request, pk):
     
     palabras_relacionadas = obtener_palabras_relacionadas(palabra)
     ejemplos_uso = palabra.ejemplos_uso.filter(
-        estado='publicado', revisado_por__isnull=False, fecha_revision__isnull=False,
+        Q(estado='publicado', tipo_revision='documental', fecha_revision__isnull=False)
+        | Q(estado='publicado', tipo_revision='humana', revisado_por__isnull=False, fecha_revision__isnull=False)
     ).order_by('id')
     
     context = {

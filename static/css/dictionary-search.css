@@ -429,6 +429,23 @@ html:has(.dictionary-surface)::-webkit-scrollbar-thumb {
   border-color: color-mix(in srgb, var(--word-color) 35%, var(--dict-line));
 }
 
+.word-row.has-image {
+  grid-template-columns: 104px minmax(0, 1fr);
+}
+
+.word-row__image {
+  display: block;
+  width: 104px;
+  height: 104px;
+  object-fit: cover;
+  background: #f7f0df;
+  border-radius: 11px;
+}
+
+.word-row.has-image .word-meta {
+  grid-column: 1 / -1;
+}
+
 .word-kichwa-line {
   display: flex;
   align-items: center;

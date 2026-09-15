@@ -4,7 +4,7 @@
 {% block title %}Buscar en Kichwa y español | Diccionario Kichwa{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}">
+<link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}?v=20260915-1">
 {% endblock %}
 
 {% block content %}
@@ -91,7 +91,8 @@
             {% if page_obj.object_list %}
                 <div class="word-list">
                     {% for palabra in page_obj %}
-                        <article class="word-row" style="--word-color: {{ palabra.categoria.color|default:'#61736c' }}">
+                        <article class="word-row{% if palabra.imagen_vocabulario %} has-image{% endif %}" style="--word-color: {{ palabra.categoria.color|default:'#61736c' }}">
+                            {% if palabra.imagen_vocabulario %}<img class="word-row__image" src="{% static palabra.imagen_vocabulario %}" alt="{{ palabra.descripcion_imagen }}" width="768" height="768" loading="lazy">{% endif %}
                             <div class="word-main">
                                 <div class="word-kichwa-line">
                                     <h3>{{ palabra.palabra_kichwa }}</h3>

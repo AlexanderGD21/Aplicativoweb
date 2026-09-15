@@ -113,6 +113,15 @@ class Palabra(models.Model):
         help_text='Archivo de pronunciación (MP3, OGG o WAV; máximo 10 MB).',
         validators=[FileExtensionValidator(['mp3', 'ogg', 'wav']), validar_tamano_audio],
     )
+    imagen_vocabulario = models.CharField(
+        max_length=200, blank=True,
+        help_text='Ruta dentro de archivos estáticos para una ilustración de esta acepción.',
+    )
+    descripcion_imagen = models.CharField(
+        max_length=240, blank=True,
+        help_text='Descripción accesible de la ilustración.',
+    )
+    credito_imagen = models.CharField(max_length=240, blank=True)
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
@@ -209,6 +218,10 @@ class EjemploUso(models.Model):
         ('borrador', 'Borrador'),
         ('publicado', 'Publicado'),
     ]
+    TIPO_REVISION_CHOICES = [
+        ('humana', 'Revisión editorial humana'),
+        ('documental', 'Cotejo documental con la fuente'),
+    ]
 
     palabra = models.ForeignKey(Palabra, on_delete=models.CASCADE, related_name='ejemplos_uso')
     oracion_kichwa = models.TextField(help_text='Oración en Kichwa revisada en contexto.')
@@ -217,6 +230,8 @@ class EjemploUso(models.Model):
     estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default='borrador', db_index=True)
     revisado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     fecha_revision = models.DateTimeField(null=True, blank=True, editable=False)
+    tipo_revision = models.CharField(max_length=12, choices=TIPO_REVISION_CHOICES, blank=True, editable=False)
+    nota_revision = models.CharField(max_length=300, blank=True, editable=False)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 
@@ -238,8 +253,11 @@ class EjemploUso(models.Model):
             marcador = f'{self.palabra.palabra_kichwa} - {self.palabra.traduccion_espanol}'
             if self.oracion_kichwa.strip() == marcador:
                 errores['oracion_kichwa'] = 'La equivalencia automática no es una oración de ejemplo.'
-        if self.estado == 'publicado' and (not self.revisado_por_id or not self.fecha_revision):
-            errores['estado'] = 'La publicación requiere un responsable y una fecha de revisión.'
+        if self.estado == 'publicado':
+            revision_humana = self.tipo_revision == 'humana' and self.revisado_por_id
+            revision_documental = self.tipo_revision == 'documental' and self.nota_revision.strip()
+            if not self.fecha_revision or not (revision_humana or revision_documental):
+                errores['estado'] = 'La publicación requiere una revisión humana o un cotejo documental registrado.'
         if errores:
             raise ValidationError(errores)
 
@@ -252,9 +270,11 @@ class EjemploUso(models.Model):
                 self.estado = 'borrador'
                 self.revisado_por = None
                 self.fecha_revision = None
+                self.tipo_revision = ''
+                self.nota_revision = ''
                 if kwargs.get('update_fields') is not None:
                     kwargs['update_fields'] = set(kwargs['update_fields']) | {
-                        'estado', 'revisado_por', 'fecha_revision',
+                        'estado', 'revisado_por', 'fecha_revision', 'tipo_revision', 'nota_revision',
                     }
         self.full_clean()
         super().save(*args, **kwargs)

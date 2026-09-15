@@ -62,8 +62,9 @@ class PalabraForm(forms.ModelForm):
     class Meta:
         model = Palabra
         fields = [
-            'palabra_kichwa', 'traduccion_espanol', 'definicion', 
-            'pronunciacion', 'audio', 'categoria', 'categoria_propuesta', 'dificultad', 'nivel_dificultad',
+            'palabra_kichwa', 'traduccion_espanol', 'definicion',
+            'pronunciacion', 'audio', 'imagen_vocabulario', 'descripcion_imagen',
+            'credito_imagen', 'categoria', 'categoria_propuesta', 'dificultad', 'nivel_dificultad',
             'tipo', 'estado_revision', 'apta_para_juegos', 'dificultad_juego',
             'descripcion_juego_espanol', 'descripcion_juego_kichwa',
             'notas_gramaticales', 'activa'
@@ -74,6 +75,9 @@ class PalabraForm(forms.ModelForm):
             'definicion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'pronunciacion': forms.TextInput(attrs={'class': 'form-control'}),
             'audio': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'imagen_vocabulario': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion_imagen': forms.TextInput(attrs={'class': 'form-control'}),
+            'credito_imagen': forms.TextInput(attrs={'class': 'form-control'}),
             'categoria': forms.Select(attrs={'class': 'form-select'}),
             'categoria_propuesta': forms.Select(attrs={'class': 'form-select'}),
             'dificultad': forms.Select(attrs={'class': 'form-select'}),

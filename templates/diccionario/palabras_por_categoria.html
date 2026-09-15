@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}{{ categoria.nombre }} | Diccionario Kichwa{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/dictionary-search.css' %}?v=20260915-1">{% endblock %}
 
 {% block content %}
 <div class="dictionary-surface category-detail" style="--tag-color: {{ categoria.color }}">
@@ -24,7 +24,8 @@
         {% if page_obj.object_list %}
             <div class="word-list">
                 {% for palabra in page_obj %}
-                    <article class="word-row">
+                    <article class="word-row{% if palabra.imagen_vocabulario %} has-image{% endif %}">
+                        {% if palabra.imagen_vocabulario %}<img class="word-row__image" src="{% static palabra.imagen_vocabulario %}" alt="{{ palabra.descripcion_imagen }}" width="768" height="768" loading="lazy">{% endif %}
                         <div class="word-main">
                             <div class="word-kichwa-line"><h3>{{ palabra.palabra_kichwa }}</h3><span class="difficulty difficulty-{{ palabra.dificultad }}">{{ palabra.get_dificultad_display }}</span></div>
                             <p class="word-translation"><span>Español</span> {{ palabra.traduccion_espanol }}</p>
